@@ -9,8 +9,11 @@
     "@types/jest": "^24.9.1",
     "@types/node": "^12.12.62",
     "@types/react": "^16.9.49",
+    "@types/react-autosuggest": "^10.0.0",
     "@types/react-dom": "^16.9.8",
+    "dexie": "^3.0.2",
     "react": "^16.13.1",
+    "react-autosuggest": "^10.0.2",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
     "typescript": "^3.7.5"

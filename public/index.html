@@ -1,43 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
+    <title>もえこすと-MoE原価計算器</title>
+    <meta name="description" content="オンラインゲーム「Master of Epic」の生産品の原価計算用webツールです。生産品の原価の計算と、素材の必要個数の算出などが行えます。">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/index.css">
+<!--    <link rel="stylesheet" href="./css/suggestion.css"> -->
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <!-- NoScript Messages-->
+    <noscript>
+      <div class="allGray"></div>
+      <div class="noscriptMessage">
+        <h2>注意事項</h2>
+        <p>このページはjavascriptの使用を前提としています。</p>
+        <p>お使いのブラウザは現在javascriptが無効となっているため、本来のコンテンツを表示できません。</p>
+        <p>もしこのページを利用したいのであれば、各ブラウザ上の設定でjavascriptを有効にしてください。</p>
+        <p>javascriptを有効にする方法については、お使いのブラウザにより異なりますので、各自検索等で調べてください。</p>
+        <p><a href="./faq.html">このページの仕様について</a> / <a href="http://moecost.bbs.fc2.com/">問い合わせ用掲示板（外部サイト）</a></p>
+      </div>
+    </noscript>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <div class="all">
+      <div class="allContents">
+        <h1>もえこすと</h1>
+        <p>このツールは、オンラインゲーム「Master of Epic」の生産品作成支援用ツールです。</p>
+        <p>使用方法などは、画面下部の<a href="./faq.html">仕様・注意事項</a>をご確認ください。</p>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+        <div id="root"></div>
+        <!--
+          This HTML file is a template.
+          If you open it directly in the browser, you will see an empty page.
+
+          You can add webfonts, meta tags, or analytics to this file.
+          The build step will place the bundled scripts into the <body> tag.
+          
+          To begin the development, run `npm start` or `yarn start`.
+          To create a production bundle, use `npm run build` or `yarn build`
+        -->
+      </div>
+      <div class="footer">
+        <ul class="footerMenu">
+          <li><a href="./faq.html">使用方法・FAQ</a></li>
+          <li><a href="http://moecost.bbs.fc2.com/">不具合報告(外部掲示板)</a></li>
+        </ul>
+        <a href="./faq.html">使用方法・FAQ</a> / <a href="http://moecost.bbs.fc2.com/">不具合報告(外部掲示板)</a>
+      </div>
+    </div>
   </body>
 </html>
