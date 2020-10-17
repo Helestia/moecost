@@ -3,12 +3,12 @@ import React from 'react'
 import jsonRecipes from '../reference/recipes.json'
 import jsonSeriesCreationItems from '../reference/seriesCreationItems.json'
 import {SuggestionArea,tSuggestion} from './suggestion'
-import {SeriesRecipeSelect,} from './seriesRecipeSelect'
+import {SeriesRecipeSelect,tSeriesSelectItems} from './seriesRecipeSelect'
 
 export type tSerchSectionRtnFuncProps = {
-        レシピ名 : string,
-        生成アイテム : string[]
-    } | undefined;
+    レシピ名 : string,
+    生成アイテム : string[]
+} | undefined;
 
 
 export type tSerchSectionProps = {
@@ -17,11 +17,12 @@ export type tSerchSectionProps = {
 
 export const SerchSection:React.FC<tSerchSectionProps> = (props) => {
     const [seriesObj,setSeriesObj] = React.useState<moecost.JSON.seriesCreationItems | undefined>(undefined);
-
+    
     const suggestionAreaRtnFunc = (suggestion? : tSuggestion) => {
         if(suggestion === undefined){
             setSeriesObj(undefined);
         } else if(! suggestion.シリーズレシピ){
+            setSeriesObj(undefined);
             const recipeIndex = jsonRecipes.findIndex(recipe => {
                 return recipe.レシピ名 === suggestion.レシピ名;
             })
@@ -48,11 +49,7 @@ export const SerchSection:React.FC<tSerchSectionProps> = (props) => {
     }
 
     // シリーズ選択結果
-    type tSeriesRecipeSelectRtnFuincProps = {
-        レシピ名 : string,
-        生成アイテム : string[]
-    };
-    const seriesRecipeSelectRtnFuinc = (seriesRecipeSelectRtnFuincProps : tSeriesRecipeSelectRtnFuincProps) => {
+    const seriesRecipeSelectRtnFuinc = (seriesRecipeSelectRtnFuincProps : tSeriesSelectItems) => {
         if(seriesRecipeSelectRtnFuincProps.レシピ名 && seriesRecipeSelectRtnFuincProps.生成アイテム.length>1){
             props.rtnFunc({
                 レシピ名 : seriesRecipeSelectRtnFuincProps.レシピ名,

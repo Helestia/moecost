@@ -1,4 +1,10 @@
 import React from 'react'
+import FormControl from '@material-ui/core/FormControl'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import FormLabel from '@material-ui/core/FormLabel'
+import FormGroup from '@material-ui/core/FormGroup'
+import CheckBox from '@material-ui/core/Checkbox'
+import Button from '@material-ui/core/Button'
 import {moecost} from '../types/app'
 
 // css styles
@@ -19,32 +25,38 @@ const styles:tStyles = {
     }
 }
 
-
-
-type rtnFuncProps = {
+export type tSeriesSelectItems = {
     レシピ名 : string,
     生成アイテム : string[]
 }
 
 type seriesRecipeSelectProps = {
     seriesObj : moecost.JSON.seriesCreationItems,
-    rtnFunc : (rtnFuncProps:rtnFuncProps) => void
+    rtnFunc : (rtnFuncProps:tSeriesSelectItems) => void
+}
+type tItemList = {
+    アイテム:string,
+    接頭:string,
+    checked:boolean
 }
 
 export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
-    const itemListDef = props.seriesObj.アイテム一覧.map(item => {
-        return {
-            アイテム : item.アイテム,
-            接頭 : item.接頭,
-            checked : true}
-    });
-    const [itemList,setItemList] = React.useState(itemListDef);
+    const [recipe,setRecipe] = React.useState("");
+    const [itemList,setItemList] = React.useState<tItemList[]>([])
 
+    if(props.seriesObj.シリーズ名 !== recipe){
+        setRecipe(props.seriesObj.シリーズ名);
+        const il = props.seriesObj.アイテム一覧.map(i => {return {アイテム:i.アイテム,接頭:i.接頭,checked:true}});
+        setItemList(il);
+    }
     // onChange
-    const renderCheckBoxRtnFunc = (index:number,checked:boolean) =>{
-        const newItemList = Array.from(itemList);
-        newItemList[index].checked = checked;
-        setItemList(newItemList);
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        const i = itemList.findIndex(i => {return i.アイテム === e.target.name});
+        if(i !== -1){
+            const result = itemList.concat();
+            result[i].checked = e.target.checked;
+            setItemList(result);
+        }
     }
     // onSubmit
     const handleOnSubmit = (event : React.FormEvent<HTMLFormElement>) => {
@@ -56,47 +68,32 @@ export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
         
         event.preventDefault();
     }
-
-    const renderLi = itemList.map((item,index) => {
-        const renderCheckBoxProps = {
-            index : index,
-            checked : item.checked,
-            rtnFunc : renderCheckBoxRtnFunc
-        }
+    const renderCheckBox = itemList.map((item,index) => {
+        const label = "[" + item.接頭 + "]" + item.アイテム
         return (
-            <li key={index}>
-                <label>
-                    {RenderCheckBox(renderCheckBoxProps)}
-                    [{item.接頭}]{item.アイテム}
-                </label>
-            </li>
-        );
-    });
+            <FormControlLabel
+                key={index}
+                control={<CheckBox color="primary" checked={item.checked} onChange={handleChange} name={item.アイテム} />}
+                label={label} />
+        )
+    })
+
     // 送信ボタンの有効・無効化
     const isSubmitDurable = itemList.every(item => {return item.checked === false});
     return (
         <div style={styles.box}>
             <form onSubmit={handleOnSubmit}>
-                <ul style={styles.listUl}>
-                    {renderLi}
-                </ul>
-                <input type="submit" value="計算" disabled={isSubmitDurable} />
+                <FormControl>
+                    <FormLabel>シリーズ一括生産・対象アイテム選択</FormLabel>
+                    <FormGroup>
+                        {renderCheckBox}
+                    </FormGroup>
+                    <Button color="primary" variant="outlined" type="submit" disabled={isSubmitDurable}>
+                        選択完了
+                    </Button>
+                </FormControl>
             </form>
         </div>
     )
 }
 
-interface renderCheckBoxProps {
-    index : number,
-    checked : boolean
-    rtnFunc : (index : number, checked : boolean) => void
-}
-const RenderCheckBox:React.FC<renderCheckBoxProps> = (props) => {
-    const handleOnChange = () => {
-        const rtnChecked = props.checked ? false : true;
-        props.rtnFunc(props.index, rtnChecked);
-    }
-    return (
-        <input type="checkbox" checked={props.checked}　onChange={handleOnChange} />
-    )
-}
