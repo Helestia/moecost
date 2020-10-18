@@ -20,7 +20,7 @@ class moecostDbClass extends Dexie {
     }
 }
 
-export const moecostDb = new moecostDbClass;
+export const moecostDb = new moecostDbClass();
 
 interface iUseDictionary {
     使用中辞書 : string

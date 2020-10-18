@@ -83,15 +83,13 @@ export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
     return (
         <div style={styles.box}>
             <form onSubmit={handleOnSubmit}>
-                <FormControl>
                     <FormLabel>シリーズ一括生産・対象アイテム選択</FormLabel>
                     <FormGroup>
                         {renderCheckBox}
                     </FormGroup>
-                    <Button color="primary" variant="outlined" type="submit" disabled={isSubmitDurable}>
+                <Button color="primary" variant="outlined" type="submit" disabled={isSubmitDurable}>
                         選択完了
-                    </Button>
-                </FormControl>
+                </Button>
             </form>
         </div>
     )

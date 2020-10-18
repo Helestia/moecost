@@ -2,6 +2,8 @@ import React from 'react';
 // import {ConfigSection,tConfigSectionProps} from './compponents/configSection'
 import {SerchSection,tSerchSectionRtnFuncProps} from './components/searchSection'
 import {retrieveDisplay,defaultStrage,iDisplay} from './scripts/storage'
+import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles'
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 
 
@@ -17,7 +19,11 @@ function App() {
   const init = async() => {
     setConfigDisplay(await retrieveDisplay());
   }
-  
+  const theme = createMuiTheme({
+    palette : {
+      type : "light"
+    }
+  });
   
 
 
@@ -27,17 +33,15 @@ function App() {
   const rtnFuncFirstSection = (rtnFuncProp : tSerchSectionRtnFuncProps) => {
     setSearched(rtnFuncProp);
   }
-  // 副作用(テーマcssの切り替え)
-//  React.useEffect(() => {
-//    if(dark)
-//  })
+
   return (
-    <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
 {/*      <ConfigSection 
         rtnFunc={rtnFuncConfigSection} />*/}
       <SerchSection
         rtnFunc={rtnFuncFirstSection} />
-    </>
+    </ThemeProvider>
   );
 }
 

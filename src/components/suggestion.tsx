@@ -10,6 +10,11 @@ export type tSuggestion = {
     "シリーズレシピ" : boolean
 }
 
+const defSuggestion : tSuggestion = {
+    "レシピ名" : "",
+    "シリーズレシピ" : false
+}
+
 // props Interface
 interface iSuggestionAreaProps {
     allSuggestions : tSuggestion[]
@@ -17,38 +22,24 @@ interface iSuggestionAreaProps {
 }
 
 export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
-    const [value,setValue] = React.useState("");
-    const [tValue,setTValue] = React.useState("");
+    const [value,setValue] = React.useState<tSuggestion>(defSuggestion);
+    const [strValue,setStrValue] = React.useState("");
 
-    const handleSubmit : (e:React.FormEvent<HTMLFormElement>)=> void = (e) => {
-        e.preventDefault();
-        if(value.length >= 1){
-            escalation(value);
-        }
-    }
+    const allSuggestions = [defSuggestion].concat(props.allSuggestions);
+
     const handleChange : (e:React.ChangeEvent<{}>,val:tSuggestion|null) => void = (e,val) => {
-        if(val){
-            setValue(val.レシピ名);
-            escalation(val.レシピ名);
-        } else {
-            setValue("");
-        }
-    }
-    // 親関数の呼び出し
-    const escalation : (str:string | null) => void = (str) => {
-        if(str === null || str.length === 0){
+        if(val === null){
+            setValue(defSuggestion);
             props.rtnFunc(undefined);
-            return;
+        } else {
+            setValue(val);
+            props.rtnFunc(val)
         }
-        const escalationObj = props.allSuggestions.find((suggestion) => {return (suggestion.レシピ名 === str)});
-        if(escalationObj){
-            props.rtnFunc(escalationObj);
-        }
-        return;
     }
 
     const renderOptionFunc = (option:tSuggestion) => {
-        const reg = new RegExp("^(.*)(" + tValue + ")(.*)$");
+        if (option.レシピ名 === "") return (<div className="suggestion">未選択</div>);
+        const reg = new RegExp("^(.*)(" + strValue + ")(.*)$");
         const matches = option.レシピ名.match(reg);
         const displayLabel = matches ? <>{matches[1]}<b>{matches[2]}</b>{matches[3]}</> : <>{option.レシピ名}</>
         if(option.シリーズレシピ){
@@ -77,19 +68,29 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
             .replace("^","\\^")
             .replace("$","\\$")
             .replace("|","\\|")
-        setTValue(setVal);
+        setStrValue(setVal);
+        if(setVal.length === 0){
+            setValue(defSuggestion);
+        }
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <AutoComplete
-                id="searchRecipe"
-                options={props.allSuggestions}
-                getOptionLabel={(option)=>option.レシピ名}
-                style={{display:"inline"}}
-                renderInput={(p) =><TextField {...p} name="serchRecipeField" onChange={handleTChange} style={{width:"350px"}} size="small" label="レシピ検索" variant="outlined" />}
-                renderOption={renderOptionFunc}
-                onChange={handleChange}/>
-        </form>
+        <AutoComplete
+            id="searchRecipe"
+            value={value}
+            options={allSuggestions}
+            getOptionSelected={(option,value) => {return (option.レシピ名 === value.レシピ名)}}
+            getOptionLabel={(option)=>option.レシピ名}
+            renderInput={(p) =>
+                <TextField {...p} 
+                    name="serchRecipeField"
+                    onChange={handleTChange}
+                    style={{width:"450px"}}
+                    label="レシピ検索"
+                    variant="outlined"
+                    />
+            }
+            renderOption={renderOptionFunc}
+            onChange={handleChange}/>
     );
 }
