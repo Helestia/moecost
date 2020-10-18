@@ -1,6 +1,6 @@
 import React from 'react';
 // import {ConfigSection,tConfigSectionProps} from './compponents/configSection'
-import {SerchSection,tSerchSectionRtnFuncProps} from './components/searchSection'
+import SerchSection, {tSerchSectionRtnFuncProps} from './components/searchSection'
 import {retrieveDisplay,defaultStrage,iDisplay} from './scripts/storage'
 import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';

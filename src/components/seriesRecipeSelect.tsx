@@ -95,3 +95,4 @@ export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
     )
 }
 
+export default SeriesRecipeSelect;

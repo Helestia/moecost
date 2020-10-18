@@ -2,8 +2,8 @@ import {moecost} from '../types/app'
 import React from 'react'
 import jsonRecipes from '../reference/recipes.json'
 import jsonSeriesCreationItems from '../reference/seriesCreationItems.json'
-import {SuggestionArea,tSuggestion} from './suggestion'
-import {SeriesRecipeSelect,tSeriesSelectItems} from './seriesRecipeSelect'
+import SuggestionArea, {tSuggestion} from './suggestion'
+import SeriesRecipeSelect, {tSeriesSelectItems} from './seriesRecipeSelect'
 
 export type tSerchSectionRtnFuncProps = {
     レシピ名 : string,
@@ -100,5 +100,6 @@ export const SerchSection:React.FC<tSerchSectionProps> = (props) => {
                 />
         )
     }
-    
 }
+
+export default SerchSection;

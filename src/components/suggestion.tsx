@@ -94,3 +94,5 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
             onChange={handleChange}/>
     );
 }
+
+export default SuggestionArea;
