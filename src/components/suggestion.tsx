@@ -2,8 +2,6 @@ import React from 'react'
 import AutoComplete from '@material-ui/lab/Autocomplete'
 import TextField from '@material-ui/core/TextField'
 
-
-
 // suggestion情報
 export type tSuggestion = {
     "レシピ名":string,
@@ -44,11 +42,11 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
         const displayLabel = matches ? <>{matches[1]}<b>{matches[2]}</b>{matches[3]}</> : <>{option.レシピ名}</>
         if(option.シリーズレシピ){
             return (
-                <div className="suggestion selese">{displayLabel}</div>
+                <div>[セット]{displayLabel}</div>
             )
         } else {
             return (
-                <div className="suggestion">{displayLabel}</div>
+                <div>{displayLabel}</div>
             )
         }
     }
@@ -85,7 +83,7 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
                 <TextField {...p} 
                     name="serchRecipeField"
                     onChange={handleTChange}
-                    style={{width:"450px"}}
+                    style={{width:"450px",marginTop:"10px"}}
                     label="レシピ検索"
                     variant="outlined"
                     />

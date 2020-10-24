@@ -1,7 +1,7 @@
 import React from 'react';
-// import {ConfigSection,tConfigSectionProps} from './compponents/configSection'
-import SerchSection, {tSerchSectionRtnFuncProps} from './components/searchSection'
-import {retrieveDisplay,defaultStrage,iDisplay} from './scripts/storage'
+import TopBar from './components/topBar'
+import SearchSection, {tSerchSectionRtnFuncProps} from './components/searchSection'
+import moecostDb from './scripts/storage'
 import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -13,33 +13,36 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 function App() {
 // 設定情報
-  const [configDsiplay,setConfigDisplay] = React.useState<iDisplay>(defaultStrage.表示設定);
+  const [isDarkMode,setIsDarkMode] = React.useState<boolean|undefined>(undefined);
   const [searched, setSearched] = React.useState<tSerchSectionRtnFuncProps>(undefined);
-  // 表示設定取得
-  const init = async() => {
-    setConfigDisplay(await retrieveDisplay());
-  }
   const theme = createMuiTheme({
     palette : {
-      type : "light"
+      type : (isDarkMode) ? "dark" : "light"
     }
   });
-  
-
-
-
 
   // 検索結果の取得
   const rtnFuncFirstSection = (rtnFuncProp : tSerchSectionRtnFuncProps) => {
     setSearched(rtnFuncProp);
   }
 
+  // 表示設定更新
+  const changeUseDarkMode = async () => {
+    setIsDarkMode(moecostDb.表示設定.ダークモード);
+  }
+
+  // 初回設定
+  if(isDarkMode === undefined){
+    moecostDb.refleshProperties(()=>{
+      setIsDarkMode(moecostDb.表示設定.ダークモード)
+    })
+  }
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-{/*      <ConfigSection 
-        rtnFunc={rtnFuncConfigSection} />*/}
-      <SerchSection
+      <TopBar 
+        changeUseDarkMode={changeUseDarkMode} />
+      <SearchSection
         rtnFunc={rtnFuncFirstSection} />
     </ThemeProvider>
   );

@@ -11,11 +11,11 @@ export type tSerchSectionRtnFuncProps = {
 } | undefined;
 
 
-export type tSerchSectionProps = {
+export type tSearchSectionProps = {
     rtnFunc : (rtnFuncProp:tSerchSectionRtnFuncProps) => void
 }
 
-export const SerchSection:React.FC<tSerchSectionProps> = (props) => {
+export const SearchSection:React.FC<tSearchSectionProps> = (props) => {
     const [seriesObj,setSeriesObj] = React.useState<moecost.JSON.seriesCreationItems | undefined>(undefined);
     
     const suggestionAreaRtnFunc = (suggestion? : tSuggestion) => {
@@ -102,4 +102,4 @@ export const SerchSection:React.FC<tSerchSectionProps> = (props) => {
     }
 }
 
-export default SerchSection;
+export default SearchSection;

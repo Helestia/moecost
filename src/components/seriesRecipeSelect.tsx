@@ -1,29 +1,12 @@
 import React from 'react'
-import FormControl from '@material-ui/core/FormControl'
+import {makeStyles} from '@material-ui/core/styles'
+import Card from '@material-ui/core/Card';
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import FormLabel from '@material-ui/core/FormLabel'
 import FormGroup from '@material-ui/core/FormGroup'
 import CheckBox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
 import {moecost} from '../types/app'
-
-// css styles
-type tStyles = {
-    box? : React.CSSProperties,
-    listUl? : React.CSSProperties,
-    listLi? : React.CSSProperties,
-    checkbox? : React.CSSProperties,
-    label? : React.CSSProperties
-}
-
-const styles:tStyles = {
-    box : {
-        borderWidth : "3px",
-    },
-    listUl : {
-        listStyle : "none"
-    }
-}
 
 export type tSeriesSelectItems = {
     レシピ名 : string,
@@ -40,9 +23,31 @@ type tItemList = {
     checked:boolean
 }
 
+const definedStyles = makeStyles({
+    cord : {
+        marginLeft: 10,
+        marginTop:10,
+        padding: 10,
+        width:440
+    },
+    title : {
+        fontSize:16
+    },
+    form : {
+        display: "flex",
+        flexDirection: "column"
+    },
+    button : {
+        marginTop:15,
+        marginleft:15
+    }
+});
+
 export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
     const [recipe,setRecipe] = React.useState("");
-    const [itemList,setItemList] = React.useState<tItemList[]>([])
+    const [itemList,setItemList] = React.useState<tItemList[]>([]);
+
+    const classes = definedStyles();
 
     if(props.seriesObj.シリーズ名 !== recipe){
         setRecipe(props.seriesObj.シリーズ名);
@@ -71,27 +76,30 @@ export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
     const renderCheckBox = itemList.map((item,index) => {
         const label = "[" + item.接頭 + "]" + item.アイテム
         return (
-            <FormControlLabel
-                key={index}
-                control={<CheckBox color="primary" checked={item.checked} onChange={handleChange} name={item.アイテム} />}
-                label={label} />
+            <>
+                <FormControlLabel
+                    key={index}
+                    control={<CheckBox color="primary" checked={item.checked} onChange={handleChange} name={item.アイテム} />}
+                    label={label}
+                    style={{display:"inline-block"}} /><br />
+            </>
         )
     })
 
     // 送信ボタンの有効・無効化
     const isSubmitDurable = itemList.every(item => {return item.checked === false});
     return (
-        <div style={styles.box}>
-            <form onSubmit={handleOnSubmit}>
-                    <FormLabel>シリーズ一括生産・対象アイテム選択</FormLabel>
-                    <FormGroup>
-                        {renderCheckBox}
-                    </FormGroup>
-                <Button color="primary" variant="outlined" type="submit" disabled={isSubmitDurable}>
+        <Card className={classes.cord}>
+            <form onSubmit={handleOnSubmit} className={classes.form}>
+                <FormLabel className={classes.title}>シリーズ一括生産・対象アイテム選択</FormLabel>
+                <FormGroup style={{display:"inline-block"}}>
+                    {renderCheckBox}
+                </FormGroup>
+                <Button className={classes.button} color="primary" variant="text" type="submit" disabled={isSubmitDurable}>
                         選択完了
                 </Button>
             </form>
-        </div>
+        </Card>
     )
 }
 

@@ -1,28 +1,133 @@
 import Dexie from 'dexie';
-import '../types/app.d.ts'
 
 class moecostDbClass extends Dexie {
-    useDictionary : Dexie.Table<iUseDictionary,1>;
-    dictionary : Dexie.Table<iDictionary,string>;
-    display : Dexie.Table<iDisplay,1>;
+    private useDictionary : Dexie.Table<iUseDictionary,1>;
+    private dictionary : Dexie.Table<iDictionary,string>;
+    private display : Dexie.Table<iDisplay,1>;
+
+    辞書 : iDictionary;
+    使用辞書 : iUseDictionary;
+    表示設定 : iDisplay;
 
     constructor () {
         super("MOECOST_localDB");
 
         this.version(1).stores({
-            useDictionary : "id",
-            dictionary : "辞書名",
-            display : "id"
+            display : "",
+            useDictionary : "",
+            dictionary : "辞書名"
         });
+        // 初期化
         this.useDictionary = this.table("useDictionary");
         this.dictionary = this.table("dictionary");
         this.display = this.table("display");
+        this.辞書 = defaultStrage.辞書;
+        this.使用辞書 = defaultStrage.使用辞書;
+        this.表示設定 = defaultStrage.表示設定;
+    }
+
+    async refleshProperties (callBack?: () => void) {
+        this.表示設定 = await this.retrieveDisplay();
+        this.使用辞書 = await this.retrieveUseDictionary();
+        this.辞書 = await this.retrieveDictionary(this.使用辞書.使用中辞書);
+        if(callBack) {
+            callBack();
+        }
+    }
+
+    private async retrieveDictionary (dictionaryName : string) {
+        let RD = await this.dictionary.get(dictionaryName).catch(() => {
+            return defaultStrage.辞書;
+        });
+        if(RD === undefined){
+            RD = defaultStrage.辞書;
+        }
+        return RD;
+    }
+
+    private async retrieveDisplay () {
+        let RD = await this.display.get(1).catch(() => {
+            return defaultStrage.表示設定;
+        })
+        if(RD === undefined){
+            RD = defaultStrage.表示設定;
+        }
+        return RD;
+    }
+
+    private async retrieveUseDictionary () {
+        let RUD = await this.useDictionary.get(1).catch(() => {
+            return defaultStrage.使用辞書;
+        });
+        if(RUD === undefined){
+            RUD = defaultStrage.使用辞書;
+        }
+        return RUD;
+    }
+
+    registerDisplay (prop : iDisplay) {
+        this.display.put(prop,1);
+        this.表示設定 = prop;
+    }
+
+    registerDictionary(prop : iDictionary) {
+        this.dictionary.put(prop,prop.辞書名);
+        this.辞書 = prop;
+    }
+
+    registerUseDictionary (prop: iUseDictionary) {
+        this.useDictionary.put(prop,1);
+        this.使用辞書 = prop;
+    }
+    // 全ての設定の削除・初期化
+    async clearAll () {
+        let dictionarys = await this.dictionary.toArray();
+        dictionarys.forEach(dict => {
+            this.dictionary.delete(dict.辞書名);
+        });
+        this.display.delete(1);
+        this.useDictionary.delete(1);
+
+        this.表示設定 = defaultStrage.表示設定;
+        this.使用辞書 = defaultStrage.使用辞書;
+        this.辞書 = defaultStrage.辞書;
+    }
+
+    // 全ての辞書名の取得
+    async retrieveAllDictionaryNames () {
+        let dictionarys = await this.dictionary.toArray();
+        if(dictionarys.length === 0){
+            return [defaultStrage.辞書.辞書名];
+        } else {
+            return dictionarys.map(dict => dict.辞書名);
+        }
+    }
+    // 辞書の削除
+}
+
+const defaultStrage: {"辞書":iDictionary,"使用辞書":iUseDictionary,"表示設定":iDisplay} = {
+    "辞書" : {
+        "辞書名" : "Default Dictionary",
+        "内容" : []
+    },
+    "使用辞書" : {
+        "使用中辞書" : "Default Dictionary"
+    },
+    "表示設定" : {
+        "ダークモード" : false,
+        "簡易表示" : false,
+        "初期非表示設定" : {
+            "概要" : false,
+            "生成アイテム一覧" : false,
+            "素材_余剰生産品_副産物一覧" : false,
+            "生産ツリー" : false
+        }
     }
 }
 
-export const moecostDb = new moecostDbClass();
+const moecostDb = new moecostDbClass();
 
-interface iUseDictionary {
+export interface iUseDictionary {
     使用中辞書 : string
 }
 
@@ -55,91 +160,6 @@ export interface iDisplay {
     }
 }
 
-export const defaultStrage: {"辞書":iDictionary,"使用辞書":iUseDictionary,"表示設定":iDisplay} = {
-    "辞書" : {
-        "辞書名" : "Default Dictionary",
-        "内容" : []
-    },
-    "使用辞書" : {
-        "使用中辞書" : "Default Dictionary"
-    },
-    "表示設定" : {
-        "ダークモード" : false,
-        "簡易表示" : false,
-        "初期非表示設定" : {
-            "概要" : false,
-            "生成アイテム一覧" : false,
-            "素材_余剰生産品_副産物一覧" : false,
-            "生産ツリー" : false
-        }
-    }
-}
-
-export const retrieveDisplay : () => Promise<iDisplay> = (async () => {
-    let display = await moecostDb.display.get(1);
-    if(! display){
-        display = defaultStrage.表示設定;
-        moecostDb.display.put(display,1)
-    }
-    return display
-});
-
-export const registerDisplay : (prop:iDisplay) => void = (prop) => {
-    moecostDb.display.put(prop);
-}
-
-export const retrieveDictionary : () => Promise<iDictionary> = (async () => {
-    let useDictionary = await moecostDb.useDictionary.get(1);
-    if(! useDictionary){
-        useDictionary = defaultStrage.使用辞書;
-    }
-    let dictionary = await moecostDb.dictionary.get(useDictionary.使用中辞書);
-    if(! dictionary){
-        dictionary = defaultStrage.辞書;
-        dictionary.辞書名 = useDictionary.使用中辞書
-    }
-    return dictionary;
-});
-
-export const registerDictionary : (prop:iDictionary) => void = (prop) => {
-    moecostDb.dictionary.put(prop);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const initialize : () => Promise<{display:iDisplay,dictionary:iDictionary}>= (async () => {
-
-    let display = await moecostDb.display.get(1);
-    if(! display){
-        display = defaultStrage.表示設定;
-        moecostDb.display.put(display,1)
-    }
-
-    let useDictionary = await moecostDb.useDictionary.get(1)
-    if(! useDictionary){
-        useDictionary = defaultStrage.使用辞書
-    }
-    
-    let dictionary = await moecostDb.dictionary.get(useDictionary.使用中辞書);
-    if(! dictionary){
-        dictionary = defaultStrage.辞書;
-    }
-
-    return {
-        display:display,
-        dictionary:dictionary
-    }
-});
-
+export default moecostDb
 
 
