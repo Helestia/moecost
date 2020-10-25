@@ -3,9 +3,8 @@ import history from './../reference/history.json';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import Typography from '@material-ui/core/Typography'
-import { createPropertySignature } from 'typescript';
+import Typography from '@material-ui/core/Typography';
+
 interface iDispChangeLogDialog {
     isOpen : boolean,
     close:() => void

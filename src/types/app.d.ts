@@ -84,6 +84,14 @@ export declare namespace moecost {
             シリーズ名:string,
             アイテム一覧: シリーズアイテム[]
         }
+        interface history {
+            version:number,
+            history:{
+                更新日:string,
+                version:number,
+                更新内容:string[]
+            }[]
+        }
     }
 }
 
@@ -116,6 +124,12 @@ declare module '../reference/recipes.json' {
 declare module '../reference/seriesCreationItems.json' {
     interface seriesCreationItems extends moecost.JSON.seriesCreationItems{};
     const value : seriesCreationItems[];
+
+    export = value;
+}
+declare module '../reference/history.json' {
+    interface history extends moecost.JSON.history{};
+    const value : history;
 
     export = value;
 }

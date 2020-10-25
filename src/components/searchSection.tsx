@@ -5,14 +5,14 @@ import jsonSeriesCreationItems from '../reference/seriesCreationItems.json'
 import SuggestionArea, {tSuggestion} from './suggestion'
 import SeriesRecipeSelect, {tSeriesSelectItems} from './seriesRecipeSelect'
 
-export type tSerchSectionRtnFuncProps = {
+export type tSearchSectionRtnFuncProps = {
     レシピ名 : string,
     生成アイテム : string[]
 } | undefined;
 
 
 export type tSearchSectionProps = {
-    rtnFunc : (rtnFuncProp:tSerchSectionRtnFuncProps) => void
+    rtnFunc : (rtnFuncProp:tSearchSectionRtnFuncProps) => void
 }
 
 export const SearchSection:React.FC<tSearchSectionProps> = (props) => {

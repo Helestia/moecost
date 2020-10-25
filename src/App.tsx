@@ -1,7 +1,9 @@
 import React from 'react';
 import TopBar from './components/topBar'
-import SearchSection, {tSerchSectionRtnFuncProps} from './components/searchSection'
-import moecostDb from './scripts/storage'
+import SearchSection, {tSearchSectionRtnFuncProps} from './components/searchSection'
+import ResultSection from './components/resultSection';
+import moecostDb,{iDisplay} from './scripts/storage'
+
 import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -10,33 +12,32 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 
 
-
 function App() {
 // 設定情報
-  const [isDarkMode,setIsDarkMode] = React.useState<boolean|undefined>(undefined);
-  const [searched, setSearched] = React.useState<tSerchSectionRtnFuncProps>(undefined);
+  const [configDisplay,setConfigDisplay] = React.useState<iDisplay>(moecostDb.表示設定);
+  const [searched, setSearched] = React.useState<tSearchSectionRtnFuncProps>(undefined);
   const theme = createMuiTheme({
     palette : {
-      type : (isDarkMode) ? "dark" : "light"
+      type : (configDisplay?.ダークモード) ? "dark" : "light"
     }
   });
 
   // 検索結果の取得
-  const rtnFuncFirstSection = (rtnFuncProp : tSerchSectionRtnFuncProps) => {
+  const rtnFuncFirstSection = (rtnFuncProp : tSearchSectionRtnFuncProps) => {
     setSearched(rtnFuncProp);
   }
 
   // 表示設定更新
   const changeUseDarkMode = async () => {
-    setIsDarkMode(moecostDb.表示設定.ダークモード);
+    setConfigDisplay(moecostDb.表示設定);
   }
 
-  // 初回設定
-  if(isDarkMode === undefined){
-    moecostDb.refleshProperties(()=>{
-      setIsDarkMode(moecostDb.表示設定.ダークモード)
+  // 初回処理・moecostDbの初期化・ステート取得
+  React.useEffect(()=>{
+    moecostDb.refleshProperties(() => {
+      setConfigDisplay(moecostDb.表示設定);
     })
-  }
+  },[])
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -44,6 +45,8 @@ function App() {
         changeUseDarkMode={changeUseDarkMode} />
       <SearchSection
         rtnFunc={rtnFuncFirstSection} />
+      <ResultSection
+        searched={searched} />
     </ThemeProvider>
   );
 }

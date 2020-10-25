@@ -10,8 +10,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Iconbutton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography'
-import {makeStyles} from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 import MenuIcon from '@material-ui/icons/Menu';
 import SettingIcon from '@material-ui/icons/SettingsApplications';
 import LocalLibraryIcon from '@material-ui/icons/LocalLibrary';
@@ -19,22 +18,6 @@ import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import StoreIcon from '@material-ui/icons/Store';
 import ForumIcon from '@material-ui/icons/Forum';
 
-// メニュードロワーの幅
-const drowerWidth = 240
-
-
-const definedStyles = makeStyles({
-    root : {
-        position: "fixed"
-    },
-    drower : {
-        width : drowerWidth
-    },
-    drowerPaper : {
-        width : drowerWidth
-    },
-
-});
 
 export interface iMenuDrower {
     isMenuOpened: boolean,
@@ -150,7 +133,6 @@ export interface iTopBar {
 const TopBar: React.FC<iTopBar> = (props) => {
     const [isMenuOpened,setIsMenuOpened] = React.useState(false);
 
-    const classes = definedStyles();
     // 表示設定値変更
     const changeUseDarkMode = async () => {
         props.changeUseDarkMode();
