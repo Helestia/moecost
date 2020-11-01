@@ -1,4 +1,5 @@
 import React from 'react'
+import {tJSON_seriesCreationItem} from '../scripts/jsonReader'
 import {makeStyles} from '@material-ui/core/styles'
 import Card from '@material-ui/core/Card';
 import FormControlLabel from '@material-ui/core/FormControlLabel'
@@ -6,7 +7,6 @@ import FormLabel from '@material-ui/core/FormLabel'
 import FormGroup from '@material-ui/core/FormGroup'
 import CheckBox from '@material-ui/core/Checkbox'
 import Button from '@material-ui/core/Button'
-import {moecost} from '../types/app'
 
 export type tSeriesSelectItems = {
     レシピ名 : string,
@@ -14,7 +14,7 @@ export type tSeriesSelectItems = {
 }
 
 type seriesRecipeSelectProps = {
-    seriesObj : moecost.JSON.seriesCreationItems,
+    seriesObj : tJSON_seriesCreationItem,
     rtnFunc : (rtnFuncProps:tSeriesSelectItems) => void
 }
 type tItemList = {

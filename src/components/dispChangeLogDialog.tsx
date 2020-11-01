@@ -1,5 +1,5 @@
 import React from 'react';
-import history from './../reference/history.json';
+import {History} from '../scripts/jsonReader';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -19,12 +19,12 @@ const DispChangeLogDialog:React.FC<iDispChangeLogDialog> = (props) => {
         >
             <DialogTitle>
                 <Typography variant="h4">開発状況・ログ</Typography>
-                <Typography variant="h6">version.{history.version}</Typography>
+                <Typography variant="h6">version.{History.version}</Typography>
             </DialogTitle>
             <DialogContent
                 dividers={true}
             >
-                {history.history.map((h) => {
+                {History.history.map((h) => {
                     return (
                         <>
                             <Typography variant="subtitle1">[ver.{h.version}] {h.更新日}</Typography>

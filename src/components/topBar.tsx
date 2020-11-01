@@ -2,8 +2,6 @@ import React from 'react';
 import ConfigDisplayDialog from './configDisplayDialog'
 import DispChangeLogDialog from './dispChangeLogDialog'
 
-
-
 import AppBar from '@material-ui/core/AppBar';
 import Drawer from '@material-ui/core/Drawer';
 import Toolbar from '@material-ui/core/Toolbar';

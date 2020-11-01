@@ -33,7 +33,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         return null;
     }
     // 計算処理
-//    const calcResult = calc(prop, userDictionary, createCount, noStackCalcRoute);
+//    const calcResult = calc(prop, userDictionary, noStackCalcRoute, createCount );
 
     return (
         <>
