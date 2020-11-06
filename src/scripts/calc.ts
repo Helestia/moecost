@@ -803,8 +803,8 @@ const getMinimumCreationNumber:iGetMinimumCreationNumber = (main,commons) => {
                     resultMaterialData.作成数,
                     resultMaterialData.要求数,
                     resultObj);
-            });        
-            return md;
+            });
+            return resultObj;
         }
         // ここまでは到達しない…はず
         return md;
@@ -829,7 +829,6 @@ const getMinimumCreationNumber:iGetMinimumCreationNumber = (main,commons) => {
                 素材情報: []
             };
         }
-        
         // 初期値取得処理
         //  要求値の乗算加算値
         const ProductAmount = usageObj.使用状況.reduce<number>((acc,cur) => {return acc * cur.要求数},1);
@@ -838,10 +837,9 @@ const getMinimumCreationNumber:iGetMinimumCreationNumber = (main,commons) => {
         // 上記配列の最小公倍数算出
         const CmATdA_lcm = lcmArray(CmATdA);
         // 最小作成コンバイン数算出
-        const miniCombArray = CmATdA.map(i => i / CmATdA_lcm);
+        const miniCombArray = CmATdA.map(i => CmATdA_lcm / i);
         // 最小作成コンバイン数合算
         const miniComb = miniCombArray.reduce<number>((acc,cur) => {return acc + cur},0);
-
         // 計算結果
         const treeTopResult:tMaterialData = {
             作成数 : tree.個数.セット作成個数 * CmATdA_lcm / gcd(tree.個数.セット作成個数, miniComb),
@@ -864,26 +862,26 @@ const getMinimumCreationNumber:iGetMinimumCreationNumber = (main,commons) => {
     const mainTreeData:tTreeData[] = main.map(tree => {return getMaterialDataParent_main(tree)})
     // 共通素材ツリーのデータ取得
     const commonTreeData:tTreeData[] = commons.reverse().map(tree => {return getMaterialDataParent_common(tree)})
-    // それらの結合
-    const concatMandC = mainTreeData.concat(commonTreeData);
-
+    // 素材調査結果の統合
+    const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => {
+        return a.concat(c.素材情報);
+    },[]);
+    const materialData_Common = commonTreeData.reduce<tMaterialData[]>((a,c) => {
+        return a.concat(c.素材情報);
+    },[]);
+    const concatMandC = materialData_Main.concat(materialData_Common);
     // 全要求数の乗算
     const AllAmountProduct = concatMandC.reduce<number>((a,c) => {
-        return a * c.素材情報.reduce<number>((a,c) => {
-            return a * c.要求数
-        },1)
+        return a * c.要求数;
     },1);
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
-    const AllCmATdA:number[] = [];
-    concatMandC.forEach(tree => {
-        tree.素材情報.forEach(data => {
-            AllCmATdA.push(data.作成数 * AllAmountProduct / data.要求数);
-        });
-    });
+    const AllCmATdA:number[] = concatMandC.map(d => {return d.作成数 * AllAmountProduct / d.要求数});
+    console.log(concatMandC);
+    console.log(AllCmATdA);
 
     // 最小作成数
-    return lcmArray(AllCmATdA);
+    return lcmArray(AllCmATdA) / AllAmountProduct;
 }
 type tSetNumberToTreeResult = {
     main:tTreeNode[],
@@ -903,6 +901,8 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
     const commonData:tCommonData[] = [];
     type tSetNumberToNode = (node:tTreeNode_noNumber, number:number) => tTreeNode
     const setNumberToNode:tSetNumberToNode = (node,number) => {
+        console.log(node);
+        console.log(number);
         // 調達方法不明時の処理
         type tSetNumberToNode_unknown = (node:tTreeNode_noNumber_unknown | tTreeNode_noNumber_unknown_durability) => tTreeNode_unknown | tTreeNode_unknown_durability;
         const setNumberToNode_unknown: tSetNumberToNode_unknown = (node) => {
@@ -1048,7 +1048,7 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
                     return result;
                 } else {
                     const useNumber = number * node.個数.上位レシピ要求個数;
-                    const creationNumber = Math.ceil(useNumber / node.個数.セット作成個数);
+                    const creationNumber = Math.ceil(useNumber / node.個数.セット作成個数) * node.個数.セット作成個数;
                     const amountNumber = creationNumber - useNumber;
                     const result:tTreeNode_creation = {
                         アイテム名: node.アイテム名,
