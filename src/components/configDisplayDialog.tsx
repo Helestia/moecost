@@ -7,6 +7,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormLabel from '@material-ui/core/FormLabel';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Switch from '@material-ui/core/Switch';
 
 type tConfigDisplayDialog = {
@@ -23,8 +28,8 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
     const [isHiddenML,setIsHiddenML] = React.useState(moecostDb.表示設定.初期非表示設定.素材_余剰生産品_副産物一覧);
     const [isHiddenCT,setIsHiddenCT] = React.useState(moecostDb.表示設定.初期非表示設定.生産ツリー);
 
-    const handleChangeA = () => {
-        const result : iDisplay = {
+    const handleClickList = (str: string) => () => {
+        const dbData: iDisplay = {
             "ダークモード" : isDarkMode,
             "簡易表示" : isSimpleMode,
             "初期非表示設定" : {
@@ -34,18 +39,38 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
                 "生産ツリー" : isHiddenCT
             }
         }
-        const isCallChange = (result.ダークモード !== moecostDb.表示設定.ダークモード) ? true : false;
-        if(JSON.stringify(moecostDb.表示設定) !== JSON.stringify(result)){
-            moecostDb.registerDisplay(result)
-        }
-        if(isCallChange){
+
+        if(str === "darkMode"){
+            setIsDarkMode(! isDarkMode);
+            dbData.ダークモード = (! isDarkMode);
+            moecostDb.registerDisplay(dbData);
             props.changeUseDarkMode();
         }
-    }
-    handleChangeA();
-
-    const handleChange = async (event:React.ChangeEvent<HTMLInputElement>,propFunc:React.Dispatch<React.SetStateAction<boolean>>) => {
-        propFunc(event.target.checked);
+        if(str === "simpleMode"){
+            setIsSimpleMode(! isSimpleMode);
+            dbData.簡易表示 = (! isSimpleMode);
+            moecostDb.registerDisplay(dbData);
+        }
+        if(str === "hiddenS"){
+            setIsHiddenS(! isHiddenS);
+            dbData.初期非表示設定.概要 = (! isHiddenS);
+            moecostDb.registerDisplay(dbData);
+        }
+        if(str === "hiddenCL"){
+            setIsHiddenCL(! isHiddenCL);
+            dbData.初期非表示設定.生成アイテム一覧 = (! isHiddenCL);
+            moecostDb.registerDisplay(dbData);
+        }
+        if(str === "hiddenML"){
+            setIsHiddenML(! isHiddenML);
+            dbData.初期非表示設定.素材_余剰生産品_副産物一覧 = (! isHiddenML);
+            moecostDb.registerDisplay(dbData);
+        }
+        if(str === "hiddenCT"){
+            setIsHiddenCT(! isHiddenCT);
+            dbData.初期非表示設定.生産ツリー = (! isHiddenCT);
+            moecostDb.registerDisplay(dbData);
+        }
     }
 
     return (
@@ -55,54 +80,54 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
         >
             <Box marginX={2}>
                 <DialogTitle>表示設定変更</DialogTitle>
-                <FormGroup>
-                    <FormLabel>一般</FormLabel>
-                    <FormControlLabel
-                        label="ダークモード使用"
-                        labelPlacement="start"
-                        control={
-                            <Switch checked={isDarkMode} onChange={(e)=> handleChange(e,setIsDarkMode)} />
-                        }
-                    />
-                    <FormControlLabel
-                        label="生産ツリーの簡易表示"
-                        labelPlacement="start"
-                        control={
-                            <Switch checked={isSimpleMode} onChange={(e)=> handleChange(e,setIsSimpleMode)} />
-                        }
-                    />
-                </FormGroup>
-                <FormGroup>
-                    <FormLabel style={{marginTop:25}}>初期状態での非表示設定</FormLabel>
-                    <FormControlLabel
-                        label="概要"
-                        labelPlacement="start"
-                        control={
-                            <Switch checked={isHiddenS} onChange={(e)=> handleChange(e,setIsHiddenS)} />
-                        }
-                    />
-                    <FormControlLabel
-                        label="生産品一覧"
-                        labelPlacement="start"
-                        control={
-                            <Switch checked={isHiddenCL} onChange={(e)=> handleChange(e,setIsHiddenCL)} />
-                        }
-                    />
-                    <FormControlLabel
-                        label="素材・余剰生産品・副産物一覧"
-                        labelPlacement="start"
-                        control={
-                            <Switch checked={isHiddenML} onChange={(e)=> handleChange(e,setIsHiddenML)} />
-                        }
-                    />
-                    <FormControlLabel
-                        label="生産ツリー"
-                        labelPlacement="start"
-                        control={
-                            <Switch checked={isHiddenCT} onChange={(e)=> handleChange(e,setIsHiddenCT)} />
-                        }
-                    />
-                </FormGroup>
+                <List
+                    subheader={<ListSubheader>一般</ListSubheader>}>
+                    <ListItem
+                        button
+                        dense
+                        onClick={handleClickList("darkMode")}>
+                        <ListItemText primary="ダークモードを使用" />
+                        <Switch checked={isDarkMode} onChange={handleClickList("darkMode")}/>
+                    </ListItem>
+                    <ListItem
+                        button
+                        dense
+                        onClick={handleClickList("simpleMode")}>
+                        <ListItemText primary="生産ツリーの簡易表示" />
+                        <Switch checked={isSimpleMode} onChange={handleClickList("simpleMode")}/>
+                    </ListItem>
+                </List>
+                <List
+                    subheader={<ListSubheader>初期状態での非表示設定</ListSubheader>}>
+                    <ListItem
+                        button
+                        dense
+                        onClick={handleClickList("hiddenS")}>
+                        <ListItemText primary="概要" />
+                        <Switch checked={isHiddenS} onChange={handleClickList("hiddenS")}/>
+                    </ListItem>
+                    <ListItem
+                        button
+                        dense
+                        onClick={handleClickList("hiddenCL")}>
+                        <ListItemText primary="生産品一覧" />
+                        <Switch checked={isHiddenCL} onChange={handleClickList("hiddenCL")}/>
+                    </ListItem>
+                    <ListItem
+                        button
+                        dense
+                        onClick={handleClickList("hiddenML")}>
+                        <ListItemText primary="素材・余剰生産品・副産物一覧" />
+                        <Switch checked={isHiddenML} onChange={handleClickList("hiddenML")}/>
+                    </ListItem>
+                    <ListItem
+                        button
+                        dense
+                        onClick={handleClickList("hiddenCT")}>
+                        <ListItemText primary="生産ツリー" />
+                        <Switch checked={isHiddenCT} onChange={handleClickList("hiddenCT")}/>
+                    </ListItem>
+                </List>
             </Box>
         </Dialog>
     )

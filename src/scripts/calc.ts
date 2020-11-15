@@ -9,28 +9,27 @@ import {
     Recipes,
     tJSON_recipe} from '../scripts/jsonReader'
 
-
-
-
 // 生産アイテムの余剰許容区分
 // fully    : 余剰不可
 // surplus  : 余剰可　生産数重視
 // undefined: スタック可能アイテムは余剰不可　スタック不能アイテムは余剰許容
-export type tNoStackCalcRoute = "fully" | "Surplus" | undefined;
+export type tNoStackCalcRoute = "fully" | "surplus" | undefined;
+export type tNoStackCalcRouteResult = "fully" | "surplus";
 
 // 返答オブジェクト
 type tCalcResult = {
     生産個数 : {
         個数 : number,
         余剰なし最小生産個数 : number
+        余剰対応: tNoStackCalcRouteResult
     }
     共通材料ツリー : tTreeNode[],
     生産ツリー : tTreeNode[],
-    メッセージ : tError[]
+    メッセージ : tResultMessage[]
 }
 
 // 生産ツリー
-type tTreeNode = 
+export type tTreeNode = 
     tTreeNode_userAndNpc | 
     tTreeNode_userAndNpc_durability |
     tTreeNode_creation |
@@ -40,7 +39,7 @@ type tTreeNode =
     tTreeNode_common |
     tTreeNode_common_durability
 
-type tTreeNode_userAndNpc ={
+export type tTreeNode_userAndNpc ={
     アイテム名 : string,
     調達方法 : "自力調達" | "NPC",
     個数 : {
@@ -53,7 +52,7 @@ type tTreeNode_userAndNpc ={
     特殊消費: "消失" | "失敗時消失" | "未消費"
 }
 
-type tTreeNode_userAndNpc_durability = {
+export type tTreeNode_userAndNpc_durability = {
     アイテム名 : string,
     調達方法 : "自力調達" | "NPC",
     個数 : {
@@ -72,7 +71,7 @@ type tTreeNode_userAndNpc_durability = {
     特殊消費: "消費"
 }
 
-type tTreeNode_creation = {
+export type tTreeNode_creation = {
     アイテム名 : string,
     調達方法 : "作成"
     個数 : {
@@ -92,13 +91,17 @@ type tTreeNode_creation = {
     副産物?: {
         アイテム名: string,
         セット作成個数: number,
-        作成個数: number
-    }
+        作成個数: number,
+        原価?: {
+            設定原価: number,
+            合計価格: number
+        }
+    }[]
     材料 : tTreeNode[],
     特殊消費: "消失" | "失敗時消失" | "未消費"
 }
 
-type tTreeNode_creation_durability = {
+export type tTreeNode_creation_durability = {
     アイテム名 : string,
     調達方法 : "作成"
     個数 : {
@@ -123,12 +126,16 @@ type tTreeNode_creation_durability = {
         アイテム名: string,
         セット作成個数: number
         作成個数: number
-    }
+        原価?: {
+            設定原価: number,
+            合計価格: number
+        }
+    }[]
     材料 : tTreeNode[],
     特殊消費: "消費"
 }
 
-type tTreeNode_unknown ={
+export type tTreeNode_unknown ={
     アイテム名 : string,
     調達方法 : "未設定",
     個数 : {
@@ -137,7 +144,7 @@ type tTreeNode_unknown ={
     特殊消費: "消失" | "失敗時消失" | "未消費"
 }
 
-type tTreeNode_unknown_durability = {
+export type tTreeNode_unknown_durability = {
     アイテム名 : string,
     調達方法 : "未設定",
     個数 : {
@@ -150,7 +157,7 @@ type tTreeNode_unknown_durability = {
     特殊消費: "消費"
 }
 
-type tTreeNode_common = {
+export type tTreeNode_common = {
     アイテム名 : string,
     調達方法 : "共通素材"
     個数 : {
@@ -159,7 +166,7 @@ type tTreeNode_common = {
     特殊消費: "消失" | "失敗時消失" | "未消費"
 }
 
-type tTreeNode_common_durability = {
+export type tTreeNode_common_durability = {
     アイテム名 : string,
     調達方法 : "共通素材"
     個数 : {
@@ -171,9 +178,6 @@ type tTreeNode_common_durability = {
     },
     特殊消費: "消費"
 }
-
-
-
 
 // 生産ツリー1.
 // ツリー構築時・共通素材抽出時ツリー
@@ -235,8 +239,11 @@ type tTreeNode_noNumber_creation = {
     備考?: string,
     副産物?: {
         アイテム名: string,
-        セット作成個数: number
-    }
+        セット作成個数: number,
+        価格? :{
+            設定原価:number
+        }
+    }[]
     材料 : tTreeNode_noNumber[],
     特殊消費: "消失" | "失敗時消失" | "未消費"
 }
@@ -264,7 +271,10 @@ type tTreeNode_noNumber_creation_durability = {
     副産物?: {
         アイテム名: string,
         セット作成個数: number
-    }
+        価格? :{
+            設定原価:number
+        }
+    }[]
     材料 : tTreeNode_noNumber[],
     特殊消費: "消費"
 }
@@ -315,8 +325,9 @@ type tTreeNode_noNumber_common_durability = {
 
 
 // エラー型
-type tError = {
-    重大度 : "Critical" |"Error" | "Warning" | "Info" | "Success",
+export type tResultMessage = {
+    重大度 : "critical" |"error" | "warning" | "info" | "success",
+    タイトル: string,
     メッセージ : string[]
 }
 
@@ -330,7 +341,8 @@ type tCalc = (
 const defResult:tCalcResult = {
     生産個数 : {
         個数 : 0,
-        余剰なし最小生産個数 : 0
+        余剰なし最小生産個数 : 0,
+        余剰対応: "fully"
     },
     共通材料ツリー : [],
     生産ツリー : [],
@@ -349,7 +361,7 @@ type tSpecialConsumption = "消失" | "消費" | "失敗時消失" | "未消費"
 /**
  * エラーによる強制終了
  */
-const errorExit : (prop : tError) => tCalcResult = (prop) => {
+const errorExit : (prop : tResultMessage) => tCalcResult = (prop) => {
     const result = cloneObj_JSON(defResult);
     result.メッセージ.push(prop);
     return result;
@@ -359,8 +371,8 @@ const errorExit : (prop : tError) => tCalcResult = (prop) => {
  */
 const buildTrees : (targets:tSearchSectionRtnFuncProps,dictionary:iDictionary | undefined) => tTreeNode_noNumber[] = (targets,dictionary) => {
     // ノード生成処理
-    type tNodeBuild = (targetName:string, numberOfOrder:number, depth:number, sc:tSpecialConsumption) => tTreeNode_noNumber
-    const nodeBuild : tNodeBuild = (targetName, numberOfOrder, depth, sc) => {
+    type tNodeBuild = (targetName:string, numberOfOrder:number, depth:number, sc:tSpecialConsumption, created:string[]) => tTreeNode_noNumber
+    const nodeBuild : tNodeBuild = (targetName, numberOfOrder, depth, sc, created) => {
         // ノード生成処理　生産以外
         type tNodeBuild_userOrNpc = (procurement:"自力調達"|"NPC" ,price:number) => tTreeNode_noNumber_userAndNpc | tTreeNode_noNumber_userAndNpc_durability
         const nodeBuild_userOrNpc : tNodeBuild_userOrNpc = (procurement,price) => {
@@ -431,7 +443,6 @@ const buildTrees : (targets:tSearchSectionRtnFuncProps,dictionary:iDictionary | 
                         ギャンブル: t.ギャンブル,
                         ペナルティ: t.ペナルティ,
                         要レシピ: t.要レシピ,
-                        備考: (t.備考 !== undefined ? t.備考 : undefined),
                         材料: []
                     }
                     return r;
@@ -449,28 +460,58 @@ const buildTrees : (targets:tSearchSectionRtnFuncProps,dictionary:iDictionary | 
                         ギャンブル: t.ギャンブル,
                         ペナルティ: t.ペナルティ,
                         要レシピ: t.要レシピ,
-                        備考: (t.備考 !== undefined ? t.備考 : undefined),
                         材料: []
                     }
                     return r;
                 }
             })();
-            t.材料.forEach(z => {
-                const nextCreationCount = (()=>{
-                    if(z.特殊消費 === "未消費"){
-                        return 1;
+            if(t.備考) result.備考 = t.備考;
+            if(t.副産物){
+                result.副産物 = t.副産物.map(s => {
+                    // 副産物の単価設定有無確認
+                    const price = (() => {
+                        if(! dictionary) return null;
+                        const obj = dictionary.内容.find(i => s.アイテム === i.アイテム);
+                        if(! obj) return null;
+                        if(obj.調達方法 !== "自力調達") return null
+                        return obj.調達価格;
+                    })();
+                    if(price === null){
+                        return {
+                            アイテム名: s.アイテム,
+                            セット作成個数: s.個数 ? s.個数 : 1
+                        }
                     } else {
-                        return z.個数 ? z.個数 : 1;
+                        return{
+                            アイテム名: s.アイテム,
+                            セット作成個数: s.個数 ? s.個数 : 1,
+                            価格 : {
+                                設定原価: price
+                            }
+                        } 
                     }
-                })();
-                // 再起呼び出しにより、材料の材料を抽出
-                result.材料.push(
-                    nodeBuild(
-                        z.アイテム,
-                        nextCreationCount,
-                        depth + 1,
-                        (z.特殊消費 ? z.特殊消費 : "消失")));
-            });
+                });
+            }
+            // 材料が既に作成済みの材料か判別。
+            // （作成済みアイテムに登録がある場合は、ループ作成しようとしている。)
+            const nextCreated = created.concat(targetName);
+            const isFindNextMaterial = t.材料.every(c => nextCreated.indexOf(c.アイテム) === -1);
+            if(isFindNextMaterial){
+                t.材料.forEach(z => {
+                    const nextCreationCount = (()=>{
+                        if(z.特殊消費 === "未消費") return 1;
+                        return z.個数 ? z.個数 : 1;
+
+                    })();
+                    result.材料.push(
+                        nodeBuild(
+                            z.アイテム,
+                            nextCreationCount,
+                            depth + 1,
+                            z.特殊消費 ? z.特殊消費 : "消失",
+                            nextCreated));
+                });
+            }
             return result;
         }
         // ノード生成処理　生産
@@ -570,7 +611,7 @@ const buildTrees : (targets:tSearchSectionRtnFuncProps,dictionary:iDictionary | 
     const result:tTreeNode_noNumber[] = [];
     if(targets === undefined) return result;
     targets.生成アイテム.forEach(target => {
-        result.push(nodeBuild(target,1,0,"消費"))
+        result.push(nodeBuild(target,1,0,"消失", []))
     });
     return result;
 }
@@ -877,8 +918,6 @@ const getMinimumCreationNumber:iGetMinimumCreationNumber = (main,commons) => {
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
     const AllCmATdA:number[] = concatMandC.map(d => {return d.作成数 * AllAmountProduct / d.要求数});
-    console.log(concatMandC);
-    console.log(AllCmATdA);
 
     // 最小作成数
     return lcmArray(AllCmATdA) / AllAmountProduct;
@@ -901,8 +940,6 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
     const commonData:tCommonData[] = [];
     type tSetNumberToNode = (node:tTreeNode_noNumber, number:number) => tTreeNode
     const setNumberToNode:tSetNumberToNode = (node,number) => {
-        console.log(node);
-        console.log(number);
         // 調達方法不明時の処理
         type tSetNumberToNode_unknown = (node:tTreeNode_noNumber_unknown | tTreeNode_noNumber_unknown_durability) => tTreeNode_unknown | tTreeNode_unknown_durability;
         const setNumberToNode_unknown: tSetNumberToNode_unknown = (node) => {
@@ -1073,12 +1110,25 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
                 result.備考 = node.備考;
             }
             if(node.副産物){
-                const creationNumber = result.個数.作成個数 / result.個数.セット作成個数 * node.副産物.セット作成個数;
-                result.副産物 = {
-                    アイテム名: node.副産物.アイテム名,
-                    セット作成個数: node.副産物.セット作成個数,
-                    作成個数 : creationNumber
-                }
+                result.副産物 = node.副産物.map(s => {
+                    const creationNumber = result.個数.作成個数 / result.個数.セット作成個数 * s.セット作成個数;
+                    if(s.価格){
+                        return {
+                            アイテム名: s.アイテム名,
+                            セット作成個数: s.セット作成個数,
+                            作成個数 : creationNumber,
+                            価格: {
+                                設定原価: s.価格.設定原価,
+                                合計価格: s.価格.設定原価 * creationNumber
+                            }
+                        }
+                    }
+                    return {
+                        アイテム名: s.アイテム名,
+                        セット作成個数: s.セット作成個数,
+                        作成個数 : creationNumber
+                    }
+                });
             }
 
             // 材料処理の為再起呼び出し
@@ -1114,16 +1164,16 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
     }
 }
 
-type tGetUnknownItemSearch = (
+type tTryFindUnknown = (
     main:tTreeNode[],
     commons:tTreeNode[]
 ) => string[]
-const unknownItemSearch:tGetUnknownItemSearch = (main,commons) => {
+const tryFindUnkonownItems:tTryFindUnknown = (main,commons) => {
     const result:string[] = [];
     type tSearch = (node:tTreeNode) => void;
     const search:tSearch = (node) => {
         if(node.調達方法 === "未設定"){
-            if(result.indexOf(node.アイテム名) !== -1){
+            if(result.indexOf(node.アイテム名) === -1){
                 result.push(node.アイテム名);
             }
         }
@@ -1141,16 +1191,161 @@ const unknownItemSearch:tGetUnknownItemSearch = (main,commons) => {
     return result;
 }
 
+const tryFindUnknownByProduct:tTryFindUnknown = (main,commons) => {
+    const result:string[] = [];
+    type tSearch = (node:tTreeNode) => void;
+    const search:tSearch = (node) => {
+        if(node.調達方法 === "作成" && node.副産物){
+            node.副産物.forEach(s => {
+                if(! s.原価){
+                    result.push(s.アイテム名)
+                }
+            })
+        }
+        if(node.調達方法 !== "作成") return;
+        node.材料.forEach(childNode => {
+            search(childNode);
+        });
+    }
+    main.forEach(tree => {
+        search(tree);
+    });
+    commons.forEach(tree => {
+        search(tree);
+    })
+    return result;
+}
+
+type tTryFindHightCostByProductThanMaterialsResult = {
+    生成アイテム名: string,
+    副産物一覧: tTryFindHightCostByProductThanMaterialsResult_byProduct[]
+    材料価格合計: number
+}
+type tTryFindHightCostByProductThanMaterialsResult_byProduct = {
+    副産物名: string,
+    作成数: number,
+    合計金額?: number
+}
+
+type tTryFindHightCostByProductThanMaterials = (
+    main:tTreeNode[],
+    common:tTreeNode[]
+) => tTryFindHightCostByProductThanMaterialsResult[]
+const tryFindHightCostByProductThanMaterials:tTryFindHightCostByProductThanMaterials = (main,common) => { 
+    const resultObj:tTryFindHightCostByProductThanMaterialsResult[] = [];
+    type tCommonItems = {
+        アイテム名: string,
+        単価: number
+    }
+    const commonItemList:tCommonItems[] = [];
+    const reCallFunc:(node:tTreeNode) => number = (node) => {
+        const reCallFunc_NPCorUser:(node:tTreeNode_userAndNpc | tTreeNode_userAndNpc_durability) => number = (node) => {
+            if(node.特殊消費 === "消費"){
+                return node.価格.耐久割合計金額;
+            } else {
+                return node.価格.合計金額;
+            }
+        }
+        const reCallFunc_Creation:(node:tTreeNode_creation | tTreeNode_creation_durability) => number = (node) => {
+            const pushResult: (materialCost:number) => void = (materialCost) => {
+                const resultByProduct:tTryFindHightCostByProductThanMaterialsResult_byProduct[] = (()=>{
+                    if(node.副産物){
+                        return node.副産物.map(b => {
+                            const result:tTryFindHightCostByProductThanMaterialsResult_byProduct = {
+                                副産物名: b.アイテム名,
+                                作成数: b.作成個数
+                            }
+                            if(b.原価){
+                                result.合計金額 = b.原価.合計価格
+                            }
+                            return result;
+                        });
+                    }
+                    return [];
+                })();
+                resultObj.push({
+                    生成アイテム名: node.アイテム名,
+                    材料価格合計: materialCost,
+                    副産物一覧: resultByProduct
+                });
+            }
+            const materialCost = node.材料.reduce<number>((a,c) => {
+                a += reCallFunc(c);
+                return a;
+            },0);
+            // 異常副産物の対処
+            if(node.副産物){
+                const byProductCost = node.副産物.reduce<number>((a,c) => {
+                    if(c.原価){
+                        a += c.原価.合計価格;
+                    }
+                    return a;
+                },0);
+                if(materialCost < byProductCost){
+                    pushResult(materialCost);
+                }
+            }
+            // 生成物1つ当たりの単価算出
+            const unitCost = (()=>{
+                if(node.特殊消費 === "消費"){
+                    return  materialCost / node.個数.耐久値.最大耐久値 / node.個数.作成個数;
+                } else {
+                    return materialCost / node.個数.作成個数;
+                }
+            })();
+
+            // 返答
+            if(node.特殊消費 === "消費"){
+                return unitCost * node.個数.耐久値.消費耐久合計;
+            } else {
+                return unitCost * (node.個数.作成個数 - node.個数.余剰作成個数);
+            }
+        }
+        const reCallFunc_common: (node:tTreeNode_common | tTreeNode_common_durability) => number = (node) => {
+            const findCommonObj = commonItemList.find(c => node.アイテム名 === c.アイテム名);
+            if(findCommonObj === undefined) return 0;
+            if(node.特殊消費 === "消費"){
+                return findCommonObj.単価 * node.個数.耐久値.消費耐久合計;
+            } else {
+                return findCommonObj.単価 * node.個数.消費個数;
+            }
+        }
+        
+        if(node.調達方法 === "共通素材") return reCallFunc_common(node);
+        if(node.調達方法 === "作成") return reCallFunc_Creation(node);
+        if(node.調達方法 === "未設定") return 0;
+        return reCallFunc_NPCorUser(node);
+    }
+    common.forEach(c => {
+        const commonCost = reCallFunc(c);
+        const commonUnitCost = (()=>{
+            if(c.調達方法==="作成" && c.特殊消費 === "消費"){
+                return commonCost / c.個数.耐久値.消費耐久合計
+            } else if(c.調達方法 === "作成"){
+                return commonCost / (c.個数.作成個数 - c.個数.余剰作成個数);
+            } else return 0;
+        })();
+        commonItemList.push({
+            アイテム名: c.アイテム名,
+            単価: commonUnitCost
+        });
+    });
+    main.forEach(m => {
+        reCallFunc(m);
+    });
+    return resultObj;
+}
 
 
 const Calc:tCalc = (targets, userDictionary, noStackCalcRoute, createNumber) => {
-    const message:tError[] = [];
+    const message:tResultMessage[] = [];
 
     // レシピ指定確認
     if(targets === undefined){
         return errorExit({
-            重大度:"Critical",
-            メッセージ : ["レシピが指定されていません。"]
+            重大度:"critical",
+            タイトル: "レシピが指定されていません",
+            メッセージ : ["レシピが指定されていません。","本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
         });
     }
     // レシピの存在有無確認
@@ -1158,8 +1353,9 @@ const Calc:tCalc = (targets, userDictionary, noStackCalcRoute, createNumber) => 
         const targetIndex = Recipes.findIndex(recipe => recipe.レシピ名 === targets.レシピ名);
         if(targetIndex === -1){
             return errorExit({
-                重大度:"Critical",
-                メッセージ:["レシピが見つかりませんでした。"]
+                重大度:"critical",
+                タイトル: "レシピが指定されていません",
+                メッセージ:["レシピが見つかりませんでした。","本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
             });
         }
     } else {
@@ -1171,8 +1367,9 @@ const Calc:tCalc = (targets, userDictionary, noStackCalcRoute, createNumber) => 
         });
         if(noRecipe.length !== 0){
             return errorExit({
-                重大度:"Critical",
-                メッセージ:(["次のアイテムのレシピが見つかりませんでした。"　+ noRecipe.join(", ")])
+                重大度:"critical",
+                タイトル:　"一部制作予定アイテムのレシピが見つかりませんでした",
+                メッセージ:(["次のアイテムのレシピが見つかりませんでした。","", noRecipe.join(" / "),"","本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"])
             })
         }
     }
@@ -1187,47 +1384,111 @@ const Calc:tCalc = (targets, userDictionary, noStackCalcRoute, createNumber) => 
     const MinimumCreation = getMinimumCreationNumber(MainTreeAndCommonTree.main,MainTreeAndCommonTree.commons);
 
     // 個数設定
-    const resultNumber = (() => {
+    type resultNumberCalc = {number:number, calcRoute:tNoStackCalcRouteResult}
+    const resultNumber:resultNumberCalc = (() => {
         // 余剰許容ルート
         const procSurpplus = () => {
-            if(createNumber === 0) return 1
-            return createNumber;
+            if(createNumber === 0){
+                const r:resultNumberCalc = {
+                    number: 1,
+                    calcRoute: "surplus"
+                };
+                return r;
+            }
+            const r:resultNumberCalc = {
+                number: createNumber,
+                calcRoute: "surplus"
+            };
+            return r;
         }
         // 余剰非許容
         const procFully = () => {
-            if(createNumber === 0) return MinimumCreation;
-            if(createNumber % MinimumCreation === 0) return createNumber;
+            if(createNumber === 0){
+                const r:resultNumberCalc = {
+                    number: MinimumCreation,
+                    calcRoute: "fully"
+                };
+                return r;
+            }
+            if(createNumber % MinimumCreation === 0){
+                const r:resultNumberCalc = {
+                    number : createNumber,
+                    calcRoute: "fully"
+                }
+                return r;
+            } 
             message.push({
-                重大度: "Warning",
-                メッセージ: ["指定した作成個数で余剰なしで作成ができませんでした。","最小作成可能個数で作成しています。"]});
-            return MinimumCreation; 
+                重大度: "info",
+                タイトル: "アイテム作成個数が変更されています",
+                メッセージ: ["指定された作成個数で余剰なしで作成ができませんでした。","最小作成可能個数で作成しています。"]});
+            const r:resultNumberCalc = {
+                number: MinimumCreation,
+                calcRoute: "fully"
+            };
+            return r;
         }
-        if(noStackCalcRoute === "Surplus") return procSurpplus();
+        if(noStackCalcRoute === "surplus") return procSurpplus();
         if(noStackCalcRoute === "fully") return procFully();
         if(targets.生成アイテム.length > 1) return procSurpplus();
         if(CanStackItems.indexOf(targets.生成アイテム[0]) === -1) return procSurpplus();
         else return procFully();
     })();
-    
+    // 生産ツリーへの作成数の設定
     const MainTreeAndCommonTree_AddedNumber = setNumberToTree(
         MainTreeAndCommonTree.main,
         MainTreeAndCommonTree.commons,
-        resultNumber);
-    
-    const unknownItem = unknownItemSearch(
+        resultNumber.number);
+
+    // 調達方法未設定アイテムの探索
+    const unknownItems = tryFindUnkonownItems(
         MainTreeAndCommonTree_AddedNumber.main,
         MainTreeAndCommonTree_AddedNumber.commons);
-    
-    if(unknownItem.length >= 1){
+    if(unknownItems.length >= 1){
         message.push({
-            重大度: "Warning",
-            メッセージ: (["この材料のアイテム入手手段が不明です。入手手段を指定してください。"].concat(unknownItem))
+            重大度: "warning",
+            タイトル: "入手手段不明のアイテムが作成過程に含まれています",
+            メッセージ: (["下記アイテムが入手経路不明の為、金額が正しく計算されていません。", unknownItems.join(" / ")])
         })
     }
+
+    // 調達価格未設定の副産物アイテムの探索
+    const unknownSubProduct = tryFindUnknownByProduct(
+        MainTreeAndCommonTree_AddedNumber.main,
+        MainTreeAndCommonTree_AddedNumber.commons);
+    if(unknownSubProduct.length >= 1){
+        message.push({
+            重大度: "info",
+            タイトル: "価格設定されていない副産物が存在します",
+            メッセージ: (["生産過程で下記アイテムが副産物として生成されます。","調達単価を設定することで、そのアイテムの価値を減らした金額を表示できます。", unknownSubProduct.join(" / ")])
+        })
+    }
+
+    // 副産物の存在するレシピで、副産物の価値のほうが材料費合計より高くないかの確認
+    const hightCostByProductList = tryFindHightCostByProductThanMaterials(
+        MainTreeAndCommonTree_AddedNumber.main,
+        MainTreeAndCommonTree_AddedNumber.commons);
+    if(hightCostByProductList.length >= 1){
+        hightCostByProductList.forEach(h => {
+            const messageList:string[] = [];
+            messageList.push("材料費の合計より価値の高い副産物が存在します。副産物の価格設定を誤っていませんか？");
+            messageList.push("作成アイテム: " + h.生成アイテム名);
+            messageList.push("材料費合計: "+ h.材料価格合計);
+            h.副産物一覧.forEach((b,i) => {
+                messageList.push("副産物　" + i + ":" + b.副産物名 + " * " + b.作成数 + " (" + b.合計金額 + ")");
+            });
+            message.push({
+                重大度: "info",
+                タイトル: "材料費の合計より高い副産物が存在します",
+                メッセージ: messageList
+            });
+        });
+    }
+
     const result:tCalcResult = {
         生産個数: {
             余剰なし最小生産個数: MinimumCreation,
-            個数: resultNumber
+            個数: resultNumber.number,
+            余剰対応: resultNumber.calcRoute
         },
         生産ツリー: MainTreeAndCommonTree_AddedNumber.main,
         共通材料ツリー: MainTreeAndCommonTree_AddedNumber.commons,
@@ -1272,13 +1533,5 @@ const lcmArray:(args:number[]) => number = (args) => {
         return lcm(args0,lcmArray(args));
     }
 }
-
-
-
-
-
-
-
-
 
 export default Calc;

@@ -19,6 +19,23 @@ function App() {
   const theme = createMuiTheme({
     palette : {
       type : (configDisplay?.ダークモード) ? "dark" : "light"
+    },
+    typography : {
+      fontSize: 14
+    },
+    props:{
+      MuiTextField: {
+        variant: "outlined"
+      },
+      MuiCheckbox: {
+        color: "primary"
+      },
+      MuiSwitch: {
+        color: "primary"
+      },
+      MuiRadio: {
+        color: "primary"
+      }
     }
   });
 

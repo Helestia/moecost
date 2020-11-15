@@ -156,7 +156,7 @@ const TopBar: React.FC<iTopBar> = (props) => {
                         >
                         <MenuIcon />
                     </Iconbutton>
-                    <Typography variant="h6" noWrap>
+                    <Typography variant="h6" component="h1" noWrap >
                         もえこすと - 生産品原価計算器
                     </Typography>
                 </Toolbar>

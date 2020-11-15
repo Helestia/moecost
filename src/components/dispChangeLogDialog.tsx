@@ -1,5 +1,6 @@
 import React from 'react';
 import {History} from '../scripts/jsonReader';
+import Box from '@material-ui/core/Box'
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -24,18 +25,18 @@ const DispChangeLogDialog:React.FC<iDispChangeLogDialog> = (props) => {
             <DialogContent
                 dividers={true}
             >
-                {History.history.map((h) => {
+                {History.history.map((h,index) => {
                     return (
-                        <>
-                            <Typography variant="subtitle1">[ver.{h.version}] {h.更新日}</Typography>
+                        <Box key={"history-" + index}>
+                            <Typography key={index} variant="subtitle1">[ver.{h.version}] {h.更新日}</Typography>
                             <ul>
-                                {h.更新内容.map((updateText)=>{
+                                {h.更新内容.map((updateText,index2)=>{
                                     return (
-                                        <li>{updateText}</li>
+                                        <li key={"history-" +index + "-" + index2}>{updateText}</li>
                                     )
                                 })}
                             </ul>
-                        </>
+                        </Box>
                     )
                 })}
             </DialogContent>
