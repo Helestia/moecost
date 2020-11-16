@@ -14,12 +14,11 @@ import {numDeform} from '../scripts/common';
 import Accordion         from '@material-ui/core/Accordion';
 import AccordionSummary  from '@material-ui/core/AccordionSummary';
 import AccordionDetails  from '@material-ui/core/AccordionDetails';
-import Box               from '@material-ui/core/Box'
-import ExpandMoreIcon    from '@material-ui/icons/ExpandMore'
+import Divider           from '@material-ui/core/Divider';
 import List              from '@material-ui/core/List';
 import ListItem          from '@material-ui/core/ListItem';
 import ListItemText      from '@material-ui/core/ListItemText';
-import Divider           from '@material-ui/core/Divider';
+import ExpandMoreIcon    from '@material-ui/icons/ExpandMore';
 import makeStyles        from '@material-ui/styles/makeStyles';
 
 const useStyles = makeStyles({
@@ -34,14 +33,11 @@ type tResultSummarySectionProps = {
     recipeName:string,
     mainTrees:tTreeNode[],
     commonTrees:tTreeNode[],
-    minimumNumber:number,
-    surplusCalcRoute:tNoStackCalcRouteResult,
-    useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>
-    returnFunc: (number:number, surplusCalcRoute:tNoStackCalcRouteResult) => void
+    useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
+    openConfigCreateNumberDialog: () => void
 }
 const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const [display,setDisplay] = React.useState( (! moecostDb.表示設定.初期非表示設定.概要));
-    const [isDialogOpen,setIsDialogOpen] = React.useState<boolean>(false);
     const classes = useStyles();
     const childrenStyles = props.useChildrenStyles();
 
@@ -159,15 +155,12 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                             />
                         </ListItem>
                         <Divider component="li" />
-                        <ListItem>
+                        <ListItem className={childrenStyles.activeStrings}>
                             <ListItemText
                                 primary="作成個数"
-                                secondary={
-                                    <Box className={childrenStyles.activeStrings}>
-                                        {numDeform(searchSummaryResult.作成セット数)}
-                                    </Box>
-                                }
-                                secondaryTypographyProps={{align:"right",color:"textPrimary"}} />
+                                secondary={numDeform(searchSummaryResult.作成セット数)}
+                                secondaryTypographyProps={{align:"right",color:"textPrimary"}} 
+                                onClick={props.openConfigCreateNumberDialog}/>
                         </ListItem>                        
                         <Divider component="li" />
                         {buildTotalCost()}

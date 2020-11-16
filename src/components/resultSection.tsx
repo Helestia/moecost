@@ -3,22 +3,41 @@ import ResultAlertSection from './resultAlertSection';
 import ResultSummarySection from './resultSummarySection'
 
 import {tSearchSectionRtnFuncProps} from './searchSection';
-import calc, {tNoStackCalcRoute,tNoStackCalcRouteResult} from '../scripts/calc';
+import calc, {tNoStackCalcRoute} from '../scripts/calc';
 import moecostDb, { iDictionary } from '../scripts/storage';
-import makeStyles from '@material-ui/styles/makeStyles';
-import {useTheme} from '@material-ui/core/styles';
+import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
+import ResultConfigCreateNumberDialog from './resultConfigCreateNumberDialog';
 
 interface iResultSectionProps {
     searched: tSearchSectionRtnFuncProps
 }
 
+    // 子要素で共通するスタイル情報
+const useChildrenStyles = makeStyles((theme:Theme) => 
+    createStyles({
+        accordionTitleStyle : {
+            fontSize: theme.typography.h5.fontSize,
+            '&:hover': {
+                backgroundColor : theme.palette.action.hover
+            }
+        },
+        activeStrings : {
+            '&:hover': {
+                backgroundColor : theme.palette.action.hover,
+                cursor: "pointer"
+            }
+        }
+    })
+);
+
+
 
 const ResultSection:React.FC<iResultSectionProps> = (props) => {
     const [beforeSearch,setBeforeSearch] = React.useState<tSearchSectionRtnFuncProps>(props.searched)
-    const [createCount, setCreateCount] = React.useState(0);
-    const [noStackCalcRoute,setNoStackCalcRoute] = React.useState<tNoStackCalcRoute>(undefined)
-    const [userDictionary,setUserDictionary] = React.useState<iDictionary|undefined>(undefined)
-    const theme = useTheme();
+    const [createNumber, setCreateNumber] = React.useState(0);
+    const [surplusCalcRoute,setSurplusCalcRoute] = React.useState<tNoStackCalcRoute>(undefined);
+    const [userDictionary,setUserDictionary] = React.useState<iDictionary|undefined>(undefined);
+    const [isOpenConfigCreateNumberDialog,setIsOpenConfigCreateNumberDialog] = React.useState<boolean>(false);
 
     // 空入力時
     if(props.searched === undefined){
@@ -28,43 +47,35 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         return null;
     }
 
-    // 子要素で共通するスタイル情報
-    const useChildrenStyles = makeStyles({
-        accordionTitleStyle : {
-            fontSize: theme.typography.h5.fontSize,
-            '&:hover': {
-                backgroundColor : theme.palette.action.hover
-            }
-        },
-        activeStrings : {
-            '&:hover': {
-                backgroundColor : theme.palette.action.hover
-            }
-        }
-    });
+
 
     // 初期設定
     // レシピ入力時は初期設定後に再度実行する
     if(JSON.stringify(props.searched) !== JSON.stringify(beforeSearch)){
         setUserDictionary(moecostDb.辞書);
-        setNoStackCalcRoute(undefined);
-        setCreateCount(0);
+        setSurplusCalcRoute(undefined);
+        setCreateNumber(0);
         setBeforeSearch(props.searched);
         return null;
     }
-    // 計算処理
-    const calcResult = calc(props.searched, userDictionary, noStackCalcRoute, createCount );
-    const summalySectionReturnFunc = (number:number, surplusCalcRoute:tNoStackCalcRouteResult) => {
-        if(createCount !== number){
-            setCreateCount(number);
-        }
-        if(surplusCalcRoute !== noStackCalcRoute){
-            setNoStackCalcRoute(surplusCalcRoute);
-        }
-    };
 
+    // 以下、ダイアログ対応
+    const openConfigCreateNumberDialog = () => {
+        setIsOpenConfigCreateNumberDialog(true);
+    }
 
-
+    // 回答受信
+    const changeTriggerCreateNumber = (number:number, route:tNoStackCalcRoute) => {
+        setCreateNumber(number);
+        setSurplusCalcRoute(route);
+        setIsOpenConfigCreateNumberDialog(false);
+    }
+    // 閉じるだけ
+    const closeConfigCreateNumberDialog = () => {
+        setIsOpenConfigCreateNumberDialog(false);
+    }
+    // 生産ツリー構築
+    const calcResult = calc(props.searched, userDictionary, surplusCalcRoute, createNumber );
 
     return (
         <>
@@ -73,10 +84,25 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 recipeName={props.searched.レシピ名}
                 mainTrees={calcResult.生産ツリー}
                 commonTrees={calcResult.共通材料ツリー}
-                minimumNumber={calcResult.生産個数.余剰なし最小生産個数}
-                surplusCalcRoute={calcResult.生産個数.余剰対応}
                 useChildrenStyles={useChildrenStyles}
-                returnFunc={summalySectionReturnFunc} />
+                openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
+
+
+
+
+
+
+
+            {/*ダイアログ関係*/}
+            <ResultConfigCreateNumberDialog 
+                isOpen={isOpenConfigCreateNumberDialog}
+                number={calcResult.生産個数.個数}
+                minimumNumber={calcResult.生産個数.余剰なし最小生産個数}
+                route={calcResult.生産個数.余剰対応}
+                close={closeConfigCreateNumberDialog}
+                changeTrigger={changeTriggerCreateNumber} />
+
+            {/*ここからテスト用*/}
             {JSON.stringify(calcResult)}
         </>
     )

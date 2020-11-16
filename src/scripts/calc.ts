@@ -1022,7 +1022,6 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
                 return pushItem;
             })();
             if(node.特殊消費 === "消費"){
-                commonObj.要求数計 += number * node.個数.耐久値.上位要求;
                 const result:tTreeNode_common_durability = {
                     アイテム名: node.アイテム名,
                     調達方法: "共通素材",
@@ -1038,7 +1037,6 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
                 commonObj.要求数計 += result.個数.耐久値.消費耐久合計;
                 return result;
             } else {
-                commonObj.要求数計 += number * node.個数.上位レシピ要求個数;
                 const result:tTreeNode_common = {
                     アイテム名: node.アイテム名,
                     調達方法: "共通素材",
@@ -1111,8 +1109,8 @@ const setNumberToTree:tSetNumberToTree = (main_noNumber,commons_noNumber,number)
             }
             if(node.副産物){
                 result.副産物 = node.副産物.map(s => {
-                    const creationNumber = result.個数.作成個数 / result.個数.セット作成個数 * s.セット作成個数;
-                    if(s.価格){
+                   const creationNumber = result.個数.作成個数 / result.個数.セット作成個数 * s.セット作成個数;
+                   if(s.価格){
                         return {
                             アイテム名: s.アイテム名,
                             セット作成個数: s.セット作成個数,
