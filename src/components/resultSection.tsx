@@ -1,6 +1,7 @@
 import React from 'react';
 import ResultAlertSection from './resultAlertSection';
-import ResultSummarySection from './resultSummarySection'
+import ResultSummarySection from './resultSummarySection';
+import ResultCreationItemTable from './resultCreationItemTable';
 
 import {tSearchSectionRtnFuncProps} from './searchSection';
 import calc, {tNoStackCalcRoute} from '../scripts/calc';
@@ -86,7 +87,10 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 commonTrees={calcResult.共通材料ツリー}
                 useChildrenStyles={useChildrenStyles}
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
-
+            <ResultCreationItemTable 
+                mainTrees={calcResult.生産ツリー}
+                commonTrees={calcResult.共通材料ツリー}
+                useChildrenStyles={useChildrenStyles} />
 
 
 

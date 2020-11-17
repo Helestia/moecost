@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     tTreeNode,
-    tNoStackCalcRouteResult,
     tTreeNode_userAndNpc,
     tTreeNode_userAndNpc_durability,
     tTreeNode_creation,
@@ -42,7 +41,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const childrenStyles = props.useChildrenStyles();
 
     // ツリー内の計算処理
-    const searchSummaryResult = searchSummary(props.mainTrees, props.commonTrees);
+    const calcResult = calcSummary(props.mainTrees, props.commonTrees);
 
     const handleAccordionChange = () => {
         setDisplay((! display));
@@ -50,11 +49,11 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
 
 
     const buildTotalCost = () => {
-        if(searchSummaryResult.材料未設定有){
+        if(calcResult.材料未設定有){
             return (
                 <>
                     <ListItem>
-                        <ListItemText primary="材料費合計" secondary={numDeform(searchSummaryResult.合計材料費) + " + 未設定価格"} secondaryTypographyProps={{align:"right", color:"error"}} />
+                        <ListItemText primary="材料費合計" secondary={numDeform(calcResult.合計材料費) + " + 未設定価格"} secondaryTypographyProps={{align:"right", color:"error"}} />
                     </ListItem>
                     <Divider component="li" />
                 </>
@@ -63,7 +62,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
             return (
                 <>
                     <ListItem>
-                        <ListItemText primary="材料費合計" secondary={numDeform(searchSummaryResult.合計材料費)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
+                        <ListItemText primary="材料費合計" secondary={numDeform(calcResult.合計材料費)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
                     </ListItem>
                     <Divider component="li" />
                 </>
@@ -72,11 +71,11 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     }
 
     const buildDurabilityCost = () => {
-        if(searchSummaryResult.耐久消費素材の未償却額){
+        if(calcResult.耐久消費素材の未償却額){
             return (
                 <>
                     <ListItem>
-                        <ListItemText primary="耐久消耗材料の残価値" secondary={numDeform(searchSummaryResult.耐久消費素材の未償却額)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
+                        <ListItemText primary="耐久消耗材料の残価値" secondary={numDeform(calcResult.耐久消費素材の未償却額)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
                     </ListItem>
                     <Divider component="li" />
                 </>
@@ -86,20 +85,20 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     }
 
     const buildByProductCost = () => {
-        if(searchSummaryResult.副産物未設定有){
+        if(calcResult.副産物未設定有){
             return (
                 <>
                     <ListItem>
-                        <ListItemText primary="副産物価格" secondary={numDeform(searchSummaryResult.副産物価格) + " + 未設定価格"} secondaryTypographyProps={{align:"right", color:"error"}} />
+                        <ListItemText primary="副産物価格" secondary={numDeform(calcResult.副産物価格) + " + 未設定価格"} secondaryTypographyProps={{align:"right", color:"error"}} />
                     </ListItem>                    
                     <Divider component="li" />
                 </>
             )
-        } else if(searchSummaryResult.副産物価格) {
+        } else if(calcResult.副産物価格) {
             return (
                 <>
                     <ListItem>
-                        <ListItemText primary="副産物価格" secondary={numDeform(searchSummaryResult.副産物価格)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
+                        <ListItemText primary="副産物価格" secondary={numDeform(calcResult.副産物価格)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
                     </ListItem>
                     <Divider component="li" />
                 </>
@@ -108,11 +107,11 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     }
 
     const buildSurplusCost = () => {
-        if(searchSummaryResult.余剰生産品原価){
+        if(calcResult.余剰生産品原価){
             return (
                 <>
                     <ListItem>
-                        <ListItemText primary="余剰生産品価値" secondary={numDeform(searchSummaryResult.余剰生産品原価)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
+                        <ListItemText primary="余剰生産品価値" secondary={numDeform(calcResult.余剰生産品原価)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
                     </ListItem>
                     <Divider component="li" />
                 </>
@@ -123,7 +122,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     }
 
     const buildUnitCost = () => {
-        const unitCost = (searchSummaryResult.合計材料費 - searchSummaryResult.余剰生産品原価 - searchSummaryResult.副産物価格 - searchSummaryResult.耐久消費素材の未償却額) / searchSummaryResult.作成セット数;
+        const unitCost = (calcResult.合計材料費 - calcResult.余剰生産品原価 - calcResult.副産物価格 - calcResult.耐久消費素材の未償却額) / calcResult.作成セット数;
         return (
             <ListItem>
                 <ListItemText primary="作成原価" secondary={numDeform(unitCost)} secondaryTypographyProps={{align:"right", color:"textPrimary"}} />
@@ -149,7 +148,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                         <Divider component="li" />
                         <ListItem>
                             <ListItemText primary="必要スキル" secondary={
-                                searchSummaryResult.必要スキル.map(s => s.スキル名 + ": " + s.スキル値).join(" / ")
+                                calcResult.必要スキル.map(s => s.スキル名 + ": " + s.スキル値).join(" / ")
                             } 
                             secondaryTypographyProps={{align:"right", color:"textPrimary"}}
                             />
@@ -158,7 +157,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                         <ListItem className={childrenStyles.activeStrings}>
                             <ListItemText
                                 primary="作成個数"
-                                secondary={numDeform(searchSummaryResult.作成セット数)}
+                                secondary={numDeform(calcResult.作成セット数)}
                                 secondaryTypographyProps={{align:"right",color:"textPrimary"}} 
                                 onClick={props.openConfigCreateNumberDialog}/>
                         </ListItem>                        
@@ -184,7 +183,7 @@ type tSkills = {
 }
 
 // ツリー内の調査
-type tSearchSummaryResult = {
+type tCalcResult = {
     作成セット数: number,
     合計材料費: number,
     耐久消費素材の未償却額: number,
@@ -194,14 +193,14 @@ type tSearchSummaryResult = {
     副産物未設定有: boolean,
     必要スキル: tSkills[]
 }
-type tSearchSummary = (
+type tCalcSummary = (
     main:tTreeNode[],
     commons:tTreeNode[]
-) => tSearchSummaryResult
+) => tCalcResult
 
-const searchSummary:tSearchSummary = (main,common) => {
+const calcSummary:tCalcSummary = (main,common) => {
     // 返答オブジェクト
-    const resultObj:tSearchSummaryResult = {
+    const resultObj:tCalcResult = {
         作成セット数: 0,
         合計材料費: 0,
         耐久消費素材の未償却額: 0,
@@ -228,14 +227,12 @@ const searchSummary:tSearchSummary = (main,common) => {
             return node.価格.合計金額;
         }
         const funcCommon = (node:tTreeNode_common | tTreeNode_common_durability) => {
-            return (() => {
-                const c = commonMaterialCost.find(c => c.アイテム名 === node.アイテム名);
-                if(c){
-                    if(node.特殊消費 === "消費") return c.単価 / node.個数.耐久値.最大耐久値 * node.個数.耐久値.消費耐久合計;
-                    return c.単価 * node.個数.消費個数;
-                }
-                return 0;
-            })();
+            const c = commonMaterialCost.find(c => c.アイテム名 === node.アイテム名);
+            if(c){
+                if(node.特殊消費 === "消費") return c.単価 / (node.個数.耐久値.最大耐久値 * node.個数.消費個数) * node.個数.耐久値.消費耐久合計;
+                return c.単価 * node.個数.消費個数;
+            }
+            return 0;
         }
         const funcUnknown = ()  => {
             resultObj.材料未設定有 = true;
@@ -304,7 +301,7 @@ const searchSummary:tSearchSummary = (main,common) => {
         if(c.調達方法 === "作成"){
             commonMaterialCost.push({
                 アイテム名: c.アイテム名,
-                単価: treeCost / c.個数.作成個数
+                単価: treeCost / (c.個数.作成個数 - c.個数.余剰作成個数)
             });
         }
     });
