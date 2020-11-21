@@ -41,7 +41,7 @@ const ResultCreationItemTable:React.FC<tResultCreationItemnTable> = (props) => {
     const childrenStyles = props.useChildrenStyles();
     const classes = useStyles();
 
-    // 作成アイテムが1つの場合は非表示
+    // 作成アイテムが1つの場合は処理終了
     if(props.mainTrees.length <= 1){
         return null;
     }

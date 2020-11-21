@@ -4,6 +4,10 @@ import ResultSummarySection from './resultSummarySection';
 import ResultCreationItemTable from './resultCreationItemTable';
 
 import {tSearchSectionRtnFuncProps} from './searchSection';
+import buildTree from '../scripts/buildTree';
+import confirmMessages from '../scripts/confirmMessages';
+import makeListArrayFromTree from '../scripts/makeListArrayFromTree';
+
 import calc, {tNoStackCalcRoute} from '../scripts/calc';
 import moecostDb, { iDictionary } from '../scripts/storage';
 import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
@@ -91,7 +95,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 mainTrees={calcResult.生産ツリー}
                 commonTrees={calcResult.共通材料ツリー}
                 useChildrenStyles={useChildrenStyles} />
-
+            
 
 
 
