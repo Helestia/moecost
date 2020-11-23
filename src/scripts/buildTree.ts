@@ -22,7 +22,7 @@ export type tTreeNode_user     = tTreeNode_user_nonDurable     | tTreeNode_user_
 export type tTreeNode_common   = tTreeNode_common_nonDurable   | tTreeNode_common_durable;
 export type tTreeNode_unknown  = tTreeNode_unknown_nonDurable  | tTreeNode_unknown_durable;
 
-export type tTreeNode_creation_nonDurable = {
+type tTreeNode_creation_nonDurable = {
     アイテム名: string,
     調達方法: "作成",
     特殊消費: "消失" | "失敗時消失" | "未消費"
@@ -52,7 +52,7 @@ export type tTreeNode_creation_nonDurable = {
     材料 : tTreeNode[],
 }
 
-export type tTreeNode_creation_durable = {
+type tTreeNode_creation_durable = {
     アイテム名 : string,
     調達方法 : "作成",
     特殊消費: "消費"
@@ -86,7 +86,7 @@ export type tTreeNode_creation_durable = {
     材料 : tTreeNode[]
 }
 
-export type tTreeNode_npc_nonDurable = {
+type tTreeNode_npc_nonDurable = {
     アイテム名 : string,
     調達方法 : "NPC",
     特殊消費: "消失" | "失敗時消失" | "未消費",
@@ -99,7 +99,7 @@ export type tTreeNode_npc_nonDurable = {
     }
 }
 
-export type tTreeNode_npc_durable = {
+type tTreeNode_npc_durable = {
     アイテム名 : string,
     調達方法 : "NPC",
     特殊消費: "消費",
@@ -118,7 +118,7 @@ export type tTreeNode_npc_durable = {
     }
 }
 
-export type tTreeNode_user_nonDurable = {
+type tTreeNode_user_nonDurable = {
     アイテム名 : string,
     調達方法 : "自力調達",
     特殊消費: "消失" | "失敗時消失" | "未消費",
@@ -131,7 +131,7 @@ export type tTreeNode_user_nonDurable = {
     }
 }
 
-export type tTreeNode_user_durable = {
+type tTreeNode_user_durable = {
     アイテム名 : string,
     調達方法 : "自力調達",
     特殊消費: "消費",
@@ -150,7 +150,7 @@ export type tTreeNode_user_durable = {
     }
 }
 
-export type tTreeNode_common_nonDurable = {
+type tTreeNode_common_nonDurable = {
     アイテム名 : string,
     調達方法 : "共通素材",
     特殊消費: "消失" | "失敗時消失" | "未消費"
@@ -159,7 +159,7 @@ export type tTreeNode_common_nonDurable = {
     }
 }
 
-export type tTreeNode_common_durable = {
+type tTreeNode_common_durable = {
     アイテム名 : string,
     調達方法 : "共通素材",
     特殊消費: "消費"
@@ -172,7 +172,7 @@ export type tTreeNode_common_durable = {
     }
 }
 
-export type tTreeNode_unknown_nonDurable = {
+type tTreeNode_unknown_nonDurable = {
     アイテム名 : string,
     調達方法 : "未設定",
     特殊消費: "消失" | "失敗時消失" | "未消費",
@@ -181,7 +181,7 @@ export type tTreeNode_unknown_nonDurable = {
     }
 }
 
-export type tTreeNode_unknown_durable = {
+type tTreeNode_unknown_durable = {
     アイテム名 : string,
     調達方法 : "未設定",
     特殊消費: "消費",
@@ -365,14 +365,15 @@ type tTreeNodeD_unknown_durable = {
 
 type t特殊消費 = "消費" | "消失" | "失敗時消失" | "未消費"
 
-type tQtyRole = "surplus" | "fully" | undefined
-type tQtyRoleResult = "surplus" | "fully";
+export type tQtyRole = "surplus" | "fully" | undefined
+export type tQtyRoleResult = "surplus" | "fully";
 
 type tBuildTreeResult = {
     main:tTreeNode_creation[],
     common:tTreeNode_creation[],
     qtyRoluResult: tQtyRoleResult,
     totalQuantity: number,
+    fullyMinimumQuantity: number,
     message:tMessage[]
 }
 type tBuildTree = (
@@ -384,12 +385,13 @@ type tBuildTree = (
 const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
     // エラー有無確認処理
     const ErrorObj = handleError(targets,qty);
-    if(ErrorObj) return {
+    if(ErrorObj) return <tBuildTreeResult>{
         main: [],
         common: [],
         message: [ErrorObj],
         qtyRoluResult: "surplus",
-        totalQuantity: 0
+        totalQuantity: 0,
+        fullyMinimumQuantity: 0
     }
 
     // メインツリー構築
@@ -416,9 +418,9 @@ const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
         common: mainTreeAndCommonTree.common,
         message: [],
         qtyRoluResult: createQuantity.qtyRole,
-        totalQuantity: createQuantity.qty
+        totalQuantity: createQuantity.qty,
+        fullyMinimumQuantity: minimumCreation
     }
-
 }
 
 type tHandleError = (targets:tSearchSectionRtnFuncProps, qty:number) => null | tMessage;
@@ -429,10 +431,10 @@ const handleError:tHandleError = (targets, qty) => {
         メッセージ : ["レシピが指定されていません。","本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
     }
     if(targets.生成アイテム.length === 1){
-        if(Recipes.every(r => r.レシピ名 !== targets.生成アイテム[0])) return {
+        if(Recipes.every(r => r.レシピ名 !== targets.レシピ名)) return {
             重大度:"error",
             タイトル: "レシピが見つかりませんでした",
-            メッセージ:["作成予定のレシピが見つかりませんでした。",`作成予定のアイテム${targets.生成アイテム[0]}`,"本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
+            メッセージ:["作成予定のレシピが見つかりませんでした。",`作成予定のアイテム${targets.レシピ名}`,"本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
         }
     } else {
         const noRecipe: string[] = [];
@@ -595,7 +597,7 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
             });
         }
         const nextCreated = created.concat(targetName);
-        const isMaterialCreated = recipe.材料.every(m => (! nextCreated.includes(m.アイテム)));
+        const isMaterialCreated = recipe.材料.every(m => nextCreated.includes(m.アイテム));
         if(isMaterialCreated) return rtnFCreation;
 
         recipe.材料.forEach(m => {
@@ -709,12 +711,12 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
     if(targets === undefined) return []; // これは処理されないはず
     if(targets.生成アイテム.length === 1){
         const recipe = Recipes.find(r => r.レシピ名 === targets.レシピ名);
-        if(recipe) return [fCreate(targets.生成アイテム[0], 1, "消費", [], recipe)];
+        if(recipe) return [fCreate(targets.生成アイテム[0], 1, "消失", [], recipe)];
         return [];
     }
     return targets.生成アイテム.map(ts => {
         const recipe = Recipes.find(r => r.生成物.アイテム === ts);
-        if(recipe){return fCreate(ts,1,"消費",[],recipe)};
+        if(recipe){return fCreate(ts, 1, "消失", [], recipe)};
         return null;
     }).filter(<T>(x:T | null) : x is T => x !== null);
 }
@@ -733,7 +735,6 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
         アイテム:string,
         使用回数:number
     };
-
     type tGetMaterialUseCount = (tree:tTreeNodeD) => void;
     const getMaterialUseCount:tGetMaterialUseCount = (node) => {
         if(node.調達方法 !== "作成") return;
@@ -762,7 +763,6 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
 
         const countedObj = materialCount.find(c => c.アイテム === node.アイテム名);
         if(countedObj && countedObj.使用回数 > 1){
-            isSplited = true;
             if(commonTreeBeforeSort.every(c => c.アイテム名 !== node.アイテム名)) commonTreeBeforeSort.push(node);
 
             if(node.特殊消費 === "消費") return {
@@ -797,15 +797,12 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
      * 分割処理実行有
      */
     const commonTreeBeforeSort: tTreeNodeD_creation[] = [];
-    let isSplited = false;
     // メインツリーの分割処理
     const splitedMainTree = main.map(m => splitCommonCreation(m));
     // 共通素材ツリーの分割処理
-    do{
-        isSplited = false;
-        const cloneMaterials = cloneObj_JSON(commonTreeBeforeSort);
-        cloneMaterials.forEach(m => splitCommonCreation(m));
-    } while(isSplited === false);
+
+    const cloneMaterials = cloneObj_JSON(commonTreeBeforeSort);
+    cloneMaterials.forEach(m => splitCommonCreation(m));
 
     type tCanSortCommon = (comon:tTreeNodeD) => boolean;
     const canSortCommon:tCanSortCommon = (common) => {
@@ -813,15 +810,15 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
         if(common.調達方法 !== "共通素材") return true;
         return commonTreeSorted.some(cs => cs.アイテム名 === common.アイテム名);
     }
-
+    
     const commonTreeSorted:tTreeNodeD_creation[] = [];
     do{
         commonTreeBeforeSort.forEach(cb => {
-            if(commonTreeSorted.every(ca => cb.アイテム名 === ca.アイテム名)) return;
+            if((commonTreeSorted.length != 0) && commonTreeSorted.every(ca => cb.アイテム名 === ca.アイテム名)) return;
             if(! canSortCommon(cb)) return;
             commonTreeSorted.push(cb);
         });
-    } while(commonTreeBeforeSort.length === commonTreeSorted.length);
+    } while(commonTreeBeforeSort.length !== commonTreeSorted.length);
 
     return {
         main:splitedMainTree,
@@ -829,8 +826,8 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
     }
 }
 
-type iGetMinimumCreationNumber = (main:tTreeNodeD_creation[],commons:tTreeNodeD_creation[]) => number;
-const calcMinimumQty:iGetMinimumCreationNumber = (main, commons) => {
+type iCalcMinimumCreationNumber = (main:tTreeNodeD_creation[],commons:tTreeNodeD_creation[]) => number;
+const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     // 素材情報
     type tMaterialData = {
         作成数:number,
@@ -852,42 +849,35 @@ const calcMinimumQty:iGetMinimumCreationNumber = (main, commons) => {
         multipleCreationSet:number,
         multipleAmountNumber:number,
         md: tMaterialData[]) => tMaterialData[];
-
     const getMaterialData:tGetMaterialData = (node,multipleCreationSet,multipleAmountNumber,md) => {
         if(node.調達方法 === "NPC" || node.調達方法 === "未設定" || node.調達方法 === "自力調達"){
             return md;
         }
         const orderQuantity = multipleAmountNumber * node.個数.上位レシピ要求個数;
         if(node.調達方法 === "共通素材"){
-            // 共通素材処理…共通素材側のツリーに登録
-            const resultMaterialData:tMaterialData = {
-                作成数: multipleCreationSet,
-                要求数: orderQuantity
-            }
-            const commonIndex = (() => {
-                const index = commonUsage.findIndex(c => node.アイテム名 === c.アイテム名);
-                if(index === -1) return index;
-                commonUsage.push({
+            const commonObj = (() => {
+                const obj = commonUsage.find(c => node.アイテム名 === c.アイテム名);
+                if(obj) return obj;
+                const pushobj:tCommonUsage = {
                     アイテム名: node.アイテム名,
                     使用状況: []
-                });
-                return commonUsage.length - 1;
+                };
+                commonUsage.push(pushobj);
+                return pushobj;
             })();
-            commonUsage[commonIndex].使用状況.push(resultMaterialData);
+            commonObj.使用状況.push(gcdCreateAndAmount(multipleCreationSet, orderQuantity));
             return md;
         }
         if(node.調達方法 === "作成"){
-            const resultMaterialData:tMaterialData = {
-                作成数: multipleCreationSet * node.個数.セット作成個数,
-                要求数: orderQuantity
-            }
+            const newCreationNumber = multipleCreationSet * node.個数.セット作成個数;
+            const pushObj = gcdCreateAndAmount(newCreationNumber, orderQuantity);
             let resultObj:tMaterialData[] = cloneObj_JSON(md);
-            resultObj.push(resultMaterialData);
+            resultObj.push(pushObj);
             node.材料.forEach(m => {
                 resultObj = getMaterialData(
                     m,
-                    resultMaterialData.作成数,
-                    resultMaterialData.要求数,
+                    pushObj.作成数,
+                    pushObj.要求数,
                     resultObj);
             });
             return resultObj;
@@ -895,6 +885,16 @@ const calcMinimumQty:iGetMinimumCreationNumber = (main, commons) => {
         // ここまでは到達しない…はず
         return md;
     }
+
+    const gcdCreateAndAmount = (create:number,amount:number) => {
+        const gcdResult = gcd(create, amount);
+        return {
+            作成数: create / gcdResult,
+            要求数: amount / gcdResult
+        }
+    }
+
+    
     type tGetMaterialDataParent_main = (tree:tTreeNodeD_creation) => tTreeData
     const getMaterialDataParent_main:tGetMaterialDataParent_main = (tree) => {
         // ツリー内の乗数算出
@@ -926,10 +926,8 @@ const calcMinimumQty:iGetMinimumCreationNumber = (main, commons) => {
         // 最小作成コンバイン数合算
         const miniComb = miniCombArray.reduce<number>((acc,cur) => {return acc + cur},0);
         // 計算結果
-        const treeTopResult:tMaterialData = {
-            作成数 : tree.個数.セット作成個数 * CmATdA_lcm / gcd(tree.個数.セット作成個数, miniComb),
-            要求数 : ProductAmount
-        }
+        const newCreationNumber = tree.個数.セット作成個数 * CmATdA_lcm / gcd(tree.個数.セット作成個数, CmATdA_lcm)
+        const treeTopResult = gcdCreateAndAmount(newCreationNumber,ProductAmount);
 
         // 下位素材の調査
         let md:tMaterialData[] = [treeTopResult];
@@ -975,9 +973,10 @@ const calcMinimumQty:iGetMinimumCreationNumber = (main, commons) => {
 
     const commonUsage: tCommonUsage[] = [];
     // 各種ツリーのツリー内の作成数等の情報収集
-    const mainTreeData:tTreeData[] = main.map(tree => {return getMaterialDataParent_main(tree)});
-    const commonTreeData:tTreeData[] = commons.reverse().map(tree => {return getMaterialDataParent_common(tree)})
+    const mainTreeData:tTreeData[] = main.map(tree => getMaterialDataParent_main(tree));
+    const commonTreeData:tTreeData[] = commons.reverse().map(tree => getMaterialDataParent_common(tree))
     // 素材調査結果の統合
+    
     const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const materialData_Common = commonTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const concatMandC = materialData_Main.concat(materialData_Common);
@@ -986,7 +985,7 @@ const calcMinimumQty:iGetMinimumCreationNumber = (main, commons) => {
     const AllAmountProduct = concatMandC.reduce<number>((a,c) => a * c.要求数,1);
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
-    const AllCmATdA:number[] = concatMandC.map(d => {return d.作成数 * AllAmountProduct / d.要求数});
+    const AllCmATdA:number[] = concatMandC.map(d => d.作成数 * AllAmountProduct / d.要求数);
 
     // 最小作成数
     return lcmArray(AllCmATdA) / AllAmountProduct;

@@ -1,3 +1,4 @@
+import { TlsOptions } from 'tls';
 import {
     tTreeNode,
     tTreeNode_creation,
@@ -7,8 +8,8 @@ import {
     tTreeNode_user
 } from './buildTree';
 
-type tMaterialList = tMaterialList_user  | tMaterialList_npc | tMaterialList_unknown;
-type tMaterialList_user = {
+export type tMaterial = tMaterial_user  | tMaterial_npc | tMaterial_unknown;
+type tMaterial_user = {
     アイテム名: string,
     調達方法: "自力調達"
     必要個数: number,
@@ -16,7 +17,7 @@ type tMaterialList_user = {
     合計金額: number
 }
 
-type tMaterialList_npc = {
+type tMaterial_npc = {
     アイテム名: string,
     調達方法: "NPC"
     必要個数: number,
@@ -24,13 +25,13 @@ type tMaterialList_npc = {
     合計金額: number
 }
 
-type tMaterialList_unknown = {
+type tMaterial_unknown = {
     アイテム名: string,
     調達方法: "未設定"
     必要個数: number
 }
 
-type tSurplusList  = {
+export type tSurplus  = {
     アイテム名: string,
     作成個数: number,
     余り個数: number,
@@ -39,14 +40,14 @@ type tSurplusList  = {
     未設定含: boolean
 }
 
-type tByproductList = tByproductList_nonSetCost | tByproductList_setCost;
-type tByproductList_nonSetCost = {
+export type tByproduct = tByproduct_nonSetCost | tByproduct_setCost;
+type tByproduct_nonSetCost = {
     アイテム名: string,
     作成個数: number,
     価格設定有: false
 }
 
-type tByproductList_setCost = {
+type tByproduct_setCost = {
     アイテム名: string,
     作成個数: number,
     価格設定有: true,
@@ -54,7 +55,7 @@ type tByproductList_setCost = {
     合計金額: number
 }
 
-type tCreationList = {
+export type tCreation = {
     アイテム名: string,
     作成個数: number,
     合計材料費: number,
@@ -62,7 +63,7 @@ type tCreationList = {
     未設定含: boolean
 }
 
-type tDurability = tDurability_user | tDurability_npc | tDurability_creation | tDurability_unknown
+export type tDurability = tDurability_user | tDurability_npc | tDurability_creation | tDurability_unknown
 type tDurability_user = {
     アイテム名: string,
     調達方法: "自力調達",
@@ -108,12 +109,19 @@ type tDurability_unknown = {
     消費耐久値: number
 }
 
+export type tSkill = {
+    スキル名: string,
+    スキル値: number
+}
+
 type tMakeListArrayResult = {
-    材料: tMaterialList[],
-    副産物: tByproductList[],
-    余剰作成: tSurplusList[],
-    最終作成物: tCreationList[],
-    耐久消費: tDurability[]
+    材料: tMaterial[],
+    副産物: tByproduct[],
+    余剰作成: tSurplus[],
+    最終作成物: tCreation[],
+    耐久消費: tDurability[],
+    スキル: tSkill[],
+    要レシピ: string[]
 }
 
 type tCommons = {
@@ -137,13 +145,14 @@ const reCallResultDefault:tReCallResult = {
     未設定含: false
 }
 
-
 const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
-    const materials    :tMaterialList[]  = [];
-    const byproducts   :tByproductList[] = [];
-    const surpluses    :tSurplusList[]   = [];
-    const lastCreations:tCreationList[]  = [];
+    const materials    :tMaterial[]      = [];
+    const byproducts   :tByproduct[]     = [];
+    const surpluses    :tSurplus[]       = [];
+    const lastCreations:tCreation[]      = [];
     const durabilities :tDurability[]    = [];
+    const skills: tSkill[]               = [];
+    const needRecipes : string[]          = [];
 
     const commons      :tCommons[] = [];
 
@@ -156,6 +165,26 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
     }
 
     const fCreation : (node:tTreeNode_creation) => tReCallResult = (node) => {
+        // スキル集計
+        node.スキル.forEach(s => {
+            const skillObj = (() => {
+                const obj = skills.find(so => so.スキル名 === s.スキル名);
+                if(obj) return obj;
+                const pushObj:tSkill = {
+                    スキル名: s.スキル名,
+                    スキル値: 0
+                }
+                skills.push(pushObj);
+                return pushObj
+            })();
+            if(skillObj.スキル値 < s.スキル値){
+                skillObj.スキル値 = s.スキル値;
+            }
+        });
+
+        // 要レシピ集計
+        if(node.要レシピ) needRecipes.push(node.アイテム名);
+
         // 材料費集計
         const materialCost = node.材料.reduce((acc,cur) => {
             const result = reCall(cur);
@@ -196,6 +225,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
             const unitCost = totalCost / node.個数.作成個数;
             const surplusCost = unitCost * node.個数.余剰作成個数;
             const isIncludeUnknown = materialCost.未設定含 || byProductCost.未設定含;
+
             surpluses.push({
                 アイテム名: node.アイテム名,
                 作成個数: node.個数.作成個数,
@@ -255,80 +285,148 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
     }
 
     const fUser:(node:tTreeNode_user) => tReCallResult = (node) => {
-        materials.push(<tMaterialList_user>{
-            アイテム名: node.アイテム名,
-            調達方法: "自力調達",
-            必要個数: node.個数.調達個数,
-            設定単価: node.価格.調達単価,
-            合計金額: node.価格.合計金額
-        });
-        if(node.特殊消費 === "消費"){
-            durabilities.push(<tDurability_user>{
-                アイテム名 :node.アイテム名,
-                単価: node.価格.調達単価,
-                合計価格: node.価格.合計金額,
-                最大耐久値: node.個数.耐久値.最大耐久値,
-                消費個数: node.個数.調達個数,
-                消費耐久値: node.個数.耐久値.消費耐久合計,
-                耐久割単価: node.価格.耐久割単価,
-                耐久割金額: node.価格.耐久割合計金額,
-                調達方法: "自力調達"
-            });
+        const material = (() => {
+            const obj = materials.find(m => m.アイテム名 === node.アイテム名);
+            if(obj && obj.調達方法 === "自力調達") return obj;
+            const pushObj:tMaterial_user = {
+                アイテム名: node.アイテム名,
+                調達方法: "自力調達",
+                必要個数: 0,
+                設定単価: node.価格.調達単価,
+                合計金額: 0
+            }
+            materials.push(pushObj);
+            return pushObj;
+        })();
+        if(node.特殊消費 !== "消費"){
+            material.必要個数 += node.個数.調達個数;
+            material.合計金額 += node.価格.合計金額;
             return {
-                価格: node.価格.耐久割合計金額,
+                価格: node.価格.合計金額,
                 未設定含: false
             }
         }
+
+        const durability:tDurability_user = (() => {
+            const obj = durabilities.find(d => node.アイテム名 === d.アイテム名);
+            if(obj && obj.調達方法 === "自力調達") return obj;
+            const pushObj: tDurability_user = {
+                アイテム名 :node.アイテム名,
+                単価: node.価格.調達単価,
+                合計価格: 0,
+                最大耐久値: node.個数.耐久値.最大耐久値,
+                消費個数: 0,
+                消費耐久値: 0,
+                耐久割単価: node.価格.耐久割単価,
+                耐久割金額: 0,
+                調達方法: "自力調達"
+            }
+            durabilities.push(pushObj);
+            return pushObj;
+        })();
+        
+        durability.消費耐久値 += node.個数.耐久値.消費耐久合計;
+        durability.消費個数   = Math.ceil(durability.消費耐久値 / node.個数.耐久値.最大耐久値);
+        durability.合計価格   = durability.単価 * durability.消費個数;
+        durability.耐久割金額 = durability.消費耐久値 * durability.耐久割単価;
+
+        material.必要個数 = durability.消費個数;
+        material.合計金額 = durability.合計価格;
+
         return {
-            価格: node.価格.合計金額,
+            価格: node.価格.耐久割合計金額,
             未設定含: false
         }
     }
 
     const fNpc:(node:tTreeNode_npc) => tReCallResult = (node) => {
-        materials.push(<tMaterialList_npc>{
-            アイテム名: node.アイテム名,
-            調達方法: "NPC",
-            必要個数: node.個数.調達個数,
-            設定単価: node.価格.調達単価,
-            合計金額: node.価格.合計金額
-        });
-        if(node.特殊消費 === "消費"){
-            durabilities.push(<tDurability_npc>{
-                アイテム名 :node.アイテム名,
-                単価: node.価格.調達単価,
-                合計価格: node.価格.合計金額,
-                最大耐久値: node.個数.耐久値.最大耐久値,
-                消費個数: node.個数.調達個数,
-                消費耐久値: node.個数.耐久値.消費耐久合計,
-                耐久割単価: node.価格.耐久割単価,
-                耐久割金額: node.価格.耐久割合計金額,
-                調達方法: "NPC"
-            });
+        const material = (() => {
+            const obj = materials.find(m => m.アイテム名 === node.アイテム名);
+            if(obj && obj.調達方法 === "NPC") return obj;
+            const pushObj:tMaterial_npc = {
+                アイテム名: node.アイテム名,
+                調達方法: "NPC",
+                必要個数: 0,
+                設定単価: node.価格.調達単価,
+                合計金額: 0
+            }
+            materials.push(pushObj);
+            return pushObj;
+        })();
+        if(node.特殊消費 !== "消費"){
+            material.必要個数 += node.個数.調達個数;
+            material.合計金額 += node.価格.合計金額;
             return {
-                価格: node.価格.耐久割合計金額,
+                価格: node.価格.合計金額,
                 未設定含: false
             }
         }
+
+        const durability:tDurability_npc = (() => {
+            const obj = durabilities.find(d => node.アイテム名 === d.アイテム名);
+            if(obj && obj.調達方法 === "NPC") return obj;
+            const pushObj: tDurability_npc = {
+                アイテム名 :node.アイテム名,
+                単価: node.価格.調達単価,
+                合計価格: 0,
+                最大耐久値: node.個数.耐久値.最大耐久値,
+                消費個数: 0,
+                消費耐久値: 0,
+                耐久割単価: node.価格.耐久割単価,
+                耐久割金額: 0,
+                調達方法: "NPC"
+            }
+            durabilities.push(pushObj);
+            return pushObj;
+        })();
+        
+        durability.消費耐久値 += node.個数.耐久値.消費耐久合計;
+        durability.消費個数   = Math.ceil(durability.消費耐久値 / node.個数.耐久値.最大耐久値);
+        durability.合計価格   = durability.単価 * durability.消費個数;
+        durability.耐久割金額 = durability.消費耐久値 * durability.耐久割単価;
+
+        material.必要個数 = durability.消費個数;
+        material.合計金額 = durability.合計価格;
+
         return {
-            価格: node.価格.合計金額,
+            価格: node.価格.耐久割合計金額,
             未設定含: false
         }
     }
 
     const fUnknown:(node:tTreeNode_unknown) => tReCallResult = (node) => {
-        materials.push(<tMaterialList_unknown>{
-            アイテム名: node.アイテム名,
-            調達方法: "未設定",
-            必要個数: node.個数.消費個数
-        });
-        if(node.特殊消費 === "消費") durabilities.push(<tDurability_unknown>{
-            アイテム名 :node.アイテム名,
-            最大耐久値: node.個数.耐久値.最大耐久値,
-            消費個数: node.個数.消費個数,
-            消費耐久値: node.個数.耐久値.消費耐久合計,
-            調達方法: "未設定"
-        });
+        const material = (() => {
+            const obj = materials.find(m => m.アイテム名 === node.アイテム名);
+            if(obj && obj.調達方法 === "未設定") return obj;
+            const pushObj:tMaterial_unknown = {
+                アイテム名: node.アイテム名,
+                調達方法: "未設定",
+                必要個数: 0
+            };
+            materials.push(pushObj);
+            return pushObj
+        })();
+        if(node.特殊消費 !== "消費"){
+            material.必要個数 += node.個数.消費個数;
+        } else {
+            const durability = (() => {
+                const obj = durabilities.find(d => d.アイテム名 === node.アイテム名);
+                if(obj && obj.調達方法 === "未設定") return obj;
+                const pushObj: tDurability_unknown = {
+                    アイテム名 :node.アイテム名,
+                    最大耐久値: node.個数.耐久値.最大耐久値,
+                    消費個数: 0,
+                    消費耐久値: 0,
+                    調達方法: "未設定"
+                }
+                durabilities.push(pushObj);
+                return pushObj;
+            })();
+            durability.消費耐久値 += node.個数.耐久値.消費耐久合計;
+            durability.消費個数    = Math.ceil(durability.消費耐久値 / durability.最大耐久値);
+
+            material.必要個数 = durability.消費個数;
+        }
         return {
             価格: 0,
             未設定含: true
@@ -352,7 +450,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
         const result = fCreation(m);
         lastCreations.push({
             アイテム名: m.アイテム名,
-            作成個数: m.個数.作成個数,
+            作成個数: m.個数.作成個数 - m.個数.余剰作成個数,
             単価: result.価格 / (m.個数.作成個数 - m.個数.余剰作成個数),
             合計材料費: result.価格 / (m.個数.作成個数 - m.個数.余剰作成個数) * m.個数.作成個数,
             未設定含: result.未設定含
@@ -363,7 +461,9 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
         副産物: byproducts,
         最終作成物: lastCreations,
         材料: materials,
-        耐久消費: durabilities
+        耐久消費: durabilities,
+        スキル: skills,
+        要レシピ: needRecipes
     }
 }
 

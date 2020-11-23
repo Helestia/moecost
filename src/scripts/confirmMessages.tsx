@@ -4,7 +4,6 @@ import {
     tTreeNode_creation,
     tTreeNode_npc,
     tTreeNode_common,
-    tTreeNode_unknown,
     tTreeNode_user
 } from './buildTree';
 
@@ -31,7 +30,7 @@ const retrieveUnknownMaterials:tRetrieveUnknownMaterials = (main,common) => {
     const resultArray:tMessage[] = [];
     type tReCall = (node:tTreeNode) => void;
     const reCall:tReCall = (node) => {
-        if(node.調達方法 === "未設定") unknownMaterials.push(node.アイテム名);
+        if(node.調達方法 === "未設定" && (! unknownMaterials.includes(node.アイテム名))){unknownMaterials.push(node.アイテム名)};
         if(node.調達方法 === "作成") node.材料.forEach(m => reCall(m));
     }
     const unknownMaterials:string[] = [];

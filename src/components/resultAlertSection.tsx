@@ -30,7 +30,7 @@ const ResultAlertSection:React.FC<iResultAlertSection> = (props) => {
                         <Alert
                             className={classes.alertClass}
                             severity={message.重大度 === "critical" ? "error" : message.重大度}
-                            variant="outlined">
+                            variant="standard">
                             <AlertTitle>{message.タイトル}</AlertTitle>
                             {message.メッセージ.map(text => {
                                 return <><p>{text}</p></>

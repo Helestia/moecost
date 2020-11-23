@@ -4,11 +4,11 @@ import ResultSummarySection from './resultSummarySection';
 import ResultCreationItemTable from './resultCreationItemTable';
 
 import {tSearchSectionRtnFuncProps} from './searchSection';
-import buildTree from '../scripts/buildTree';
+import buildTree, {tQtyRole,tQtyRoleResult} from '../scripts/buildTree';
 import confirmMessages from '../scripts/confirmMessages';
 import makeListArrayFromTree from '../scripts/makeListArrayFromTree';
 
-import calc, {tNoStackCalcRoute} from '../scripts/calc';
+
 import moecostDb, { iDictionary } from '../scripts/storage';
 import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
 import ResultConfigCreateNumberDialog from './resultConfigCreateNumberDialog';
@@ -40,7 +40,7 @@ const useChildrenStyles = makeStyles((theme:Theme) =>
 const ResultSection:React.FC<iResultSectionProps> = (props) => {
     const [beforeSearch,setBeforeSearch] = React.useState<tSearchSectionRtnFuncProps>(props.searched)
     const [createNumber, setCreateNumber] = React.useState(0);
-    const [surplusCalcRoute,setSurplusCalcRoute] = React.useState<tNoStackCalcRoute>(undefined);
+    const [surplusCalcRoute,setSurplusCalcRoute] = React.useState<tQtyRole>(undefined);
     const [userDictionary,setUserDictionary] = React.useState<iDictionary|undefined>(undefined);
     const [isOpenConfigCreateNumberDialog,setIsOpenConfigCreateNumberDialog] = React.useState<boolean>(false);
 
@@ -70,7 +70,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
     }
 
     // 回答受信
-    const changeTriggerCreateNumber = (number:number, route:tNoStackCalcRoute) => {
+    const changeTriggerCreateNumber = (number:number, route:tQtyRoleResult) => {
         setCreateNumber(number);
         setSurplusCalcRoute(route);
         setIsOpenConfigCreateNumberDialog(false);
@@ -79,21 +79,36 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
     const closeConfigCreateNumberDialog = () => {
         setIsOpenConfigCreateNumberDialog(false);
     }
+    console.log(0);
     // 生産ツリー構築
-    const calcResult = calc(props.searched, userDictionary, surplusCalcRoute, createNumber );
+    //const calcResult = calc(props.searched, userDictionary, surplusCalcRoute, createNumber );
+    const treesAndQuantities = buildTree(props.searched, userDictionary, surplusCalcRoute, createNumber);
+    if(treesAndQuantities.message.length !== 0) return (
+        <ResultAlertSection messages={treesAndQuantities.message} />
+    );
+    console.log(1);
+    const messages = confirmMessages(treesAndQuantities.main, treesAndQuantities.common, createNumber);
+    
+    console.log(2);
+    const lists = makeListArrayFromTree(treesAndQuantities.main, treesAndQuantities.common);
+    console.log(3);
 
     return (
         <>
-            <ResultAlertSection messages={calcResult.メッセージ} />
+            <ResultAlertSection messages={messages} />
             <ResultSummarySection
                 recipeName={props.searched.レシピ名}
-                mainTrees={calcResult.生産ツリー}
-                commonTrees={calcResult.共通材料ツリー}
+                creations={lists.最終作成物}
+                materials={lists.材料}
+                surpluses={lists.余剰作成}
+                byproducts={lists.副産物}
+                durabilities={lists.耐久消費}
+                skills={lists.スキル}
+                needRecipe={lists.要レシピ}
                 useChildrenStyles={useChildrenStyles}
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
             <ResultCreationItemTable 
-                mainTrees={calcResult.生産ツリー}
-                commonTrees={calcResult.共通材料ツリー}
+                creations={lists.最終作成物}
                 useChildrenStyles={useChildrenStyles} />
             
 
@@ -104,14 +119,14 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
             {/*ダイアログ関係*/}
             <ResultConfigCreateNumberDialog 
                 isOpen={isOpenConfigCreateNumberDialog}
-                number={calcResult.生産個数.個数}
-                minimumNumber={calcResult.生産個数.余剰なし最小生産個数}
-                route={calcResult.生産個数.余剰対応}
+                number={treesAndQuantities.totalQuantity}
+                minimumNumber={treesAndQuantities.fullyMinimumQuantity}
+                route={treesAndQuantities.qtyRoluResult}
                 close={closeConfigCreateNumberDialog}
                 changeTrigger={changeTriggerCreateNumber} />
 
             {/*ここからテスト用*/}
-            {JSON.stringify(calcResult)}
+            {JSON.stringify(treesAndQuantities)}
         </>
     )
 } 
