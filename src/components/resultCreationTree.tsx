@@ -54,7 +54,6 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 }));
 
 type tResultCreationTree = {
-    isInitialize: boolean,
     main: tTreeNode_creation[],
     common: tTreeNode_creation[],
     handleItemClick: (str:string) => void,
@@ -66,10 +65,6 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
     const childrenStyles = props.useChildrenStyles();
     const classes = useStyles(useTheme());
 
-    if(props.isInitialize){
-        setDisplay( (! moecostDb.表示設定.初期非表示設定.生産ツリー))
-        return null;
-    }
 
 
     // アコーディオンのオープン/クローズ

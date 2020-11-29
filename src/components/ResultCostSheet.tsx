@@ -35,7 +35,6 @@ const useStyles = makeStyles((theme:Theme) =>
 );
 
 type tResultCostSheet= {
-    isInitialize: boolean,
     creations: tCreation[],
     materials: tMaterial[],
     durabilities: tDurability[],
@@ -58,16 +57,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
     const [display,setDisplay] = React.useState( (! moecostDb.表示設定.初期非表示設定.原価表));
     const childrenStyles = props.useChildrenStyles();
     const classes = useStyles(useTheme());
-    React.useEffect(() => {return (() => {
-        setDisplay((! moecostDb.表示設定.初期非表示設定.原価表));
-        console.log("unmounting...");
-    })},[]);
 
-
-    if(props.isInitialize){
-        setDisplay((! moecostDb.表示設定.初期非表示設定.原価表));
-        return null;
-    }
 
 
     // アコーディオンのオープン/クローズ

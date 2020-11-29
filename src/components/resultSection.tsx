@@ -151,7 +151,6 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         <>
             <ResultAlertSection messages={messages} />
             <ResultSummarySection
-                isInitialize={false}
                 recipeName={props.searched.レシピ名}
                 creations={lists.最終作成物}
                 materials={lists.材料}
@@ -164,7 +163,6 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
 
             <ResultCostSheet
-                isInitialize={false}
                 materials={lists.材料}
                 durabilities={lists.耐久消費}
                 surpluses={lists.余剰作成}
@@ -174,7 +172,6 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 handleItemClick={openConfigItemDialog} />
 
             <ResultCreationTree
-                isInitialize={false}
                 main={treesAndQuantities.main}
                 common={treesAndQuantities.common}
                 useChildrenStyles={useChildrenStyles}

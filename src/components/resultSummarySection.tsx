@@ -33,7 +33,6 @@ const useStyles = makeStyles({
 
  
 type tResultSummarySectionProps = {
-    isInitialize: boolean,
     recipeName: string,
     creations: tCreation[],
     materials: tMaterial[],
@@ -49,11 +48,6 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const [display,setDisplay] = React.useState( (! moecostDb.表示設定.初期非表示設定.概要));
     const classes = useStyles();
     const childrenStyles = props.useChildrenStyles();
-
-    if(props.isInitialize){
-        setDisplay( (! moecostDb.表示設定.初期非表示設定.概要));
-        return null;
-    }
 
     // 各フィールドで表示する情報の取得
     type tData = {
