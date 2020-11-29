@@ -35,6 +35,9 @@ function App() {
       },
       MuiRadio: {
         color: "primary"
+      },
+      MuiTable: {
+        size: (configDisplay?.smallテーブル) ? "small" : "medium"
       }
     }
   });
@@ -45,7 +48,7 @@ function App() {
   }
 
   // 表示設定更新
-  const changeUseDarkMode = async () => {
+  const changeDisplayConfig = async () => {
     setConfigDisplay(moecostDb.表示設定);
   }
 
@@ -59,7 +62,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <TopBar 
-        changeUseDarkMode={changeUseDarkMode} />
+        changeDisplayConfig={changeDisplayConfig} />
       <SearchSection
         rtnFunc={rtnFuncFirstSection} />
       <ResultSection

@@ -1,11 +1,12 @@
 import React from 'react';
-import {tResultMessage} from '../scripts/calc';
+import {tMessage} from '../scripts/buildTree';
 import {Alert, AlertTitle} from '@material-ui/lab'
 import Box from '@material-ui/core/Box'
+import Typography from '@material-ui/core/Typography'
 import {makeStyles} from '@material-ui/styles';
 
 interface iResultAlertSection {
-    messages:tResultMessage[]
+    messages:tMessage[]
 }
 
 const useStyles = makeStyles({
@@ -25,15 +26,21 @@ const ResultAlertSection:React.FC<iResultAlertSection> = (props) => {
     return (
         <Box className={classes.root}>
             {
-                props.messages.map(message => {
+                props.messages.map((message,index) => {
                     return (
                         <Alert
+                            key={"resultAlertSection_AlertMessage_" + index}
                             className={classes.alertClass}
-                            severity={message.重大度 === "critical" ? "error" : message.重大度}
+                            severity={message.重大度}
                             variant="standard">
                             <AlertTitle>{message.タイトル}</AlertTitle>
-                            {message.メッセージ.map(text => {
-                                return <><p>{text}</p></>
+                            {message.メッセージ.map((text,index) => {
+                                return ( 
+                                    <Typography
+                                        key={"resultAlertSection_AlertMessageText_" + index}>
+                                        {text}
+                                    </Typography>
+                                )
                             })}
                         </Alert>
                     )

@@ -105,22 +105,22 @@ class moecostDbClass extends Dexie {
     // 辞書の削除
 }
 
-const defaultStrage: {"辞書":iDictionary,"使用辞書":iUseDictionary,"表示設定":iDisplay} = {
-    "辞書" : {
-        "辞書名" : "Default Dictionary",
-        "内容" : []
+const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, 表示設定:iDisplay} = {
+    辞書 : {
+        辞書名 : "Default Dictionary",
+        内容 : []
     },
-    "使用辞書" : {
-        "使用中辞書" : "Default Dictionary"
+    使用辞書 : {
+        使用中辞書 : "Default Dictionary"
     },
-    "表示設定" : {
-        "ダークモード" : false,
-        "簡易表示" : false,
-        "初期非表示設定" : {
-            "概要" : false,
-            "生成アイテム一覧" : false,
-            "素材_余剰生産品_副産物一覧" : false,
-            "生産ツリー" : false
+    表示設定 : {
+        ダークモード : false,
+        smallテーブル: false,
+        簡易表示 : false,
+        初期非表示設定 : {
+            概要 : false,
+            原価表 : false,
+            生産ツリー : false
         }
     }
 }
@@ -151,11 +151,11 @@ type アイテム情報 = {
 
 export interface iDisplay {
     簡易表示 : boolean,
+    smallテーブル: boolean,
     ダークモード : boolean,
     初期非表示設定 :{
         概要 : boolean,
-        生成アイテム一覧 : boolean,
-        素材_余剰生産品_副産物一覧 : boolean,
+        原価表 : boolean,
         生産ツリー : boolean
     }
 }

@@ -1,12 +1,16 @@
 import React from 'react'
 import {tJSON_seriesCreationItem} from '../scripts/jsonReader'
-import {makeStyles} from '@material-ui/core/styles'
+
+import Box from '@material-ui/core/Box'
+import Button from '@material-ui/core/Button'
 import Card from '@material-ui/core/Card';
+import CheckBox from '@material-ui/core/Checkbox'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import FormLabel from '@material-ui/core/FormLabel'
 import FormGroup from '@material-ui/core/FormGroup'
-import CheckBox from '@material-ui/core/Checkbox'
-import Button from '@material-ui/core/Button'
+
+import {makeStyles} from '@material-ui/core/styles'
+
 
 export type tSeriesSelectItems = {
     レシピ名 : string,
@@ -76,13 +80,13 @@ export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
     const renderCheckBox = itemList.map((item,index) => {
         const label = "[" + item.接頭 + "]" + item.アイテム
         return (
-            <>
+            <Box key={"seriesRecipeSelecter_" + index}>
                 <FormControlLabel
                     key={index}
                     control={<CheckBox color="primary" checked={item.checked} onChange={handleChange} name={item.アイテム} />}
                     label={label}
-                    style={{display:"inline-block"}} /><br />
-            </>
+                    style={{display:"inline-block"}} />
+            </Box>
         )
     })
 

@@ -1,4 +1,3 @@
-import { TlsOptions } from 'tls';
 import {
     tTreeNode,
     tTreeNode_creation,
@@ -7,6 +6,7 @@ import {
     tTreeNode_unknown,
     tTreeNode_user
 } from './buildTree';
+import {cloneObj_JSON} from './common'
 
 export type tMaterial = tMaterial_user  | tMaterial_npc | tMaterial_unknown;
 type tMaterial_user = {
@@ -146,15 +146,15 @@ const reCallResultDefault:tReCallResult = {
 }
 
 const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
-    const materials    :tMaterial[]      = [];
-    const byproducts   :tByproduct[]     = [];
-    const surpluses    :tSurplus[]       = [];
+    const materials:tMaterial[]          = [];
+    const byproducts:tByproduct[]        = [];
+    const surpluses:tSurplus[]           = [];
     const lastCreations:tCreation[]      = [];
     const durabilities :tDurability[]    = [];
     const skills: tSkill[]               = [];
-    const needRecipes : string[]          = [];
+    const needRecipes : string[]         = [];
 
-    const commons      :tCommons[] = [];
+    const commons:tCommons[]             = [];
 
     const reCall:(node:tTreeNode) => tReCallResult = (node) => {
         if(node.調達方法 === "作成") return fCreation(node);
@@ -191,10 +191,10 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
             acc.価格 += result.価格;
             if(result.未設定含) acc.未設定含 = true;
             return acc;
-        },reCallResultDefault);
+        },cloneObj_JSON(reCallResultDefault));
         // 副産物確認
         const byProductCost = (() => {
-            if(! node.副産物) return reCallResultDefault;
+            if(! node.副産物) return cloneObj_JSON(reCallResultDefault);
             // 副産物配列への登録
             node.副産物.forEach(b => {
                 if(b.原価) byproducts.push({
@@ -215,12 +215,12 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
                 if(cur.原価) acc.価格 += cur.原価.設定原価;
                 else acc.未設定含 = true;
                 return acc;
-            },reCallResultDefault);
+            },cloneObj_JSON(reCallResultDefault));
         })();
 
         // 余剰生産物確認
         const surplusCost:tReCallResult = (() => {
-            if(node.個数.余剰作成個数 === 0) return reCallResultDefault;
+            if(node.個数.余剰作成個数 === 0) return cloneObj_JSON(reCallResultDefault);
             const totalCost = materialCost.価格 - byProductCost.価格;
             const unitCost = totalCost / node.個数.作成個数;
             const surplusCost = unitCost * node.個数.余剰作成個数;
@@ -234,34 +234,35 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
                 余り合計金額: surplusCost,
                 未設定含: isIncludeUnknown
             });
-            return <tReCallResult>{
+            return {
                 価格: surplusCost,
                 未設定含: isIncludeUnknown
-            }
+            } as tReCallResult
         })();
         // 耐久割確認
         const durabilityCost = (() => {
-            if(node.特殊消費 !== "消費") return reCallResultDefault;
+            if(node.特殊消費 !== "消費") return cloneObj_JSON(reCallResultDefault);
             const totalCost = materialCost.価格 - byProductCost.価格 - surplusCost.価格;
             const durabilityUnitCost = totalCost / (node.個数.耐久値.最大耐久値 * node.個数.作成個数);
             const durabilityCost = durabilityUnitCost * node.個数.耐久値.消費耐久合計;
             const isIncludeUnknown = materialCost.未設定含 || byProductCost.未設定含 || surplusCost.未設定含;
             // 耐久割リストへの登録
-            durabilities.push(<tDurability_creation>{
+            durabilities.push({
                 アイテム名: node.アイテム名,
                 調達方法: "作成",
                 合計価格: totalCost,
                 最大耐久値: node.個数.耐久値.最大耐久値,
+                単価: totalCost / (node.個数.作成個数 - node.個数.余剰作成個数),
                 未設定含: isIncludeUnknown,
                 消費個数: node.個数.作成個数 - node.個数.余剰作成個数,
                 消費耐久値: node.個数.耐久値.消費耐久合計,
                 耐久割単価: durabilityUnitCost,
                 耐久割金額: durabilityCost
-            });
-            return <tReCallResult>{
+            } as tDurability_creation);
+            return {
                 価格: durabilityCost,
                 未設定含: isIncludeUnknown
-            }
+            } as tReCallResult;
         })();
         return {
             価格: materialCost.価格 - byProductCost.価格 - surplusCost.価格 - durabilityCost.価格,

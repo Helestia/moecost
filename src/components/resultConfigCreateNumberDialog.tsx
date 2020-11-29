@@ -1,5 +1,5 @@
 import React from 'react';
-import { tNoStackCalcRouteResult } from '../scripts/calc';
+import { tQtyRoleResult } from '../scripts/buildTree';
 import { numDeform } from '../scripts/common'
 
 import Box                      from '@material-ui/core/Box';
@@ -38,15 +38,15 @@ type tResultInputCreateNumber = {
     isOpen:boolean,
     number:number,
     minimumNumber:number,
-    route:tNoStackCalcRouteResult,
+    route:tQtyRoleResult,
     close: () => void,
-    changeTrigger: (number:number, route:tNoStackCalcRouteResult) => void
+    changeTrigger: (number:number, route:tQtyRoleResult) => void
 }
 
 const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props) => {
     const [befOpen, setBefOpen] = React.useState<boolean>(false);
     const [number,setNumber] = React.useState<number>(props.number);
-    const [route,setRoute] = React.useState<tNoStackCalcRouteResult>(props.route);
+    const [route,setRoute] = React.useState<tQtyRoleResult>(props.route);
     const [sliderMaxState,setSliderMaxState] = React.useState<number>(0)
     const classes = useClasses();
 
@@ -127,7 +127,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
         }
     }
 
-    const handleChangeRoute = (route:tNoStackCalcRouteResult) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
+    const handleChangeRoute = (route:tQtyRoleResult) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
         if(checked) setRoute(route);
     }
 
@@ -183,6 +183,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
                 {
                     sliderOptions.map(n => 
                         <FormControlLabel
+                            key={"resultConfigCreateNumberDialog_ListNo_" + n}
                             label={numDeform(n)}
                             control={<Radio size="small" onChange={handleChangeSliderRadio(n)} />}
                             checked={n === sliderMaxState} />

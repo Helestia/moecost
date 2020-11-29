@@ -20,7 +20,7 @@ import ForumIcon from '@material-ui/icons/Forum';
 export interface iMenuDrower {
     isMenuOpened: boolean,
     closeMenu: () => void,
-    changeUseDarkMode : () => Promise<void>
+    changeDisplayConfig : () => Promise<void>
 }
 
 const MenuDrower:React.FC<iMenuDrower> = (props) => {
@@ -102,7 +102,7 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
             <ConfigDisplayDialog 
                 isOpen={isOpenConfigDisplay}
                 close={handleConfigDisplayClose}
-                changeUseDarkMode={() => props.changeUseDarkMode()}
+                changeDisplayConfig={() => props.changeDisplayConfig()}
             />
 
 
@@ -126,14 +126,14 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
 
 
 export interface iTopBar {
-    changeUseDarkMode : () => Promise<void>
+    changeDisplayConfig : () => Promise<void>
 }
 const TopBar: React.FC<iTopBar> = (props) => {
     const [isMenuOpened,setIsMenuOpened] = React.useState(false);
 
     // 表示設定値変更
-    const changeUseDarkMode = async () => {
-        props.changeUseDarkMode();
+    const changeDisplayConfig = async () => {
+        props.changeDisplayConfig();
     }
     const handleDrowerOpenOrClose = () => {
         setIsMenuOpened(true);
@@ -145,7 +145,7 @@ const TopBar: React.FC<iTopBar> = (props) => {
     return (
         <>
             <AppBar 
-                position="static"
+                position="sticky"
                 color="default">
                 <Toolbar>
                     <Iconbutton
@@ -164,7 +164,7 @@ const TopBar: React.FC<iTopBar> = (props) => {
             <MenuDrower
                 isMenuOpened={isMenuOpened}
                 closeMenu={closeMenu}
-                changeUseDarkMode={changeUseDarkMode} />
+                changeDisplayConfig={changeDisplayConfig} />
         </>
     )
 }

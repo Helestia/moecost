@@ -1,5 +1,6 @@
 import {tSearchSectionRtnFuncProps} from '../components/searchSection';
 import {iDictionary} from './storage';
+import {cloneObj_JSON} from './common'
 import {
     CanStackItems,
     Durabilities,
@@ -13,6 +14,8 @@ export type tMessage = {
     タイトル: string,
     メッセージ: string[]
 }
+
+export type tProcurement = "作成" | "共通素材" | "NPC" | "自力調達" | "未設定";
 
 export type tTreeNode = tTreeNode_creation | tTreeNode_npc | tTreeNode_user | tTreeNode_common | tTreeNode_unknown;
 
@@ -385,33 +388,37 @@ type tBuildTree = (
 const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
     // エラー有無確認処理
     const ErrorObj = handleError(targets,qty);
-    if(ErrorObj) return <tBuildTreeResult>{
+    if(ErrorObj) return {
         main: [],
         common: [],
         message: [ErrorObj],
         qtyRoluResult: "surplus",
         totalQuantity: 0,
         fullyMinimumQuantity: 0
-    }
+    } as tBuildTreeResult
 
     // メインツリー構築
     const mainTreeD = buildMainTree(targets,dictionary);
 
+    console.log("buildTree mainTreeD complete");
+
     // 共通中間素材を別ツリーに切りだし
     const mainTreeAndCommonTreeD = splitCommonAndMain(mainTreeD);
-
+    console.log(JSON.stringify(mainTreeAndCommonTreeD.common))
     // 余剰作成数なしでの最小作成個数算出
     const minimumCreation = calcMinimumQty(mainTreeAndCommonTreeD.main,mainTreeAndCommonTreeD.common);
 
     // 作成個数の設定
     const createQuantity = decideCreateQuantity(targets,qtyRole,qty,minimumCreation);
-
+    console.log(JSON.stringify(mainTreeAndCommonTreeD.common));
     // ツリーに個数設定
     const mainTreeAndCommonTree = setQuantityToTree(
         mainTreeAndCommonTreeD.main,
         mainTreeAndCommonTreeD.common,
         createQuantity.qty
     );
+
+    console.log(JSON.stringify(mainTreeAndCommonTree.common));
 
     return {
         main: mainTreeAndCommonTree.main,
@@ -481,7 +488,7 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
                 } else if(userMethod.調達方法 === "生産"){
                     const recipe = Recipes.find(r => r.レシピ名 === userMethod.レシピ名);
                     if(recipe){
-                        return fCreate(targetName, qty, sc, created,recipe);
+                        return fCreationOrUnknown(targetName, qty, sc, created, recipe);
                     }
                 } else if(userMethod.調達方法 === "自力調達"){
                     return fUser(targetName, qty, sc, userMethod.調達価格)
@@ -505,15 +512,15 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
             if(multiDefault){
                 const defRecipe = Recipes.find(r => r.レシピ名 === multiDefault.標準レシピ名);
                 if(defRecipe){
-                    return fCreate(targetName, qty, sc, created, defRecipe);
+                    return fCreationOrUnknown(targetName, qty, sc, created, defRecipe);
                 }
             }
             // マルチレシピのメンテミスや、標準レシピが存在しない場合の退避手段
             // 1件目のレシピを使用してツリー作成
-            return fCreate(targetName, qty, sc, created, matchRecipes[0]);
+            return fCreationOrUnknown(targetName, qty, sc, created, matchRecipes[0]);
         }
         if(matchRecipes.length === 1){
-            return fCreate(targetName, qty, sc, created, matchRecipes[0]);
+            return fCreationOrUnknown(targetName, qty, sc, created, matchRecipes[0]);
         }
 
         // 入手手段不明
@@ -527,8 +534,16 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
         return 1;
     }
 
-    type tFCreation = (targetName:string, qty:number, sc:t特殊消費,created:string[], recipe:tJSON_recipe) => tTreeNodeD_creation
-    const fCreate:tFCreation = (targetName, qty, sc, created, recipe) => {
+    type tFCreationOrUnknown = (targetName:string, qty:number, sc:t特殊消費,created:string[], recipe:tJSON_recipe) => tTreeNodeD_creation | tTreeNodeD_unknown;
+    const fCreationOrUnknown:tFCreationOrUnknown = (targetName, qty, sc, created, recipe) => {
+        // すでに作ってるアイテムの場合、強制的にunknown扱いで処理終了とする。
+        if(created.includes(targetName)) return fUnknown(targetName,qty,sc);
+        return fCreation(targetName, qty, sc, created, recipe);
+    }
+
+    type tFCreation = (targetName:string, qty:number, sc:t特殊消費,created:string[], recipe:tJSON_recipe) => tTreeNodeD_creation;
+    const fCreation:tFCreation = (targetName, qty, sc, created, recipe) => {
+
         const numberOfCreation = recipe.生成物.個数 ? recipe.生成物.個数 : 1;
         const rtnFCreation:tTreeNodeD_creation = (()=>{
             if(sc === "消費"){
@@ -596,10 +611,8 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
                 }
             });
         }
-        const nextCreated = created.concat(targetName);
-        const isMaterialCreated = recipe.材料.every(m => nextCreated.includes(m.アイテム));
-        if(isMaterialCreated) return rtnFCreation;
 
+        const nextCreated = created.concat(targetName);
         recipe.材料.forEach(m => {
             const nextQty = (() => {
                 if(m.特殊消費 === "未消費") return 1;
@@ -702,7 +715,7 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
             調達方法: "未設定",
             特殊消費: sc,
             個数: {
-                上位レシピ要求個数: 0
+                上位レシピ要求個数: qty
             }
         }
     }
@@ -711,12 +724,12 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
     if(targets === undefined) return []; // これは処理されないはず
     if(targets.生成アイテム.length === 1){
         const recipe = Recipes.find(r => r.レシピ名 === targets.レシピ名);
-        if(recipe) return [fCreate(targets.生成アイテム[0], 1, "消失", [], recipe)];
+        if(recipe) return [fCreation(targets.生成アイテム[0], 1, "消失", [], recipe)];
         return [];
     }
     return targets.生成アイテム.map(ts => {
         const recipe = Recipes.find(r => r.生成物.アイテム === ts);
-        if(recipe){return fCreate(ts, 1, "消失", [], recipe)};
+        if(recipe){return fCreation(ts, 1, "消失", [], recipe)};
         return null;
     }).filter(<T>(x:T | null) : x is T => x !== null);
 }
@@ -759,11 +772,52 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
     // 共通素材の分割処理 
     type tSplitCommon = (node:tTreeNodeD) => tTreeNodeD;
     const splitCommon:tSplitCommon = (node) => {
+        const buildCommonTreeNode: (node:tTreeNodeD_creation) => tTreeNodeD_creation = (node) => {
+            const resultObj = (node.特殊消費 === "消費") 
+                ? {
+                    アイテム名: node.アイテム名,
+                    調達方法: node.調達方法,
+                    特殊消費: node.特殊消費,
+                    個数: {
+                        セット作成個数: node.個数.セット作成個数,
+                        上位レシピ要求個数: 0,
+                        耐久値: {
+                            上位要求: 1,
+                            最大耐久値: node.個数.耐久値.最大耐久値
+                        }
+                    },
+                    テクニック: node.テクニック,
+                    スキル: node.スキル,
+                    材料: node.材料,
+                    ギャンブル: node.ギャンブル,
+                    ペナルティ: node.ペナルティ,
+                    要レシピ: node.要レシピ
+                } as tTreeNodeD_creation_durable
+                : {
+                    アイテム名: node.アイテム名,
+                    調達方法: node.調達方法,
+                    特殊消費: node.特殊消費,
+                    個数: {
+                        セット作成個数: node.個数.セット作成個数,
+                        上位レシピ要求個数: 1,
+                    },
+                    テクニック: node.テクニック,
+                    スキル: node.スキル,
+                    材料: node.材料,
+                    ギャンブル: node.ギャンブル,
+                    ペナルティ: node.ペナルティ,
+                    要レシピ: node.要レシピ
+                } as tTreeNodeD_creation_nonDurable
+            if(node.副産物) resultObj.副産物 = node.副産物;
+            if(node.備考)   resultObj.備考   = node.備考;
+            return resultObj;
+        }
+
         if(node.調達方法 !== "作成") return node;
 
         const countedObj = materialCount.find(c => c.アイテム === node.アイテム名);
         if(countedObj && countedObj.使用回数 > 1){
-            if(commonTreeBeforeSort.every(c => c.アイテム名 !== node.アイテム名)) commonTreeBeforeSort.push(node);
+            if(commonTreeBeforeSort.every(c => c.アイテム名 !== node.アイテム名)) commonTreeBeforeSort.push(buildCommonTreeNode(node));
 
             if(node.特殊消費 === "消費") return {
                 アイテム名: node.アイテム名,
@@ -796,13 +850,12 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
     /**
      * 分割処理実行有
      */
-    const commonTreeBeforeSort: tTreeNodeD_creation[] = [];
+    let commonTreeBeforeSort: tTreeNodeD_creation[] = [];
     // メインツリーの分割処理
     const splitedMainTree = main.map(m => splitCommonCreation(m));
-    // 共通素材ツリーの分割処理
 
-    const cloneMaterials = cloneObj_JSON(commonTreeBeforeSort);
-    cloneMaterials.forEach(m => splitCommonCreation(m));
+    // 共通素材ツリーの分割処理
+    commonTreeBeforeSort = commonTreeBeforeSort.map(m => splitCommonCreation(m))
 
     type tCanSortCommon = (comon:tTreeNodeD) => boolean;
     const canSortCommon:tCanSortCommon = (common) => {
@@ -814,7 +867,7 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
     const commonTreeSorted:tTreeNodeD_creation[] = [];
     do{
         commonTreeBeforeSort.forEach(cb => {
-            if((commonTreeSorted.length != 0) && commonTreeSorted.every(ca => cb.アイテム名 === ca.アイテム名)) return;
+            if((commonTreeSorted.length != 0) && commonTreeSorted.some(ca => cb.アイテム名 === ca.アイテム名)) return;
             if(! canSortCommon(cb)) return;
             commonTreeSorted.push(cb);
         });
@@ -853,8 +906,8 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
         if(node.調達方法 === "NPC" || node.調達方法 === "未設定" || node.調達方法 === "自力調達"){
             return md;
         }
-        const orderQuantity = multipleAmountNumber * node.個数.上位レシピ要求個数;
-        if(node.調達方法 === "共通素材"){
+        if(node.調達方法 === "共通素材"){        
+            const orderQuantity = multipleAmountNumber * node.個数.上位レシピ要求個数;
             const commonObj = (() => {
                 const obj = commonUsage.find(c => node.アイテム名 === c.アイテム名);
                 if(obj) return obj;
@@ -868,7 +921,8 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
             commonObj.使用状況.push(gcdCreateAndAmount(multipleCreationSet, orderQuantity));
             return md;
         }
-        if(node.調達方法 === "作成"){
+        if(node.調達方法 === "作成"){            
+            const orderQuantity = node.特殊消費 === "消費" ? multipleAmountNumber : multipleAmountNumber * node.個数.上位レシピ要求個数;
             const newCreationNumber = multipleCreationSet * node.個数.セット作成個数;
             const pushObj = gcdCreateAndAmount(newCreationNumber, orderQuantity);
             let resultObj:tMaterialData[] = cloneObj_JSON(md);
@@ -974,7 +1028,7 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     const commonUsage: tCommonUsage[] = [];
     // 各種ツリーのツリー内の作成数等の情報収集
     const mainTreeData:tTreeData[] = main.map(tree => getMaterialDataParent_main(tree));
-    const commonTreeData:tTreeData[] = commons.reverse().map(tree => getMaterialDataParent_common(tree))
+    const commonTreeData:tTreeData[] = commons.concat().reverse().map(tree => getMaterialDataParent_common(tree));
     // 素材調査結果の統合
     
     const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
@@ -1321,23 +1375,22 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
     const commonData:tCommonData[] = [];
 
     const resultMain = main.map(tree => setQuantityToNode_create(tree,quantity));
-    const resultCommon = common.reverse().map(tree => {
+
+    const resultCommon = common.concat().reverse().map(tree => {
         const commonObj = commonData.find(c => c.アイテム名 === tree.アイテム名);
         const orderQuantity = (() => {
             if(! commonObj) return 1;
             if(commonObj.最大耐久値) return commonObj.要求個数 + Math.ceil(commonObj.要求耐久値 / commonObj.最大耐久値);
             return commonObj.要求個数;
         })();
-        return setQuantityToNode_create(tree,orderQuantity);
+        console.log(tree.アイテム名 + " : " + orderQuantity);
+        console.log(tree);
+        return setQuantityToNode_create(tree, orderQuantity);
     }).reverse();
     return {
         main:resultMain,
         common:resultCommon
     };
-}
-
-const cloneObj_JSON: <T>(obj:T) => T = (obj) => {
-    return JSON.parse(JSON.stringify(obj));
 }
 
 export default buildTree;

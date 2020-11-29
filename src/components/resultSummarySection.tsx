@@ -8,27 +8,32 @@ import {
     tSkill
 } from '../scripts/makeListArrayFromTree'
 import moecostDb from '../scripts/storage';
-import {numDeform} from '../scripts/common';
+import {numDeform, cloneObj_JSON} from '../scripts/common';
 
 import Accordion         from '@material-ui/core/Accordion';
 import AccordionSummary  from '@material-ui/core/AccordionSummary';
 import AccordionDetails  from '@material-ui/core/AccordionDetails';
-import Divider           from '@material-ui/core/Divider';
-import List              from '@material-ui/core/List';
-import ListItem          from '@material-ui/core/ListItem';
-import ListItemText      from '@material-ui/core/ListItemText';
+import TableContainer    from '@material-ui/core/TableContainer';
+import Table             from '@material-ui/core/Table';
+import TableBody         from '@material-ui/core/TableBody';
+import TableCell         from '@material-ui/core/TableCell';
+import Typography        from '@material-ui/core/Typography';
+import Tooltip           from '@material-ui/core/Tooltip';
+import Paper             from '@material-ui/core/Paper';
 import ExpandMoreIcon    from '@material-ui/icons/ExpandMore';
 import makeStyles        from '@material-ui/styles/makeStyles';
+import { TableRow } from '@material-ui/core';
 
 const useStyles = makeStyles({
-    listRoot: {
+    TableRoot: {
         width: "100%",
-        maxWidth: "750px"
+        maxWidth: "550px"
     }
 })
 
  
 type tResultSummarySectionProps = {
+    isInitialize: boolean,
     recipeName: string,
     creations: tCreation[],
     materials: tMaterial[],
@@ -45,6 +50,11 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const classes = useStyles();
     const childrenStyles = props.useChildrenStyles();
 
+    if(props.isInitialize){
+        setDisplay( (! moecostDb.表示設定.初期非表示設定.概要));
+        return null;
+    }
+
     // 各フィールドで表示する情報の取得
     type tData = {
         money:number,
@@ -59,21 +69,21 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         if(c.調達方法 === "未設定") a.hasUnknown = true;
         else a.money += c.合計金額;
         return a;
-    },initialData);
+    }, cloneObj_JSON(initialData));
 
     // 副産物合計
     const byproductData = props.byproducts.reduce((a,c) => {
         if(c.価格設定有) a.money += c.合計金額;
         else a.hasUnknown = true;
         return a;
-    },initialData);
+    }, cloneObj_JSON(initialData));
 
     // 余剰作成品合計
     const surplusData = props.surpluses.reduce((a,c) => {
         if(c.未設定含) a.hasUnknown = true;
         a.money += c.余り合計金額;
         return a;
-    },initialData);
+    }, cloneObj_JSON(initialData));
 
     // 耐久消費素材の残価値
     const durabilityData = props.durabilities.reduce((a,c) => {
@@ -81,124 +91,127 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         if(c.調達方法 === "作成" && c.未設定含) a.hasUnknown = true;
         if(c.調達方法 !== "未設定") a.money += c.合計価格 - c.耐久割金額;
         return a;
-    },initialData)
+    }, cloneObj_JSON(initialData));
 
     const renderRecipeName = () => (
-        <>
-            <ListItem>
-                <ListItemText
-                    primary="レシピ名"
-                    secondary={props.recipeName}
-                    secondaryTypographyProps={{align:"right", color:"textPrimary"}}
-                    />
-            </ListItem>
-            <Divider component="li" />
-        </>
+        <TableRow>
+            <TableCell component="th">
+                <Typography>レシピ名</Typography>
+            </TableCell>
+            <TableCell>
+                <Typography>{props.recipeName}</Typography>
+            </TableCell>
+        </TableRow>
     );
 
     const renderCreateCount = () => (
-        <>
-            <ListItem>
-                <ListItemText
-                    primary="作成個数"
-                    secondary={numDeform(props.creations[0].作成個数)}
-                    secondaryTypographyProps={{align:"right",color:"textPrimary"}} 
-                    onClick={props.openConfigCreateNumberDialog}
-                    className={childrenStyles.activeStrings}
-                />
-            </ListItem>
-            <Divider component="li" />
-        </>
+        <Tooltip title="作成個数の変更">
+            <TableRow 
+                className={childrenStyles.activeStrings}
+                onClick={props.openConfigCreateNumberDialog}>
+                <TableCell component="th">
+                    <Typography>作成個数</Typography>
+                </TableCell>
+                <TableCell align="right"><Typography>{numDeform(props.creations[0].作成個数)}</Typography></TableCell>
+            </TableRow>
+        </Tooltip>
     );
     
     const renderNeedSkills = () => (
-        <>
-            <ListItem>
-                <ListItemText
-                    primary="必要スキル"
-                    secondary={props.skills.map(skill => 
-                        skill.スキル名 + ":" + (numDeform(skill.スキル値))).join(" / ")}
-                    secondaryTypographyProps={{align:"right", color:"textPrimary"}}
-                />
-            </ListItem>
-            <Divider component="li" />
-        </>
+        <TableRow>
+            <TableCell component="th">
+                <Typography>必要スキル</Typography>
+            </TableCell>
+            <TableCell>{props.skills.map(skill => skill.スキル名 + ":" + (numDeform(skill.スキル値))).join(" / ")}</TableCell>
+        </TableRow>
     );
     
     const renderNeedRecipe = () => {
         if(props.needRecipe.length === 0) return null;
         return (
-            <>
-                <ListItem>
-                    <ListItemText 
-                        primary="必要レシピ"
-                        secondary={props.needRecipe.join(" / ")}
-                        secondaryTypographyProps={{align:"right", color:"textPrimary"}}
-                    />
-                </ListItem>
-                <Divider component="li" />
-            </>
+            <TableRow>
+                <TableCell component="th">
+                    <Typography>必要レシピ</Typography>
+                </TableCell>
+                <TableCell>{props.needRecipe.join(" / ")}</TableCell>
+            </TableRow>
         );
     }
 
     const renderMaterialCost = () => (
-        <>
-            <ListItem>
-                <ListItemText
-                    primary="材料費合計"
-                    secondary={numDeform(materialData.money) + (materialData.hasUnknown) ? " + 未設定価格" : ""}
-                    secondaryTypographyProps={{align:"right", color:(materialData.hasUnknown) ? "error" : "textPrimary"}}
-                />
-            </ListItem>
-        </>
+        <TableRow>
+            <TableCell component="th"><Typography>材料費合計</Typography></TableCell>
+            <TableCell
+                align="right">
+                <Typography color={(materialData.hasUnknown)? "error" : "textPrimary"}>
+                    {numDeform(materialData.money)} 
+                    {(materialData.hasUnknown)
+                        ? " + 未設定価格" 
+                        : ""
+                    }
+                </Typography>
+            </TableCell>
+        </TableRow>
     )
 
 
     const renderByproductRebate = () => {
         if(props.byproducts.length === 0) return null;
         return (
-            <>
-                <ListItem>
-                    <ListItemText
-                        primary="副産物価格"
-                        secondary={numDeform(byproductData.money) + (byproductData.hasUnknown) ? " + 未設定価格" : ""}
-                        secondaryTypographyProps={{align:"right", color:(byproductData.hasUnknown) ? "error" : "textPrimary"}}
-                    />
-                </ListItem>
-                <Divider component="li" />
-            </>
+            <TableRow>
+                <TableCell component="th">
+                    <Typography>副産物価格</Typography>
+                </TableCell>
+                <TableCell align="right">
+                        <Typography color={(byproductData.hasUnknown) ? "error" : "textPrimary"}>
+                        {numDeform(byproductData.money)}
+                        {(byproductData.hasUnknown)
+                            ? " + 未設定価格" 
+                            : ""
+                        }
+                        </Typography>
+                </TableCell>
+            </TableRow>
         );
     }
 
     const renderSurplusRebate = () => {
         if(props.surpluses.length === 0) return null;
         return (
-            <>
-                <ListItem>
-                    <ListItemText
-                        primary="余剰生産価格"
-                        secondary={numDeform(surplusData.money) + (surplusData.hasUnknown) ? " + 未設定価格" : ""}
-                        secondaryTypographyProps={{align:"right", color:(surplusData.hasUnknown) ? "error" : "textPrimary"}}
-                    />
-                </ListItem>
-                <Divider component="li" />
-            </>
+            <TableRow>
+                <TableCell component="th">
+                    <Typography>余剰生産価格</Typography>
+                </TableCell>
+                <TableCell align="right">
+                    <Typography color={(surplusData.hasUnknown) ? "error" : "textPrimary"}>
+                        {numDeform(surplusData.money)}
+                        {(surplusData.hasUnknown)
+                            ? " + 未設定価格"
+                            : ""
+                        }
+                    </Typography>
+                </TableCell>
+            </TableRow>
         )
     }
 
     const renderDurabilityRebate = () => {
         if(props.durabilities.length === 0) return null;
         return (
-            <>
-                <ListItem>
-                    <ListItemText
-                        primary="耐久消費素材の残価値"
-                        secondary={numDeform(durabilityData.money) + (durabilityData.hasUnknown) ? " + 未設定価格" : ""}
-                        secondaryTypographyProps={{align:"right", color:(durabilityData.hasUnknown) ? "error" : "textPrimary"}}
-                    />
-                </ListItem>
-                <Divider component="li" />
-            </>
+            <TableRow>
+                <TableCell component="th">
+                    <Typography>耐久消費素材の残価値</Typography>
+                </TableCell>
+                <TableCell align="right">
+                    <Typography color={(durabilityData.hasUnknown) ? "error" : "textPrimary"}>
+                    {numDeform(durabilityData.money)}
+                    {(durabilityData.hasUnknown)
+                        ? " + 未設定価格"
+                        : ""
+                    }
+                    </Typography>
+                </TableCell>
+            </TableRow>
         )
     }
 
@@ -207,16 +220,18 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         const totalCost  = materialData.money - byproductData.money - surplusData.money - durabilityData.money;
         const unitCost = totalCost / props.creations[0].作成個数;
         return (
-            <>
-                <ListItem>
-                    <ListItemText
-                        primary="単価"
-                        secondary={numDeform(unitCost) + (hasUnknown) ? " ± 未設定価格" : ""}
-                        secondaryTypographyProps={{align:"right", color:(hasUnknown) ? "error" : "textPrimary"}}
-                    />
-                </ListItem>
-                <Divider component="li" />
-            </>
+            <TableRow>
+                <TableCell component="th"><Typography>単価</Typography></TableCell>
+                <TableCell align="right">
+                    <Typography color={(hasUnknown) ? "error" : "textPrimary"}>
+                    {numDeform(unitCost)}
+                    {(hasUnknown)
+                        ? " + 未設定価格"
+                        : ""
+                    }
+                    </Typography>
+                </TableCell>
+            </TableRow>
         )
     }
 
@@ -224,34 +239,36 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         setDisplay((! display));
     }
 
-
     return (
-        <>
-            <Accordion
-                expanded={display}
-                onChange={handleAccordionChange}>
-                <AccordionSummary
-                    className={childrenStyles.accordionTitleStyle}
-                    expandIcon={<ExpandMoreIcon />}>
-                    生産概要
-                </AccordionSummary>
-                <AccordionDetails>
-                    <List dense={true} className={classes.listRoot}>
-                        {renderRecipeName()}
-                        {renderCreateCount()}
-                        {renderNeedSkills()}
-                        {renderNeedRecipe()}
-                        {renderMaterialCost()}
-                        {renderByproductRebate()}
-                        {renderSurplusRebate()}
-                        {renderDurabilityRebate()}
-                        {renderResultUnitCost()}
-                    </List>
-                </AccordionDetails>
-
-            </Accordion>
-        </>
-
+        <Accordion
+            expanded={display}
+            onChange={handleAccordionChange}>
+            <AccordionSummary
+                className={childrenStyles.accordionTitleStyle}
+                expandIcon={<ExpandMoreIcon />}
+                >
+                生産概要
+            </AccordionSummary>
+            <AccordionDetails>
+                <TableContainer
+                    component={Paper}
+                    className={classes.TableRoot}>
+                    <Table>
+                        <TableBody>
+                            {renderRecipeName()}
+                            {renderCreateCount()}
+                            {renderNeedSkills()}
+                            {renderNeedRecipe()}
+                            {renderMaterialCost()}
+                            {renderByproductRebate()}
+                            {renderSurplusRebate()}
+                            {renderDurabilityRebate()}
+                            {renderResultUnitCost()}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </AccordionDetails>
+        </Accordion>
     )
 
 }
