@@ -217,7 +217,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
                 {dispSlider()}
                 {renderSliderRadio()}
 
-                <Button variant="outlined" onClick={sendResult}>再計算</Button>
+                <Button onClick={sendResult}>再計算</Button>
             </Box>
         </Dialog>
     )

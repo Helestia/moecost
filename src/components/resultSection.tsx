@@ -42,6 +42,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
 
     const [createNumber, setCreateNumber] = React.useState(0);
     const [surplusCalcRoute,setSurplusCalcRoute] = React.useState<tQtyRole>(undefined);
+
     const [userDictionary,setUserDictionary] = React.useState<iDictionary|undefined>(undefined);
     const [isOpenConfigCreateNumberDialog,setIsOpenConfigCreateNumberDialog] = React.useState(false);
 
@@ -101,39 +102,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         setSurplusCalcRoute(undefined);
         setCreateNumber(0);
         setBeforeSearch(props.searched);
-/*
-        return (
-            <>
-                <ResultSummarySection
-                    isInitialize={true}
-                    recipeName={""}
-                    creations={[]}
-                    materials={[]}
-                    surpluses={[]}
-                    byproducts={[]}
-                    durabilities={[]}
-                    skills={[]}
-                    needRecipe={[]}
-                    useChildrenStyles={useChildrenStyles}
-                    openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
-                <ResultCostSheet
-                    isInitialize={true}
-                    materials={[]}
-                    durabilities={[]}
-                    surpluses={[]}
-                    byproducts={[]}
-                    creations={[]}
-                    useChildrenStyles={useChildrenStyles}
-                    handleItemClick={openConfigItemDialog} />
-                <ResultCreationTree
-                    isInitialize={true}
-                    main={[]}
-                    common={[]}
-                    useChildrenStyles={useChildrenStyles}
-                    handleItemClick={openConfigItemDialog} />
-            </>
-        )
-*/
+
         return null;
     }
 
@@ -169,7 +138,8 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 byproducts={lists.副産物}
                 creations={lists.最終作成物}
                 useChildrenStyles={useChildrenStyles}
-                handleItemClick={openConfigItemDialog} />
+                handleItemClick={openConfigItemDialog}
+                openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
 
             <ResultCreationTree
                 main={treesAndQuantities.main}

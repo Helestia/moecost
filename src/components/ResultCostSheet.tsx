@@ -8,6 +8,7 @@ import Accordion         from '@material-ui/core/Accordion';
 import AccordionSummary  from '@material-ui/core/AccordionSummary';
 import AccordionDetails  from '@material-ui/core/AccordionDetails';
 import Box               from '@material-ui/core/Box'
+import Button            from '@material-ui/core/Button'
 import TableContainer    from '@material-ui/core/TableContainer'
 import Table             from '@material-ui/core/Table';
 import TableHead         from '@material-ui/core/TableHead'
@@ -30,6 +31,9 @@ const useStyles = makeStyles((theme:Theme) =>
         },
         boxRootSeconds: {
             marginTop: theme.spacing(2)
+        },
+        button: {
+            marginTop:theme.spacing(2)
         }
     })
 );
@@ -41,7 +45,8 @@ type tResultCostSheet= {
     surpluses: tSurplus[],
     byproducts: tByproduct[],
     useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
-    handleItemClick: (itemName:string) => void;
+    handleItemClick: (itemName:string) => void,
+    openConfigCreateNumberDialog: () => void
 }
 
 type tReduceResult = {
@@ -576,6 +581,10 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                     {renderTableSurplus()}
                     {renderTableDurability()}
                     {renderTableCreate()}
+                    <Button
+                        variant="outlined"
+                        onClick={props.openConfigCreateNumberDialog}
+                        className={classes.button}>作成個数の変更</Button>
                 </Box>
             </AccordionDetails>
         </Accordion>

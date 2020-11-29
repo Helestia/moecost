@@ -407,7 +407,7 @@ const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
     console.log(JSON.stringify(mainTreeAndCommonTreeD.common))
     // 余剰作成数なしでの最小作成個数算出
     const minimumCreation = calcMinimumQty(mainTreeAndCommonTreeD.main,mainTreeAndCommonTreeD.common);
-
+    console.log(minimumCreation);
     // 作成個数の設定
     const createQuantity = decideCreateQuantity(targets,qtyRole,qty,minimumCreation);
     console.log(JSON.stringify(mainTreeAndCommonTreeD.common));
@@ -743,11 +743,7 @@ type tSplitCommonAndMainRtn = {
 }
 type tSplitCommonAndMain = (main:tTreeNodeD_creation[]) => tSplitCommonAndMainRtn;
 const splitCommonAndMain: tSplitCommonAndMain = (main) => {
-    // 各種初期化処理
-    type tMaterialCount = {
-        アイテム:string,
-        使用回数:number
-    };
+    // === 作成アイテムの使用回数カウント ===
     type tGetMaterialUseCount = (tree:tTreeNodeD) => void;
     const getMaterialUseCount:tGetMaterialUseCount = (node) => {
         if(node.調達方法 !== "作成") return;
@@ -765,14 +761,18 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
             getMaterialUseCount(material);
         });
     }
-    // 作成アイテムの使用回数カウント
-    const materialCount:tMaterialCount[] = [];
+    type tMaterialCount = {
+        アイテム:string,
+        使用回数:number
+    };
+    const materialCount: tMaterialCount[] = [];
     main.forEach(node => getMaterialUseCount(node));
+    const materialCountResult = materialCount.filter(m => m.使用回数 > 1).map(m => m.アイテム);
 
-    // 共通素材の分割処理 
-    type tSplitCommon = (node:tTreeNodeD) => tTreeNodeD;
-    const splitCommon:tSplitCommon = (node) => {
-        const buildCommonTreeNode: (node:tTreeNodeD_creation) => tTreeNodeD_creation = (node) => {
+    // 共通素材の分割処理1. 共通素材のツリーを別に複製
+    type tSplitCommonBuildObj = (node:tTreeNodeD,separated:tTreeNodeD_creation[]) => tTreeNodeD_creation[]
+    const splitCommonBuildObj:tSplitCommonBuildObj = (node,separated) => {
+        const splitCommonBuildNode: (node:tTreeNodeD_creation) => tTreeNodeD_creation = (node) => {
             const resultObj = (node.特殊消費 === "消費") 
                 ? {
                     アイテム名: node.アイテム名,
@@ -811,51 +811,57 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
             if(node.副産物) resultObj.副産物 = node.副産物;
             if(node.備考)   resultObj.備考   = node.備考;
             return resultObj;
-        }
+        }        
 
-        if(node.調達方法 !== "作成") return node;
+        if(node.調達方法 !== "作成") return [];
+        if( materialCountResult.includes(node.アイテム名) &&
+            separated.every(n => n.アイテム名 !== node.アイテム名)) separated.push(splitCommonBuildNode(node));
 
-        const countedObj = materialCount.find(c => c.アイテム === node.アイテム名);
-        if(countedObj && countedObj.使用回数 > 1){
-            if(commonTreeBeforeSort.every(c => c.アイテム名 !== node.アイテム名)) commonTreeBeforeSort.push(buildCommonTreeNode(node));
-
-            if(node.特殊消費 === "消費") return {
-                アイテム名: node.アイテム名,
-                調達方法: "共通素材",
-                特殊消費: "消費",
-                個数: {
-                    上位レシピ要求個数: node.個数.上位レシピ要求個数,
-                    耐久値: {
-                        上位要求: node.個数.耐久値.上位要求,
-                        最大耐久値: node.個数.耐久値.最大耐久値
-                    }
-                }
-            }
-            return {
-                アイテム名: node.アイテム名,
-                調達方法: "共通素材",
-                特殊消費: node.特殊消費,
-                個数: {
-                    上位レシピ要求個数: node.個数.上位レシピ要求個数
-                }
-            }
-        }
-        return splitCommonCreation(node);
+        node.材料.forEach(n => splitCommonBuildObj(n,separated))
+        return separated;
     }
-    type tSplitCommon_creation = (node:tTreeNodeD_creation) => tTreeNodeD_creation
-    const splitCommonCreation:tSplitCommon_creation = (node) => {
-        node.材料 = node.材料.map(material => splitCommon(material));
+    // ===== 分割対象ノードを新配列(common[])に登録
+    const extractCommonTree: tTreeNodeD_creation[] = main.reduce<tTreeNodeD_creation[]>((a,c) => {
+        return splitCommonBuildObj(c,a);
+    },[] as tTreeNodeD_creation[])
+
+    type tSplitCommonReplace_create = (node:tTreeNodeD_creation) => tTreeNodeD_creation;
+    const splitCommonReplace_create:tSplitCommonReplace_create = (node) => {
+        node.材料 = node.材料.map(m => splitCommonReplace(m));
         return node;
     }
-    /**
-     * 分割処理実行有
-     */
-    let commonTreeBeforeSort: tTreeNodeD_creation[] = [];
-    // メインツリーの分割処理
-    const splitedMainTree = main.map(m => splitCommonCreation(m));
-
-    // 共通素材ツリーの分割処理
-    commonTreeBeforeSort = commonTreeBeforeSort.map(m => splitCommonCreation(m))
+    type tSplitCommonReplace = (node:tTreeNodeD) => tTreeNodeD;
+    const splitCommonReplace:tSplitCommonReplace = (node) => {
+        if(node.調達方法 !== "作成") return node;
+        if(materialCountResult.includes(node.アイテム名)) return splitCommonReplace_common(node);
+        return splitCommonReplace_create(node);
+    }
+    type tSplitCommonReplace_common = (node:tTreeNodeD_creation) => tTreeNodeD_common
+    const splitCommonReplace_common:tSplitCommonReplace_common = (node) => {
+        if(node.特殊消費 === "消費") return {
+            アイテム名: node.アイテム名,
+            個数: {
+                上位レシピ要求個数: 0,
+                耐久値:{
+                    上位要求: node.個数.耐久値.上位要求,
+                    最大耐久値: node.個数.耐久値.最大耐久値
+                }
+            },
+            特殊消費: "消費",
+            調達方法: "共通素材"
+        } as tTreeNodeD_common_durable
+        return {
+            アイテム名: node.アイテム名,
+            個数: {
+                上位レシピ要求個数: node.個数.上位レシピ要求個数
+            },
+            特殊消費: node.特殊消費,
+            調達方法: "共通素材"
+        } as tTreeNodeD_common_nonDurable
+    }
+    // 分割対象のノードをcommonノードに置換
+    const resultMian = main.map(m => splitCommonReplace_create(m));
+    const commonTreeBeforeSort = extractCommonTree.map(c => splitCommonReplace_create(c));
 
     type tCanSortCommon = (comon:tTreeNodeD) => boolean;
     const canSortCommon:tCanSortCommon = (common) => {
@@ -867,14 +873,14 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
     const commonTreeSorted:tTreeNodeD_creation[] = [];
     do{
         commonTreeBeforeSort.forEach(cb => {
-            if((commonTreeSorted.length != 0) && commonTreeSorted.some(ca => cb.アイテム名 === ca.アイテム名)) return;
+            if((commonTreeSorted.length !== 0) && commonTreeSorted.some(ca => cb.アイテム名 === ca.アイテム名)) return;
             if(! canSortCommon(cb)) return;
             commonTreeSorted.push(cb);
         });
     } while(commonTreeBeforeSort.length !== commonTreeSorted.length);
 
     return {
-        main:splitedMainTree,
+        main:resultMian,
         common: commonTreeSorted
     }
 }
@@ -980,7 +986,7 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
         // 最小作成コンバイン数合算
         const miniComb = miniCombArray.reduce<number>((acc,cur) => {return acc + cur},0);
         // 計算結果
-        const newCreationNumber = tree.個数.セット作成個数 * CmATdA_lcm / gcd(tree.個数.セット作成個数, CmATdA_lcm)
+        const newCreationNumber = tree.個数.セット作成個数 * CmATdA_lcm / gcd(tree.個数.セット作成個数, miniComb)
         const treeTopResult = gcdCreateAndAmount(newCreationNumber,ProductAmount);
 
         // 下位素材の調査
@@ -1027,20 +1033,22 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
 
     const commonUsage: tCommonUsage[] = [];
     // 各種ツリーのツリー内の作成数等の情報収集
+    console.log("test1");
     const mainTreeData:tTreeData[] = main.map(tree => getMaterialDataParent_main(tree));
+    console.log(commonUsage);
     const commonTreeData:tTreeData[] = commons.concat().reverse().map(tree => getMaterialDataParent_common(tree));
     // 素材調査結果の統合
-    
+    console.log("test2.1")
     const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const materialData_Common = commonTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const concatMandC = materialData_Main.concat(materialData_Common);
-
+    console.log("test2.5")
     // 全要求数の乗算
     const AllAmountProduct = concatMandC.reduce<number>((a,c) => a * c.要求数,1);
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
     const AllCmATdA:number[] = concatMandC.map(d => d.作成数 * AllAmountProduct / d.要求数);
-
+    console.log("test3")
     // 最小作成数
     return lcmArray(AllCmATdA) / AllAmountProduct;
 }
