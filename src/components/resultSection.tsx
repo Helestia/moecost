@@ -1,17 +1,18 @@
 import React from 'react';
-import ResultAlertSection from './resultAlertSection';
-import ResultSummarySection from './resultSummarySection';
-import ResultCostSheet from './ResultCostSheet';
-import ResultCreationTree from './resultCreationTree';
+import ResultAlertSection                   from './resultAlertSection';
+import ResultSummarySection                 from './resultSummarySection';
+import ResultCostSheet                      from './ResultCostSheet';
+import ResultCreationTree                   from './resultCreationTree';
+import ResultConfigCreateNumberDialog       from './resultConfigCreateNumberDialog';
+import ResultConfigItemDialog               from './resultConfigItemDialog';
+import {tSearchSectionRtnFuncProps}         from './searchSection';
 
-import {tSearchSectionRtnFuncProps} from './searchSection';
 import buildTree, {tQtyRole,tQtyRoleResult} from '../scripts/buildTree';
-import confirmMessages from '../scripts/confirmMessages';
-import makeListArrayFromTree from '../scripts/makeListArrayFromTree';
+import confirmMessages                      from '../scripts/confirmMessages';
+import makeListArrayFromTree                from '../scripts/makeListArrayFromTree';
 
-import moecostDb, { iDictionary } from '../scripts/storage';
-import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
-import ResultConfigCreateNumberDialog from './resultConfigCreateNumberDialog';
+import moecostDb, { iDictionary }           from '../scripts/storage';
+import {createStyles, Theme, makeStyles}    from '@material-ui/core/styles';
 
 interface iResultSectionProps {
     searched: tSearchSectionRtnFuncProps
@@ -77,11 +78,8 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
 
     // ====== アイテム情報の表示・変更ダイアログ
     const openConfigItemDialog = (itemName:string) => {
-        /*
         setConfigItemDialogTarget(itemName);
         setIsOpenConfigItemDialog(true);
-        */
-       console.log(itemName);
     }
     // 辞書情報変更
     const changeTriggerItem = () => {
@@ -156,7 +154,12 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 route={treesAndQuantities.qtyRoluResult}
                 close={closeConfigCreateNumberDialog}
                 changeTrigger={changeTriggerCreateNumber} />
-            
+            <ResultConfigItemDialog
+                isOpen={isOpenConfigItemDialog}
+                userDictionary={userDictionary}
+                itemName={configItemDialogTarget}
+                close={closeConfigItemDialog}
+                changeTrigger={changeTriggerItem} />
         </>
     )
 } 

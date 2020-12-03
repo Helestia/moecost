@@ -39,16 +39,11 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
         if (option.レシピ名 === "") return (<div className="suggestion">未選択</div>);
         const reg = new RegExp("^(.*)(" + strValue + ")(.*)$");
         const matches = option.レシピ名.match(reg);
-        const displayLabel = matches ? <>{matches[1]}<b>{matches[2]}</b>{matches[3]}</> : <>{option.レシピ名}</>
-        if(option.シリーズレシピ){
-            return (
-                <div>[セット]{displayLabel}</div>
-            )
-        } else {
-            return (
-                <div>{displayLabel}</div>
-            )
-        }
+        const displayLabel = matches 
+            ? <>{matches[1]}<b>{matches[2]}</b>{matches[3]}</> 
+            : <>{option.レシピ名}</>
+        if(option.シリーズレシピ) return <div>[セット]{displayLabel}</div>
+        return <div>{displayLabel}</div>
     }
     const handleTChange : (e:React.ChangeEvent<HTMLInputElement>) => void = (e) => {
         const setVal = e.target.value
@@ -65,7 +60,7 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
             .replace(")","\\)")
             .replace("^","\\^")
             .replace("$","\\$")
-            .replace("|","\\|")
+            .replace("|","\\|");
         setStrValue(setVal);
         if(setVal.length === 0){
             setValue(defSuggestion);
@@ -89,7 +84,7 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
                     />
             }
             renderOption={renderOptionFunc}
-            onChange={handleChange}/>
+            onChange={handleChange} />
     );
 }
 

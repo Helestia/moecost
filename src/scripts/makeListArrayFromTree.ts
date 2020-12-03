@@ -114,7 +114,7 @@ export type tSkill = {
     スキル値: number
 }
 
-type tMakeListArrayResult = {
+export type tMakeListArrayResult = {
     材料: tMaterial[],
     副産物: tByproduct[],
     余剰作成: tSurplus[],

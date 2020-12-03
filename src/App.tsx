@@ -34,10 +34,17 @@ function App() {
         color: "primary"
       },
       MuiRadio: {
-        color: "primary"
+        color: "primary",
+        size: "small"
       },
       MuiTable: {
         size: (configDisplay?.smallテーブル) ? "small" : "medium"
+      },
+      MuiList:{
+        dense: (configDisplay?.smallテーブル) ? true : false
+      },
+      MuiPaper: {
+        variant: "outlined"
       }
     }
   });

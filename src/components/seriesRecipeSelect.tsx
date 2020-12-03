@@ -90,8 +90,14 @@ export const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
         )
     })
 
-    // 送信ボタンの有効・無効化
-    const isSubmitDurable = itemList.every(item => {return item.checked === false});
+    // 送信ボタンの無効化
+    const isSubmitDurable = (() => {
+        const trueItems = itemList.reduce((a,c) => {
+            if(c.checked) a++;
+            return a;
+        },0)
+        return (trueItems < 2);
+    })();
     return (
         <Card className={classes.cord}>
             <form onSubmit={handleOnSubmit} className={classes.form}>

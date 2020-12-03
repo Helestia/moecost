@@ -111,23 +111,58 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         </Tooltip>
     );
     
-    const renderNeedSkills = () => (
-        <TableRow>
-            <TableCell component="th">
-                <Typography>必要スキル</Typography>
-            </TableCell>
-            <TableCell>{props.skills.map(skill => skill.スキル名 + ":" + (numDeform(skill.スキル値))).join(" / ")}</TableCell>
-        </TableRow>
-    );
+    const renderNeedSkills = () => {
+        const renderText = props.skills.map(skill => skill.スキル名 + ":" + (numDeform(skill.スキル値))).join(" / ");
+        const renderJSX = (() => {
+            if(renderText.length > 20) return (
+                <Typography>
+                    {renderText.split(" / ").map((s,i) => {
+                        if(i === 0) return <>{s}</>
+                        return <><br />{s}</>
+                    })}
+                </Typography>
+            );
+            return (
+                <Typography>{renderText}</Typography>
+            );
+        })();
+
+        return (
+            <TableRow>
+                <TableCell component="th">
+                    <Typography>必要スキル</Typography>
+                </TableCell>
+                <TableCell>{renderJSX}</TableCell>
+            </TableRow>
+        )
+    };
     
     const renderNeedRecipe = () => {
         if(props.needRecipe.length === 0) return null;
+        const needRecipeText = props.needRecipe.join(" / ");
+        const renderJSX = (() => {
+            if(needRecipeText.length > 20) return (
+                <Typography>
+                    {needRecipeText.split(" / ").map((r,i) => {
+                        if(i === 0) return <>{r}</>
+                        return <><br />{r}</>
+                    })}
+                </Typography>
+            );
+            return (
+                <Typography>{needRecipeText}</Typography>
+            );
+        })();
+
+
+
+
         return (
             <TableRow>
                 <TableCell component="th">
                     <Typography>必要レシピ</Typography>
                 </TableCell>
-                <TableCell>{props.needRecipe.join(" / ")}</TableCell>
+                <TableCell>{renderJSX}</TableCell>
             </TableRow>
         );
     }
@@ -264,7 +299,6 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
             </AccordionDetails>
         </Accordion>
     )
-
 }
 
 export default ResultSummarySection;

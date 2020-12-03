@@ -371,7 +371,7 @@ type t特殊消費 = "消費" | "消失" | "失敗時消失" | "未消費"
 export type tQtyRole = "surplus" | "fully" | undefined
 export type tQtyRoleResult = "surplus" | "fully";
 
-type tBuildTreeResult = {
+export type tBuildTreeResult = {
     main:tTreeNode_creation[],
     common:tTreeNode_creation[],
     qtyRoluResult: tQtyRoleResult,
