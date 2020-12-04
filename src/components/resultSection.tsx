@@ -50,6 +50,9 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
     const [isOpenConfigItemDialog,setIsOpenConfigItemDialog] = React.useState(false);
     const [configItemDialogTarget,setConfigItemDialogTarget] = React.useState("");
 
+    const [notTargetForByproduct,setNotTargetForByproduct] = React.useState<string[]>([]);
+    const [notTargetForSurplus,setNotTargetForSurplus] = React.useState<string[]>([]);
+
     // 空入力時
     if(props.searched === undefined){
         if(beforeSearch !== undefined){
@@ -57,6 +60,21 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         }
         return null;
     }
+
+    const handleNotTarget_Surpluses = (targets:string[]) => {
+        setNotTargetForSurplus(targets);
+    }
+
+    const handleNotTarget_Byproducts = (targets:string[]) => {
+        setNotTargetForByproduct(targets);
+    }
+
+
+
+
+
+
+
 
     // 以下、ダイアログ対応
     
@@ -100,19 +118,20 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         setSurplusCalcRoute(undefined);
         setCreateNumber(0);
         setBeforeSearch(props.searched);
+        setNotTargetForByproduct([]);
+        setNotTargetForSurplus([]);
 
         return null;
     }
 
     // 生産ツリー構築
     const treesAndQuantities = buildTree(props.searched, userDictionary, surplusCalcRoute, createNumber);
-    console.log(treesAndQuantities);
     if(treesAndQuantities.message.length !== 0) return (
         <ResultAlertSection messages={treesAndQuantities.message} />
     );
     const messages = confirmMessages(treesAndQuantities.main, treesAndQuantities.common, createNumber);
     
-    const lists = makeListArrayFromTree(treesAndQuantities.main, treesAndQuantities.common);
+    const lists = makeListArrayFromTree(treesAndQuantities.main, treesAndQuantities.common, notTargetForByproduct, notTargetForSurplus);
 
     return (
         <>
@@ -126,6 +145,8 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 durabilities={lists.耐久消費}
                 skills={lists.スキル}
                 needRecipe={lists.要レシピ}
+                changeNotTargetByproducts={handleNotTarget_Byproducts}
+                changeNotTargetSurpluses={handleNotTarget_Surpluses}
                 useChildrenStyles={useChildrenStyles}
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
 
@@ -135,6 +156,8 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 surpluses={lists.余剰作成}
                 byproducts={lists.副産物}
                 creations={lists.最終作成物}
+                changeNotTargetByproducts={handleNotTarget_Byproducts}
+                changeNotTargetSurpluses={handleNotTarget_Surpluses}
                 useChildrenStyles={useChildrenStyles}
                 handleItemClick={openConfigItemDialog}
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />

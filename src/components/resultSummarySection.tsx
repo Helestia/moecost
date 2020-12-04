@@ -28,6 +28,9 @@ const useStyles = makeStyles({
     TableRoot: {
         width: "100%",
         maxWidth: "550px"
+    },
+    strikeOut: {
+        textDecorationLine: "line-through"
     }
 })
 
@@ -40,7 +43,9 @@ type tResultSummarySectionProps = {
     byproducts: tByproduct[],
     durabilities: tDurability[],
     skills: tSkill[],
-    needRecipe: string[]
+    needRecipe: string[],
+    changeNotTargetSurpluses : (newItems:string[]) => void,
+    changeNotTargetByproducts : (newItems:string[]) => void,
     useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
     openConfigCreateNumberDialog: () => void
 }
@@ -58,6 +63,18 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         money:0,
         hasUnknown:false
     }
+
+    type tDataHasStrike = {
+        hasStrike: boolean,
+        nonStrike: tData,
+        Strike: tData
+    }
+    const initialDataHasStrike = {
+        hasStrike: false,
+        nonStrike: cloneObj_JSON(initialData),
+        strike: cloneObj_JSON(initialData)
+    }
+
     // 材料費合計
     const materialData = props.materials.reduce((a,c) => {
         if(c.調達方法 === "未設定") a.hasUnknown = true;
@@ -67,17 +84,31 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
 
     // 副産物合計
     const byproductData = props.byproducts.reduce((a,c) => {
-        if(c.価格設定有) a.money += c.合計金額;
-        else a.hasUnknown = true;
+        if(c.計算対象外) a.hasStrike = true;
+        if(c.価格設定有) {
+            a.nonStrike.money += c.合計金額;
+            if(! c.計算対象外) a.strike.money += c.合計金額;
+        }
+        else {
+            a.nonStrike.hasUnknown = true;
+            if(! c.計算対象外) a.strike.hasUnknown = true;
+        }
         return a;
-    }, cloneObj_JSON(initialData));
+    }, cloneObj_JSON(initialDataHasStrike));
 
     // 余剰作成品合計
     const surplusData = props.surpluses.reduce((a,c) => {
-        if(c.未設定含) a.hasUnknown = true;
-        a.money += c.余り合計金額;
+        if(c.計算対象外) a.hasStrike = true;
+        if(c.余り合計金額) {
+            a.nonStrike.money += c.余り合計金額;
+            if(! c.計算対象外) a.strike.money += c.余り合計金額;
+        }
+        if(c.未設定含) {
+            a.nonStrike.hasUnknown = true;
+            if(! c.計算対象外) a.strike.hasUnknown = true;
+        }
         return a;
-    }, cloneObj_JSON(initialData));
+    }, cloneObj_JSON(initialDataHasStrike));
 
     // 耐久消費素材の残価値
     const durabilityData = props.durabilities.reduce((a,c) => {
@@ -86,6 +117,25 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         if(c.調達方法 !== "未設定") a.money += c.合計価格 - c.耐久割金額;
         return a;
     }, cloneObj_JSON(initialData));
+
+    const handleAccordionChange = () => {
+        setDisplay((! display));
+    }
+
+    const handleToggleNotTargetSurplus = () => {
+        const testAllTrue  = props.surpluses.every(s => s.計算対象外 === true);
+        if(testAllTrue) props.changeNotTargetSurpluses([]);
+        else props.changeNotTargetSurpluses(props.surpluses.map(s => s.アイテム名));
+    }
+
+    const handleToggleNotTargetByproduct = () => {
+        const testAllTrue  = props.byproducts.every(s => s.計算対象外 === true);
+        if(testAllTrue) props.changeNotTargetByproducts([]);
+        else props.changeNotTargetByproducts(props.byproducts.map(s => s.アイテム名));
+    }
+
+
+
 
     const renderRecipeName = () => (
         <TableRow>
@@ -154,9 +204,6 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
             );
         })();
 
-
-
-
         return (
             <TableRow>
                 <TableCell component="th">
@@ -191,14 +238,27 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                 <TableCell component="th">
                     <Typography>副産物価格</Typography>
                 </TableCell>
-                <TableCell align="right">
-                        <Typography color={(byproductData.hasUnknown) ? "error" : "textPrimary"}>
-                        {numDeform(byproductData.money)}
-                        {(byproductData.hasUnknown)
-                            ? " + 未設定価格" 
-                            : ""
-                        }
+                <TableCell
+                    align="right"
+                    onClick={handleToggleNotTargetByproduct}
+                    className={childrenStyles.activeStrings}>
+                    {(byproductData.hasStrike)
+                        ? <Typography
+                            color={(byproductData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
+                            className={classes.strikeOut}>
+                            {(byproductData.nonStrike.hasUnknown)
+                                ? numDeform(byproductData.nonStrike.money) + " + 未設定価格"
+                                : numDeform(byproductData.nonStrike.money)}
                         </Typography>
+                        : null
+                    }
+                    <Typography
+                        color={(byproductData.strike.hasUnknown) ? "error" : "textPrimary"}>
+                        {(byproductData.strike.hasUnknown)
+                            ? numDeform(byproductData.strike.money) + " + 未設定価格"
+                            : numDeform(byproductData.strike.money)
+                        }
+                    </Typography>
                 </TableCell>
             </TableRow>
         );
@@ -211,12 +271,25 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                 <TableCell component="th">
                     <Typography>余剰生産価格</Typography>
                 </TableCell>
-                <TableCell align="right">
-                    <Typography color={(surplusData.hasUnknown) ? "error" : "textPrimary"}>
-                        {numDeform(surplusData.money)}
-                        {(surplusData.hasUnknown)
-                            ? " + 未設定価格"
-                            : ""
+                <TableCell
+                    align="right"
+                    onClick={handleToggleNotTargetSurplus}
+                    className={childrenStyles.activeStrings}>
+                    {(surplusData.hasStrike)
+                        ? <Typography
+                            color={(surplusData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
+                            className={classes.strikeOut}>
+                            {(surplusData.nonStrike.hasUnknown)
+                                ? numDeform(surplusData.nonStrike.money) + " ± 未設定価格"
+                                : numDeform(surplusData.nonStrike.money)
+                            }
+                        </Typography>
+                        : null
+                    }
+                    <Typography color={(surplusData.strike.hasUnknown) ? "error" : "textPrimary"}>
+                        {(surplusData.strike.hasUnknown)
+                            ? numDeform(surplusData.strike.money) + " ± 未設定価格"
+                            : numDeform(surplusData.strike.money)
                         }
                     </Typography>
                 </TableCell>
@@ -245,8 +318,8 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     }
 
     const renderResultUnitCost = () => {
-        const hasUnknown = materialData.hasUnknown || byproductData.hasUnknown || surplusData.hasUnknown || durabilityData.hasUnknown;
-        const totalCost  = materialData.money - byproductData.money - surplusData.money - durabilityData.money;
+        const hasUnknown = materialData.hasUnknown || byproductData.strike.hasUnknown || surplusData.strike.hasUnknown || durabilityData.hasUnknown;
+        const totalCost  = materialData.money - byproductData.strike.money - surplusData.strike.money - durabilityData.money;
         const unitCost = totalCost / props.creations[0].作成個数;
         return (
             <TableRow>
@@ -262,10 +335,6 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                 </TableCell>
             </TableRow>
         )
-    }
-
-    const handleAccordionChange = () => {
-        setDisplay((! display));
     }
 
     return (

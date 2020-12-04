@@ -619,7 +619,7 @@ const RetrieveItemData_Recipe = (itemName:string, dictionary:iDictionary | undef
     const propBuildTrees = recipeAll.map(r => {return {レシピ名:r.レシピ名, 生成アイテム:[r.生成物.アイテム]}})
     
     const buildTreeResults = propBuildTrees.map(p => buildTree(p,dictionary,"fully",0));
-    const lists = buildTreeResults.map(tree => makeListArrayFromTree(tree.main, tree.common));
+    const lists = buildTreeResults.map(tree => makeListArrayFromTree(tree.main, tree.common, [], []));
     
     const result: tRetrieveItemData_RecipeResult[] = [];
     for(let i=0;i<recipeAll.length;i++){

@@ -37,14 +37,16 @@ export type tSurplus  = {
     余り個数: number,
     単価: number,
     余り合計金額: number,
-    未設定含: boolean
+    未設定含: boolean,
+    計算対象外: boolean
 }
 
 export type tByproduct = tByproduct_nonSetCost | tByproduct_setCost;
 type tByproduct_nonSetCost = {
     アイテム名: string,
     作成個数: number,
-    価格設定有: false
+    価格設定有: false,
+    計算対象外: boolean
 }
 
 type tByproduct_setCost = {
@@ -52,7 +54,8 @@ type tByproduct_setCost = {
     作成個数: number,
     価格設定有: true,
     設定単価: number,
-    合計金額: number
+    合計金額: number,
+    計算対象外: boolean
 }
 
 export type tCreation = {
@@ -137,7 +140,9 @@ type tReCallResult = {
 
 type tMakeListArrayFromTree = (
     main: tTreeNode_creation[],
-    common: tTreeNode_creation[]
+    common: tTreeNode_creation[],
+    notTargetForByproduct: string[],
+    notTargetForSurplus: string[]
 ) => tMakeListArrayResult
 
 const reCallResultDefault:tReCallResult = {
@@ -145,7 +150,7 @@ const reCallResultDefault:tReCallResult = {
     未設定含: false
 }
 
-const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
+const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, notTargetForByproduct, notTargetForSurplus) => {
     const materials:tMaterial[]          = [];
     const byproducts:tByproduct[]        = [];
     const surpluses:tSurplus[]           = [];
@@ -202,16 +207,19 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
                     作成個数: b.作成個数,
                     価格設定有: true,
                     設定単価: b.原価.設定原価,
-                    合計金額: b.原価.合計価格
+                    合計金額: b.原価.合計価格,
+                    計算対象外: notTargetForByproduct.includes(b.アイテム名)
                 });
                 else byproducts.push({
                     アイテム名: b.アイテム名,
                     作成個数: b.作成個数,
-                    価格設定有: false
+                    価格設定有: false,
+                    計算対象外: notTargetForByproduct.includes(b.アイテム名)
                 });
             });
 
             return node.副産物.reduce((acc,cur) => {
+                if(notTargetForByproduct.includes(cur.アイテム名)) return acc;
                 if(cur.原価) acc.価格 += cur.原価.設定原価;
                 else acc.未設定含 = true;
                 return acc;
@@ -232,8 +240,10 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main,common) => {
                 余り個数: node.個数.余剰作成個数,
                 単価: unitCost,
                 余り合計金額: surplusCost,
-                未設定含: isIncludeUnknown
+                未設定含: isIncludeUnknown,
+                計算対象外: (notTargetForSurplus.includes(node.アイテム名))
             });
+            if(notTargetForSurplus.includes(node.アイテム名)) return cloneObj_JSON(reCallResultDefault);
             return {
                 価格: surplusCost,
                 未設定含: isIncludeUnknown
