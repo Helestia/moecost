@@ -2,7 +2,6 @@ import React from 'react';
 
 import ResultItemNameCell   from './resultItemNameCell'
 
-
 import moecostDb            from '../scripts/storage';
 import {numDeform}          from '../scripts/common';
 import {
@@ -11,20 +10,20 @@ import {
     tTreeNode_common,
     tTreeNode_npc,
     tTreeNode_unknown,
-    tTreeNode_user} from '../scripts/buildTree'
+    tTreeNode_user}         from '../scripts/buildTree';
 
-import Accordion         from '@material-ui/core/Accordion';
-import AccordionSummary  from '@material-ui/core/AccordionSummary';
-import AccordionDetails  from '@material-ui/core/AccordionDetails';
+import Accordion            from '@material-ui/core/Accordion';
+import AccordionSummary     from '@material-ui/core/AccordionSummary';
+import AccordionDetails     from '@material-ui/core/AccordionDetails';
 
-import TableContainer    from '@material-ui/core/TableContainer'
-import Table             from '@material-ui/core/Table';
-import TableBody         from '@material-ui/core/TableBody';
-import TableRow          from '@material-ui/core/TableRow';
-import Box               from '@material-ui/core/Box'
-import Paper             from '@material-ui/core/Paper';
-import ExpandMoreIcon    from '@material-ui/icons/ExpandMore';
-import Typography        from '@material-ui/core/Typography'
+import TableContainer       from '@material-ui/core/TableContainer'
+import Table                from '@material-ui/core/Table';
+import TableBody            from '@material-ui/core/TableBody';
+import TableRow             from '@material-ui/core/TableRow';
+import Box                  from '@material-ui/core/Box'
+import Paper                from '@material-ui/core/Paper';
+import ExpandMoreIcon       from '@material-ui/icons/ExpandMore';
+import Typography           from '@material-ui/core/Typography'
 import {
     makeStyles,
     createStyles,
@@ -54,23 +53,17 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 }));
 
 type tResultCreationTree = {
+    isExpanded: boolean,
     main: tTreeNode_creation[],
     common: tTreeNode_creation[],
+    handleExpand: () => void,
     handleItemClick: (str:string) => void,
     useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>
 }
 
 const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
-    const [display,setDisplay] = React.useState( (! moecostDb.表示設定.初期非表示設定.生産ツリー));
     const childrenStyles = props.useChildrenStyles();
     const classes = useStyles(useTheme());
-
-
-
-    // アコーディオンのオープン/クローズ
-    const handleAccordionChange = () => {
-        setDisplay((! display));
-    }
 
     // テーブルセルクリックのハンドル
     const handleItemCellClick = (str:string) => {props.handleItemClick(str)};
@@ -100,10 +93,12 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
     );
     
     const renderTable = (nodeArray:tBuildTableObjElement[][],prefix:string,index:number) => (
-        <Box className={classes.box}>
+        <Box
+            className={classes.box}
+            key={prefix + "_" + index}
+        >
             <TableContainer
                 component={Paper}
-                key={prefix + "_" + index}
                 className={classes.tableContainer}>
                 <Table className={classes.tableClass}>
                     <TableBody>
@@ -130,24 +125,31 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
     }
     
     const renderTableCellCreation = (node:tTreeNodeT_creation, key:string) => {
-        const skill = <Typography variant="caption" color="textSecondary">[ {node.スキル.map(s => s.スキル名 + ":" + numDeform(s.スキル値)).join(", ")}]</Typography>;
-        const technique = <Typography variant="body2" color="textPrimary">{node.テクニック}</Typography>;
+        const appConfig = moecostDb.アプリ設定.表示設定.ツリー表示内容.生産
+        const skill = (appConfig.スキル)
+            ? <Typography variant="caption" color="textSecondary">[ {node.スキル.map(s => s.スキル名 + ":" + numDeform(s.スキル値)).join(", ")}]</Typography>
+            : null;
+        const technique = (appConfig.テクニック)
+            ? <Typography variant="body2" color="textPrimary">{node.テクニック}</Typography>
+            : null;
         const itemName = <Typography variant="body1" noWrap={true} display="inline">{node.アイテム名}</Typography>
         const creationNumber = (node.個数.作成個数 === 1) 
             ? null
             : <Typography variant="body1" noWrap={true} display="inline">  &times; {numDeform(node.個数.作成個数)}</Typography>;
-        const lostDurability = (node.特殊消費 === "消費") 
+        const lostDurability = (appConfig.消費耐久 && node.特殊消費 === "消費") 
             ? <Typography variant="body2">消費耐久: {numDeform(node.個数.耐久値.消費耐久合計)}</Typography>
             : null
         const specialUsage = (() => {
+            if(! appConfig.特殊消費) return null;
             if(node.特殊消費 === "失敗時消失") return <Typography variant="body2">※作成失敗時消失</Typography>
             if(node.特殊消費 === "未消費") return <Typography variant="body2">※未消費</Typography>
             return null;
         })();
-        const surplus = (node.個数.余剰作成個数)
+        const surplus = (appConfig.余剰個数 && node.個数.余剰作成個数)
             ? <Typography variant="body2">余り: {numDeform(node.個数.余剰作成個数)}</Typography>
             : null
         const byproduct = (() => {
+            if(! appConfig.副産物) return null;
             if(! node.副産物) return null;
             const results = node.副産物.map((b,i) => {
                 const countObj = (b.作成個数 !== 1)
@@ -163,15 +165,16 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
                 )}</Typography>;
         })();
         const createRemarks = (() => {
+            if(! appConfig.作成時備考) return null;
             if(node.ギャンブル && node.ペナルティ) return <Typography variant="body2">ギャンブル・ペナルティ</Typography>
             if(node.ギャンブル) return <Typography variant="body2">ギャンブル配置</Typography>
             if(node.ペナルティ) return <Typography variant="body2">ペナルティ型</Typography>
             return null
         })();
-        const requireRecipes = (node.要レシピ)
+        const requireRecipes = (appConfig.要レシピ && node.要レシピ)
             ? <Typography variant="body2">要レシピ</Typography>
             : null;
-        const remarks = (typeof node.備考 === "string")
+        const remarks = (appConfig.備考 && (typeof node.備考 === "string"))
             ? <Typography variant="body2">※{node.備考}</Typography>
             : null;
         return (
@@ -199,6 +202,12 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
         )
     }
     const renderTableCellOtherCreation = (node:tTreeNodeT_common | tTreeNodeT_user | tTreeNodeT_npc | tTreeNodeT_unknown, key:string) => {
+        const appConfig = (() => {
+            if(node.調達方法 === "NPC") return moecostDb.アプリ設定.表示設定.ツリー表示内容.NPC;
+            if(node.調達方法 === "共通素材") return moecostDb.アプリ設定.表示設定.ツリー表示内容.共通素材;
+            if(node.調達方法 === "自力調達") return moecostDb.アプリ設定.表示設定.ツリー表示内容.自力調達;
+            return moecostDb.アプリ設定.表示設定.ツリー表示内容.未設定;
+        })();
         const itemName = <Typography variant="body1" noWrap={true} display="inline">{node.アイテム名}</Typography>
         const creationNumber = (() => {
             if(node.調達方法 === "NPC"      && node.個数.調達個数 !== 1) return <Typography variant="body1" noWrap={true} display="inline"> &times; {numDeform(node.個数.調達個数)}</Typography>;
@@ -207,15 +216,17 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
             if(node.調達方法 === "共通素材" && node.個数.消費個数 !== 1) return <Typography variant="body1" noWrap={true} display="inline"> &times; {numDeform(node.個数.消費個数)}</Typography>;
             return null;
         })();
-        const lostDurability = (node.特殊消費 === "消費")
+        const lostDurability = (appConfig.消費耐久 && node.特殊消費 === "消費")
             ? <Typography variant="body2">消費耐久: {numDeform(node.個数.耐久値.消費耐久合計)}</Typography>
             : null;
         const specialUsage = (() => {
+            if(! appConfig.特殊消費) return null;
             if(node.特殊消費 === "失敗時消失") return <Typography variant="body2">※作成失敗時消失</Typography>
             if(node.特殊消費 === "未消費") return <Typography variant="body2">※未消費</Typography>
             return null;
         })();
         const costs = (() => {
+            if(("価格" in appConfig) && (! appConfig.価格)) return null;
             if(node.調達方法 === "NPC" || node.調達方法 === "自力調達"){
                 const unit = (node.個数.調達個数 !== 1)
                     ? <>(@{numDeform(node.価格.調達単価)})</>
@@ -225,6 +236,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
             return null;
         })();
         const message = (() => {
+            if(("メッセージ" in appConfig) && (! appConfig.メッセージ)) return null;
             if(node.調達方法 === "共通素材") return <Typography variant="body2">共通素材で作成</Typography>
             if(node.調達方法 === "未設定")   return <Typography variant="body2">【注意】入手手段不明</Typography>
             return null;
@@ -251,8 +263,8 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
 
     return (
         <Accordion
-            expanded={display}
-            onChange={handleAccordionChange}>
+            expanded={props.isExpanded}
+            onChange={props.handleExpand}>
             <AccordionSummary
                 className={childrenStyles.accordionTitleStyle}
                 expandIcon={<ExpandMoreIcon />}>
@@ -359,7 +371,6 @@ type tBuildTbleObj = (main:tTreeNode_creation[],common:tTreeNode_creation[]) => 
 
 const buildTableObj:tBuildTbleObj = (main,common) => {
 
-    console.log(common);
     // table全体のcolsを計測
     const measureDepth : (node: tTreeNode,depth:number) => number = (node, depth) => {
         if(node.調達方法 !== "作成") return depth + 1;

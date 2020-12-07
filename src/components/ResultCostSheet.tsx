@@ -1,7 +1,6 @@
 import React from 'react';
 import ResultItemNameCell from './resultItemNameCell';
-import { tMaterial, tByproduct, tDurability, tSurplus, tCreation } from '../scripts/makeListArrayFromTree'
-import moecostDb from '../scripts/storage';
+import { tMaterial, tByproduct, tDurability, tSurplus, tCreation } from '../scripts/makeListArrayFromTree';
 import {numDeform, cloneObj_JSON} from '../scripts/common';
 
 import Accordion         from '@material-ui/core/Accordion';
@@ -48,11 +47,13 @@ const useStyles = makeStyles((theme:Theme) =>
 );
 
 type tResultCostSheet= {
+    isExpanded: boolean,
     creations: tCreation[],
     materials: tMaterial[],
     durabilities: tDurability[],
     surpluses: tSurplus[],
     byproducts: tByproduct[],
+    handleExpand: () => void,
     changeNotTargetSurpluses : (newItems:string[]) => void,
     changeNotTargetByproducts : (newItems:string[]) => void,
     useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
@@ -70,14 +71,8 @@ const reduceResultDefault: tReduceResult = {
 }
 
 const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
-    const [display,setDisplay] = React.useState( (! moecostDb.表示設定.初期非表示設定.原価表));
     const childrenStyles = props.useChildrenStyles();
     const classes = useStyles(useTheme());
-
-    // アコーディオンのオープン/クローズ
-    const handleAccordionChange = () => {
-        setDisplay((! display));
-    }
 
     // アイテム名クリック
     const handleItemNameClick = (str:string) => {props.handleItemClick(str)};
@@ -185,7 +180,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                 <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
                                 {materialTotal.hasUnknown 
                                     ? <TableCell align="right"><Typography color="error">{numDeform(materialTotal.money) + "+ α"}</Typography></TableCell>
-                                    : <TableCell align="right">{numDeform(materialTotal.money)}</TableCell>
+                                    : <TableCell align="right"><Typography>{numDeform(materialTotal.money)}</Typography></TableCell>
                                 }
                             </TableRow>
                         </TableFooter>
@@ -663,8 +658,8 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
 
     return (
         <Accordion
-            expanded={display}
-            onChange={handleAccordionChange}>
+            expanded={props.isExpanded}
+            onChange={props.handleExpand}>
             <AccordionSummary
                 className={childrenStyles.accordionTitleStyle}
                 expandIcon={<ExpandMoreIcon />}>

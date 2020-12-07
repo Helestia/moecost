@@ -7,7 +7,6 @@ import {
     tSurplus,
     tSkill
 } from '../scripts/makeListArrayFromTree'
-import moecostDb from '../scripts/storage';
 import {numDeform, cloneObj_JSON} from '../scripts/common';
 
 import Accordion         from '@material-ui/core/Accordion';
@@ -36,6 +35,7 @@ const useStyles = makeStyles({
 
  
 type tResultSummarySectionProps = {
+    isExpanded: boolean,
     recipeName: string,
     creations: tCreation[],
     materials: tMaterial[],
@@ -44,13 +44,13 @@ type tResultSummarySectionProps = {
     durabilities: tDurability[],
     skills: tSkill[],
     needRecipe: string[],
+    handleExpand: () => void,
     changeNotTargetSurpluses : (newItems:string[]) => void,
     changeNotTargetByproducts : (newItems:string[]) => void,
     useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
     openConfigCreateNumberDialog: () => void
 }
 const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
-    const [display,setDisplay] = React.useState( (! moecostDb.表示設定.初期非表示設定.概要));
     const classes = useStyles();
     const childrenStyles = props.useChildrenStyles();
 
@@ -117,10 +117,6 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         if(c.調達方法 !== "未設定") a.money += c.合計価格 - c.耐久割金額;
         return a;
     }, cloneObj_JSON(initialData));
-
-    const handleAccordionChange = () => {
-        setDisplay((! display));
-    }
 
     const handleToggleNotTargetSurplus = () => {
         const testAllTrue  = props.surpluses.every(s => s.計算対象外 === true);
@@ -234,14 +230,14 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const renderByproductRebate = () => {
         if(props.byproducts.length === 0) return null;
         return (
-            <TableRow>
+            <TableRow
+                onClick={handleToggleNotTargetByproduct}
+                className={childrenStyles.activeStrings}>
                 <TableCell component="th">
                     <Typography>副産物価格</Typography>
                 </TableCell>
                 <TableCell
-                    align="right"
-                    onClick={handleToggleNotTargetByproduct}
-                    className={childrenStyles.activeStrings}>
+                    align="right">
                     {(byproductData.hasStrike)
                         ? <Typography
                             color={(byproductData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
@@ -267,14 +263,14 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const renderSurplusRebate = () => {
         if(props.surpluses.length === 0) return null;
         return (
-            <TableRow>
+            <TableRow
+                onClick={handleToggleNotTargetSurplus}
+                className={childrenStyles.activeStrings}>
                 <TableCell component="th">
                     <Typography>余剰生産価格</Typography>
                 </TableCell>
                 <TableCell
-                    align="right"
-                    onClick={handleToggleNotTargetSurplus}
-                    className={childrenStyles.activeStrings}>
+                    align="right">
                     {(surplusData.hasStrike)
                         ? <Typography
                             color={(surplusData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
@@ -339,8 +335,8 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
 
     return (
         <Accordion
-            expanded={display}
-            onChange={handleAccordionChange}>
+            expanded={props.isExpanded}
+            onChange={props.handleExpand}>
             <AccordionSummary
                 className={childrenStyles.accordionTitleStyle}
                 expandIcon={<ExpandMoreIcon />}

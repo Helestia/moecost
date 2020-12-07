@@ -20,7 +20,7 @@ import ForumIcon from '@material-ui/icons/Forum';
 export interface iMenuDrower {
     isMenuOpened: boolean,
     closeMenu: () => void,
-    changeDisplayConfig : () => Promise<void>
+    changeDisplayConfig : () => void
 }
 
 const MenuDrower:React.FC<iMenuDrower> = (props) => {
@@ -126,7 +126,7 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
 
 
 export interface iTopBar {
-    changeDisplayConfig : () => Promise<void>
+    changeDisplayConfig : () => void
 }
 const TopBar: React.FC<iTopBar> = (props) => {
     const [isMenuOpened,setIsMenuOpened] = React.useState(false);

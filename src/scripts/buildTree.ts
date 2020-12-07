@@ -399,26 +399,18 @@ const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
 
     // メインツリー構築
     const mainTreeD = buildMainTree(targets,dictionary);
-
-    console.log("buildTree mainTreeD complete");
-
     // 共通中間素材を別ツリーに切りだし
     const mainTreeAndCommonTreeD = splitCommonAndMain(mainTreeD);
-    console.log(JSON.stringify(mainTreeAndCommonTreeD.common))
     // 余剰作成数なしでの最小作成個数算出
     const minimumCreation = calcMinimumQty(mainTreeAndCommonTreeD.main,mainTreeAndCommonTreeD.common);
-    console.log(minimumCreation);
     // 作成個数の設定
     const createQuantity = decideCreateQuantity(targets,qtyRole,qty,minimumCreation);
-    console.log(JSON.stringify(mainTreeAndCommonTreeD.common));
     // ツリーに個数設定
     const mainTreeAndCommonTree = setQuantityToTree(
         mainTreeAndCommonTreeD.main,
         mainTreeAndCommonTreeD.common,
         createQuantity.qty
     );
-
-    console.log(JSON.stringify(mainTreeAndCommonTree.common));
 
     return {
         main: mainTreeAndCommonTree.main,
@@ -947,7 +939,7 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     }
 
     const gcdCreateAndAmount = (create:number,amount:number) => {
-        const gcdResult = gcd(create, amount);
+        const gcdResult = gcd(create, amount);        
         return {
             作成数: create / gcdResult,
             要求数: amount / gcdResult
@@ -1033,22 +1025,17 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
 
     const commonUsage: tCommonUsage[] = [];
     // 各種ツリーのツリー内の作成数等の情報収集
-    console.log("test1");
     const mainTreeData:tTreeData[] = main.map(tree => getMaterialDataParent_main(tree));
-    console.log(commonUsage);
     const commonTreeData:tTreeData[] = commons.concat().reverse().map(tree => getMaterialDataParent_common(tree));
     // 素材調査結果の統合
-    console.log("test2.1")
     const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const materialData_Common = commonTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const concatMandC = materialData_Main.concat(materialData_Common);
-    console.log("test2.5")
     // 全要求数の乗算
     const AllAmountProduct = concatMandC.reduce<number>((a,c) => a * c.要求数,1);
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
     const AllCmATdA:number[] = concatMandC.map(d => d.作成数 * AllAmountProduct / d.要求数);
-    console.log("test3")
     // 最小作成数
     return lcmArray(AllCmATdA) / AllAmountProduct;
 }
@@ -1391,8 +1378,6 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
             if(commonObj.最大耐久値) return commonObj.要求個数 + Math.ceil(commonObj.要求耐久値 / commonObj.最大耐久値);
             return commonObj.要求個数;
         })();
-        console.log(tree.アイテム名 + " : " + orderQuantity);
-        console.log(tree);
         return setQuantityToNode_create(tree, orderQuantity);
     }).reverse();
     return {

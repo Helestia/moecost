@@ -5,14 +5,16 @@ import {numDeform}                          from '../scripts/common';
 import makeListArrayFromTree,
     {tMakeListArrayResult}                  from '../scripts/makeListArrayFromTree';
 import {
-    CanStackItems,
-    Durabilities,
     MultiRecipesDefault,
     NpcSaleItems,
     Recipes,
     tJSON_recipe,
     tJSON_npcSaleItem} from '../scripts/jsonReader';
-import { iDictionary } from '../scripts/storage';
+import moecostDb,{ 
+    iDictionary, 
+    tDictionary_ItemInfo_user,
+    tDictionary_ItemInfo_npc,
+    tDictionary_ItemInfo_creation} from '../scripts/storage';
 
 import AppBar                   from '@material-ui/core/AppBar';
 import Box                      from '@material-ui/core/Box'
@@ -108,18 +110,18 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                 if(dictObj){
                     if(dictObj.調達方法 === "NPC") return {調達方法:"NPC", ユーザー価格:0};
                     if(dictObj.調達方法 === "生産") return {調達方法:"生産_" + dictObj.レシピ名, ユーザー価格:0};
-                    return {調達方法:"自力調達", ユーザー価格:dictObj.調達価格};;
+                    return {調達方法:"自力調達", ユーザー価格:dictObj.調達価格};
                 };
             }
             const npcObj = NpcSaleItems.find(n => n.アイテム === props.itemName);
             if(npcObj) return {調達方法:"NPC", ユーザー価格:0};
-            const recipeObj = Recipes.filter(r => r.レシピ名 === props.itemName);
+            const recipeObj = Recipes.filter(r => r.生成物.アイテム === props.itemName);
             if(recipeObj.length > 1){
                 const multi = MultiRecipesDefault.find(m => m.アイテム名 === props.itemName);
-                if(multi) return {調達方法:"生産_" + multi.標準レシピ名 , ユーザー価格:0}
-                return {調達方法:"生産_" + recipeObj[0].レシピ名 , ユーザー価格:0}
+                if(multi) return {調達方法:"生産_" + multi.標準レシピ名 , ユーザー価格:0};
+                return {調達方法:"生産_" + recipeObj[0].レシピ名 , ユーザー価格:0};
             }
-            if(recipeObj.length === 1) return {調達方法:"生産_" + recipeObj[0].レシピ名 , ユーザー価格:0}
+            if(recipeObj.length === 1) return {調達方法:"生産_" + recipeObj[0].レシピ名 , ユーザー価格:0};
             return {調達方法:"" , ユーザー価格:0};
         })();
         setRadioSelected(defConf.調達方法);
@@ -127,8 +129,9 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
 
         setBefOpen(true);
     }
-
-
+    if(befOpen && (! props.isOpen)){
+        setBefOpen(false);
+    }
 
     const recipes = RetrieveItemData_Recipe(props.itemName, props.userDictionary)
     const npcs = RetrieveItemData_Npc(props.itemName);
@@ -138,7 +141,6 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
 
     // ダイアログクローズ
     const closeDialog = () => {
-        setBefOpen(false);
         props.close();
     }
 
@@ -148,6 +150,38 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
 
     const handleUserCost = (num:number) => setUserCostValue(num);
 
+    // 登録情報の最新化
+    const handleSubmit = () => {
+        moecostDb.refleshProperties(submitItemData);
+    }
+
+    // 登録情報の修正
+    const submitItemData = () => {
+        const resultObj = (() => {
+            if(radioSelected === "自力調達") return {
+                アイテム: props.itemName,
+                調達方法: "自力調達",
+                調達価格: userCostValue
+            } as tDictionary_ItemInfo_user
+            if(radioSelected === "NPC") return {
+                アイテム: props.itemName,
+                調達方法: "NPC"
+            } as tDictionary_ItemInfo_npc
+            const recipeName = radioSelected.replace("生産_","")
+            return {
+                アイテム: props.itemName,
+                調達方法: "生産",
+                レシピ名: recipeName
+            } as tDictionary_ItemInfo_creation
+        })();
+        const dictionaryObj = moecostDb.辞書.内容.filter(d => d.アイテム !== props.itemName).concat(resultObj);
+        const newDictionary:iDictionary = {
+            辞書名: moecostDb.辞書.辞書名,
+            内容: dictionaryObj
+        }
+        moecostDb.registerDictionary(newDictionary);
+        props.changeTrigger();
+    }
 
     return (
         <Dialog
@@ -195,6 +229,7 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                         userCost={userCostValue}
                         handleRadio={handleRadio}
                         handleUserCost={handleUserCost}
+                        handleSubmit={submitItemData}
                     />
                     <RenderNpc
                         tabSelected={(tabSelected === "npc")}
@@ -208,7 +243,13 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                     />
                 </DialogContent>
                 <DialogActions className={classes.dialogAction}>
-                    <Button color="primary" variant="contained" disabled={tabSelected !== "summary"}>登録</Button>
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        disabled={tabSelected !== "summary"}
+                        onClick={handleSubmit}>
+                        登録
+                    </Button>
                 </DialogActions>
             </Box>
         </Dialog>
@@ -221,9 +262,10 @@ type tRenderSummaryProps = {
     recipes: tRetrieveItemData_RecipeResult[],
     npcs: tJSON_npcSaleItem | undefined,
     procurement: string,
-    userCost: number
-    handleRadio:    (str:string) => void
-    handleUserCost: (num:number) => void
+    userCost: number,
+    handleRadio:    (str:string) => void,
+    handleUserCost: (num:number) => void,
+    handleSubmit: () => void
 }
 const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
     const classes = useStyles();
@@ -392,6 +434,7 @@ const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
                             label="単価"
                             disabled={props.procurement !== "自力調達"}
                             size="small"
+                            value={props.userCost}
                             onClick={handleClickUserTextField}
                             onChange={handleUserCost}
                             className={classes.userCostInput}
@@ -403,17 +446,24 @@ const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
                 </ListItemSecondaryAction>
             </ListItem>
         );
+
+        const handleSubmit = (e:React.FormEvent<HTMLFormElement>) => {
+            props.handleSubmit();
+            e.preventDefault();
+        }
         return (
             <TableRow>
                 <TableCell>調達方法</TableCell>
                 <TableCell>
-                    <RadioGroup value={props.procurement} onChange={handleChangeRadio}>
-                        <List dense>
-                            {npc}
-                            {create}
-                            {user}
-                        </List>
-                    </RadioGroup>
+                    <form onSubmit={handleSubmit} autoComplete="off">
+                        <RadioGroup value={props.procurement} onChange={handleChangeRadio}>
+                            <List dense>
+                                {npc}
+                                {create}
+                                {user}
+                            </List>
+                        </RadioGroup>
+                    </form>
                 </TableCell>
             </TableRow>
         )
@@ -544,11 +594,6 @@ const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
             </TableRow>
         )
     }
-
-
-
-
-
 
     return (
         <>

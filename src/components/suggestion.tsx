@@ -1,6 +1,9 @@
-import React from 'react'
-import AutoComplete from '@material-ui/lab/Autocomplete'
-import TextField from '@material-ui/core/TextField'
+import React from 'react';
+import AutoComplete, {createFilterOptions} from '@material-ui/lab/Autocomplete';
+import TextField from '@material-ui/core/TextField';
+import { Typography } from '@material-ui/core';
+import moecostDb from '../scripts/storage';
+import {numDeform} from '../scripts/common'
 
 // suggestion情報
 export type tSuggestion = {
@@ -24,6 +27,16 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
     const [strValue,setStrValue] = React.useState("");
 
     const allSuggestions = [defSuggestion].concat(props.allSuggestions);
+
+    const helperText = (moecostDb.アプリ設定.表示設定.検索候補表示数 === 0)
+        ? <>現在の設定上、検索候補数の上限なしです。<br />動作が重い場合はアプリメニューから候補数を絞ってください。</>
+        : <>現在の設定上、{numDeform(moecostDb.アプリ設定.表示設定.検索候補表示数)}件でレシピ検索を終了します。<br />左上のメニューのアプリ設定から変更が可能です。</>
+
+    const filterOptions = createFilterOptions<tSuggestion>({
+        limit: (moecostDb.アプリ設定.表示設定.検索候補表示数 === 0)
+            ? undefined
+            : moecostDb.アプリ設定.表示設定.検索候補表示数
+    });
 
     const handleChange : (e:React.ChangeEvent<{}>,val:tSuggestion|null) => void = (e,val) => {
         if(val === null){
@@ -72,8 +85,16 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
             id="searchRecipe"
             value={value}
             options={allSuggestions}
+            filterOptions={filterOptions}
             getOptionSelected={(option,value) => {return (option.レシピ名 === value.レシピ名)}}
             getOptionLabel={(option)=>option.レシピ名}
+            clearOnEscape={true}
+            noOptionsText={
+                <>
+                    <Typography>レシピが見つかりませんでした。</Typography>
+                    <Typography>入力内容を減らしてみてください。</Typography>
+                </>
+            }
             renderInput={(p) =>
                 <TextField {...p} 
                     name="serchRecipeField"
@@ -81,6 +102,7 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
                     style={{width:"450px",marginTop:"10px"}}
                     label="レシピ検索"
                     variant="outlined"
+                    helperText={helperText}
                     />
             }
             renderOption={renderOptionFunc}

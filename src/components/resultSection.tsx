@@ -53,6 +53,10 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
     const [notTargetForByproduct,setNotTargetForByproduct] = React.useState<string[]>([]);
     const [notTargetForSurplus,setNotTargetForSurplus] = React.useState<string[]>([]);
 
+    const [isExpandedSummary,setIsExpandedSummary] = React.useState(false);
+    const [isExpandedCostSheet,setIsExpandedCostSheet] = React.useState(false);
+    const [isExpandedCreationTree,setIsExpandedCreationTree] = React.useState(false);
+
     // 空入力時
     if(props.searched === undefined){
         if(beforeSearch !== undefined){
@@ -69,15 +73,12 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         setNotTargetForByproduct(targets);
     }
 
+    // アコーディオンの開閉処理
+    const handleExpandSummary      = () => setIsExpandedSummary(! isExpandedSummary);
+    const handleExpandCostSheet    = () => setIsExpandedCostSheet(! isExpandedCostSheet);
+    const handleExpandCreationTree = () => setIsExpandedCreationTree(! isExpandedCreationTree)
 
-
-
-
-
-
-
-    // 以下、ダイアログ対応
-    
+    // 以下、ダイアログ対応    
     // ====== 作成数変更ダイアログ
     const openConfigCreateNumberDialog = () => {
         setIsOpenConfigCreateNumberDialog(true);
@@ -120,6 +121,9 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         setBeforeSearch(props.searched);
         setNotTargetForByproduct([]);
         setNotTargetForSurplus([]);
+        setIsExpandedSummary(moecostDb.アプリ設定.表示設定.初期表示設定.概要);
+        setIsExpandedCostSheet(moecostDb.アプリ設定.表示設定.初期表示設定.原価表);
+        setIsExpandedCreationTree(moecostDb.アプリ設定.表示設定.初期表示設定.生産ツリー);
 
         return null;
     }
@@ -137,6 +141,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
         <>
             <ResultAlertSection messages={messages} />
             <ResultSummarySection
+                isExpanded={isExpandedSummary}
                 recipeName={props.searched.レシピ名}
                 creations={lists.最終作成物}
                 materials={lists.材料}
@@ -145,17 +150,20 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 durabilities={lists.耐久消費}
                 skills={lists.スキル}
                 needRecipe={lists.要レシピ}
+                handleExpand={handleExpandSummary}
                 changeNotTargetByproducts={handleNotTarget_Byproducts}
                 changeNotTargetSurpluses={handleNotTarget_Surpluses}
                 useChildrenStyles={useChildrenStyles}
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
 
             <ResultCostSheet
+                isExpanded={isExpandedCostSheet}
                 materials={lists.材料}
                 durabilities={lists.耐久消費}
                 surpluses={lists.余剰作成}
                 byproducts={lists.副産物}
                 creations={lists.最終作成物}
+                handleExpand={handleExpandCostSheet}
                 changeNotTargetByproducts={handleNotTarget_Byproducts}
                 changeNotTargetSurpluses={handleNotTarget_Surpluses}
                 useChildrenStyles={useChildrenStyles}
@@ -163,8 +171,10 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 openConfigCreateNumberDialog={openConfigCreateNumberDialog} />
 
             <ResultCreationTree
+                isExpanded={isExpandedCreationTree}
                 main={treesAndQuantities.main}
                 common={treesAndQuantities.common}
+                handleExpand={handleExpandCreationTree}
                 useChildrenStyles={useChildrenStyles}
                 handleItemClick={openConfigItemDialog}
             />
