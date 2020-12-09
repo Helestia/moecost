@@ -59,82 +59,63 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
 
     // 空入力時
     if(props.searched === undefined){
-        if(beforeSearch !== undefined){
-            setBeforeSearch(undefined);
-        }
+        if(beforeSearch !== undefined) setBeforeSearch(undefined);
         return null;
     }
 
-    const handleNotTarget_Surpluses = (targets:string[]) => {
-        setNotTargetForSurplus(targets);
-    }
-
-    const handleNotTarget_Byproducts = (targets:string[]) => {
-        setNotTargetForByproduct(targets);
-    }
-
-    // アコーディオンの開閉処理
-    const handleExpandSummary      = () => setIsExpandedSummary(! isExpandedSummary);
-    const handleExpandCostSheet    = () => setIsExpandedCostSheet(! isExpandedCostSheet);
-    const handleExpandCreationTree = () => setIsExpandedCreationTree(! isExpandedCreationTree)
-
-    // 以下、ダイアログ対応    
-    // ====== 作成数変更ダイアログ
-    const openConfigCreateNumberDialog = () => {
-        setIsOpenConfigCreateNumberDialog(true);
-    }
-
-    // 回答受信
-    const changeTriggerCreateNumber = (number:number, route:tQtyRoleResult) => {
-        setCreateNumber(number);
-        setSurplusCalcRoute(route);
-        setIsOpenConfigCreateNumberDialog(false);
-    }
-    // 閉じるだけ
-    const closeConfigCreateNumberDialog = () => {
-        setIsOpenConfigCreateNumberDialog(false);
-    }
-
-    // ====== アイテム情報の表示・変更ダイアログ
-    const openConfigItemDialog = (itemName:string) => {
-        setConfigItemDialogTarget(itemName);
-        setIsOpenConfigItemDialog(true);
-    }
-    // 辞書情報変更
-    const changeTriggerItem = () => {
-        setUserDictionary(moecostDb.辞書);
-        setIsOpenConfigItemDialog(false);
-    }
-
-    // 閉じるだけ
-    const closeConfigItemDialog = () => {
-        setConfigItemDialogTarget("");
-        setIsOpenConfigItemDialog(false);
-    }
-
     // 初期設定
-    // レシピ入力時は初期設定後に再度実行する
     if(JSON.stringify(props.searched) !== JSON.stringify(beforeSearch)){
         setUserDictionary(moecostDb.辞書);
         setSurplusCalcRoute(undefined);
         setCreateNumber(0);
-        setBeforeSearch(props.searched);
         setNotTargetForByproduct([]);
         setNotTargetForSurplus([]);
         setIsExpandedSummary(moecostDb.アプリ設定.表示設定.初期表示設定.概要);
         setIsExpandedCostSheet(moecostDb.アプリ設定.表示設定.初期表示設定.原価表);
         setIsExpandedCreationTree(moecostDb.アプリ設定.表示設定.初期表示設定.生産ツリー);
 
+        setBeforeSearch(props.searched);
         return null;
     }
 
+    const handleNotTarget_Surpluses  = (targets:string[]) => setNotTargetForSurplus(targets);
+    const handleNotTarget_Byproducts = (targets:string[]) => setNotTargetForByproduct(targets);
+
+    const handleExpandSummary      = () => setIsExpandedSummary(! isExpandedSummary);
+    const handleExpandCostSheet    = () => setIsExpandedCostSheet(! isExpandedCostSheet);
+    const handleExpandCreationTree = () => setIsExpandedCreationTree(! isExpandedCreationTree)
+
+    // 以下、ダイアログ対応
+    // ====== 作成数変更ダイアログ
+    const openConfigCreateNumberDialog = () => setIsOpenConfigCreateNumberDialog(true);
+
+    const changeTriggerCreateNumber = (number:number, route:tQtyRoleResult) => {
+        setCreateNumber(number);
+        setSurplusCalcRoute(route);
+    }
+
+    const closeConfigCreateNumberDialog = () => setIsOpenConfigCreateNumberDialog(false);
+
+    // ====== アイテム情報の表示・変更ダイアログ
+    const openConfigItemDialog = (itemName:string) => {
+        setConfigItemDialogTarget(itemName);
+        setIsOpenConfigItemDialog(true);
+    }
+    const changeTriggerItem = () => setUserDictionary(moecostDb.辞書);
+
+    const closeConfigItemDialog = () => setIsOpenConfigItemDialog(false);
+
+
     // 生産ツリー構築
-    const treesAndQuantities = buildTree(props.searched, userDictionary, surplusCalcRoute, createNumber);
-    if(treesAndQuantities.message.length !== 0) return (
+    const treesAndQuantities = buildTree(props.searched, surplusCalcRoute, createNumber);
+    if(treesAndQuantities.message.length !== 0) 
+        // ツリー生成中のメッセージ発生は強制終了。
+        return (
         <ResultAlertSection messages={treesAndQuantities.message} />
     );
+
     const messages = confirmMessages(treesAndQuantities.main, treesAndQuantities.common, createNumber);
-    
+     
     const lists = makeListArrayFromTree(treesAndQuantities.main, treesAndQuantities.common, notTargetForByproduct, notTargetForSurplus);
 
     return (

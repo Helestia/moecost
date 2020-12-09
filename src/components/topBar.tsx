@@ -25,7 +25,7 @@ export interface iMenuDrower {
 
 const MenuDrower:React.FC<iMenuDrower> = (props) => {
     const [isOpenConfigDisplay,setIsOpenConfigDisplay] = React.useState(false);
-    const [isOpenConfigDictionary,setIsOpenConfigDictionary] = React.useState(false);
+//    const [isOpenConfigDictionary,setIsOpenConfigDictionary] = React.useState(false);
 
     const [isOpenDispChangeLog,setIsOpenDispChangeLog] = React.useState(false);
 
@@ -71,7 +71,7 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
                 <List>
                     <ListItem button onClick={handleConfigDisplay}>
                         <SettingIcon />
-                        表示設定
+                        アプリ設定
                     </ListItem>
                     <ListItem button disabled onClick={handleConfigDictionary}>
                         <LocalLibraryIcon />

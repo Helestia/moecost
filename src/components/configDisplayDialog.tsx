@@ -17,7 +17,6 @@ import Typography    from '@material-ui/core/Typography';
 import List          from '@material-ui/core/List';
 import ListItem      from '@material-ui/core/ListItem';
 import ListItemText  from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
 
 import Paper         from '@material-ui/core/Paper';
 import Switch        from '@material-ui/core/Switch';
@@ -293,7 +292,7 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
                             />
                             <Tab
                                 value="dispTree"
-                                label={<>ツリー<br />非表示設定</>}
+                                label={<>ツリー<br />表示設定</>}
                             />
                             <Tab
                                 value="calc"
@@ -349,13 +348,11 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
                 <DialogActions>
                     <Button
                         color="default"
-                        variant="contained"
                         onClick={props.close}>
                         キャンセル
                     </Button>
                     <Button
                         color="primary"
-                        variant="contained"
                         onClick={handleSubmit}>
                         設定完了
                     </Button>

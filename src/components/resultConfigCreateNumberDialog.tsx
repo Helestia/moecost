@@ -6,6 +6,8 @@ import Box                      from '@material-ui/core/Box';
 import Button                   from '@material-ui/core/Button'
 import Dialog                   from '@material-ui/core/Dialog';
 import DialogTitle              from '@material-ui/core/DialogTitle';
+import DialogContent            from '@material-ui/core/DialogContent';
+import DialogActions            from '@material-ui/core/DialogActions'
 import TextField                from '@material-ui/core/TextField';
 import Slider                   from '@material-ui/core/Slider';
 import FormControlLabel         from '@material-ui/core/FormControlLabel';
@@ -16,8 +18,10 @@ import {createStyles, Theme, makeStyles} from '@material-ui/core/styles'
 
 const useClasses = makeStyles((theme:Theme)=> 
     createStyles({
-        root:{
-            padding:"2%"
+        dialogRoot: {
+            maxHeight:"80vh",
+            display:"flex",
+            flexDirection:"column"
         },
         slider: {
             width:"95%",
@@ -79,15 +83,17 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
         else setSliderMaxState(0);
 
         setBefOpen(true);
+        return null;
+    }
+
+    if(befOpen && (! props.isOpen)){
+        setBefOpen(false);
     }
 
     // ダイアログクローズ
-    const closeDialog = () => {
-        setBefOpen(false);
-        props.close();
-    }
+    const closeDialog = () => props.close();
 
-    // 結果送信&ダイアログクローズ
+    // 結果送信 & ダイアログクローズ
     const sendResult = () => {
         props.changeTrigger(number,route);
         closeDialog();
@@ -108,23 +114,16 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
     }
 
     const handleNumberSlider = (e:React.ChangeEvent<{}>, value:number| number[]) => {
-        if(typeof value === "number"){
-            setNumber(value);
-        } else {
-            setNumber(value[0]);
-        }
+        if(typeof value === "number") setNumber(value);
+        else setNumber(value[0]);
     }
 
     const handleChangeSliderRadio = (num:number) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
-        console.log(checked);
-        console.log(num);
         if(! checked) return;
 
         if(num === 0) setSliderMaxState(number);
         else setSliderMaxState(num);
-        if(num < number && num !== 0){
-            setNumber(num);
-        }
+        if(num < number && num !== 0) setNumber(num);
     }
 
     const handleChangeRoute = (route:tQtyRoleResult) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
@@ -132,7 +131,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
     }
 
     // スライダーに変数が多いので、専用関数を作成
-    const dispSlider = () => {
+    const renderSlider = () => {
         const createMarks = (n:number) => {
             return [
                 {
@@ -179,7 +178,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
     const renderSliderRadio = () => {
         return (
             <RadioGroup>
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" flexWrap="wrap">
                 {
                     sliderOptions.map(n => 
                         <FormControlLabel
@@ -201,23 +200,27 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
             onClose={closeDialog}
             fullWidth
             maxWidth="lg">
-            <Box component="div" className={classes.root}>
+            <Box component="div" className={classes.dialogRoot}>
                 <DialogTitle>作成個数変更</DialogTitle>
-                <FormLabel>余剰アイテムの対応</FormLabel>
-                <RadioGroup name="surplus">
-                    <Box display="flex">
-                        <FormControlLabel control={<Radio onChange={handleChangeRoute("surplus")} />} value="surplus" checked={route === "surplus"} label="余剰生産有" />
-                        <FormControlLabel control={<Radio onChange={handleChangeRoute("fully")} />} value="fully" checked={route === "fully"} label={"作り切り(" + numDeform(props.minimumNumber) + "セットずつ)"} />
+                <DialogContent>
+                    <FormLabel>余剰アイテムの対応</FormLabel>
+                    <RadioGroup name="surplus">
+                        <Box display="flex" flexWrap="wrpa">
+                            <FormControlLabel control={<Radio onChange={handleChangeRoute("surplus")} />} value="surplus" checked={route === "surplus"} label="余剰生産有" />
+                            <FormControlLabel control={<Radio onChange={handleChangeRoute("fully")} />} value="fully" checked={route === "fully"} label={"作り切り(" + numDeform(props.minimumNumber) + "セットずつ)"} />
+                        </Box>
+                    </RadioGroup>
+                    <Box>
+                        <FormLabel>作成個数指定</FormLabel>
                     </Box>
-                </RadioGroup>
-                <Box>
-                    <FormLabel>作成個数指定</FormLabel>
-                </Box>
-                <TextField type="number" onChange={handleNumberInputChange} onBlur={handleNumberInputBlur} label="作成個数直接指定" size="small" margin="dense" value={number} />
-                {dispSlider()}
-                {renderSliderRadio()}
-
-                <Button onClick={sendResult} variant="contained" color="primary">再計算</Button>
+                    <TextField type="number" onChange={handleNumberInputChange} onBlur={handleNumberInputBlur} label="作成個数直接指定" size="small" margin="dense" value={number} />
+                    {renderSlider()}
+                    {renderSliderRadio()}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDialog} color="default">キャンセル</Button>
+                    <Button onClick={sendResult} color="primary">再計算</Button>
+                </DialogActions>
             </Box>
         </Dialog>
     )

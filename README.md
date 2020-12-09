@@ -1,44 +1,54 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# もえこすと　試作版
 
-## Available Scripts
+これはオンラインゲーム [Master of Epic](https://moepic.com/) の生産者支援用Webツールです。
 
-In the project directory, you can run:
+主に生産品の原価計算や素材数計算を主目的としていますが、それ以外の機能拡張も予定しています。
 
-### `npm start`
+# 実行場所
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+下記urlにアクセスすることで利用できます。
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+http://moecost.starfree.jp
 
-### `npm test`
+# 特徴
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- (おそらく)全レシピ網羅
+  - [moecoop-data](https://github.com/coop-mojo/moecoop-data)様のデータを加工し、独自にレシピを追加しています。
+    - データ加工については、別リポジトリ [moecost-jsonconv](https://github.com/Helestia/moecost-jsonconv)で行っています。
+- 生産品を作るための生産品(中間生産品)対応済
+- ツリー表示による視覚的な生産経路の表示
+- 各素材に独自単価を登録可能
+  - indexedDbによりブラウザに保存するようにしており、一度登録した内容は削除するまで保存されます。
 
-### `npm run build`
+# 使用ライブラリ等
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- React v16.13.1
+- Material-ui v4.11
+  - Material-ui/lab v4.11.0-arpha
+  - Material-ui/icons v4.9
+- Dexie v3.0.2
+- TypeScript v3.7.5
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+# 使用データ
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- [moecoop-data](https://github.com/coop-mojo/moecoop-data)
+  - [moecost-jsonConv](https://github.com/Helestia/moecost-jsonconv)による加工データを利用。
 
-### `npm run eject`
+# 開発環境の構築
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+$ git clone https://github.com/Helestia/moecost.git
+$ cd moecost
+$ npm start
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# 以降の開発予定
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- indexedDbのバックアップ・別ブラウザへの移植処理の作成
+- ベンダー管理機能の実装
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# ライセンス
 
-## Learn More
+MITライセンスとします。
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).

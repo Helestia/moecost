@@ -1,5 +1,5 @@
 import {tSearchSectionRtnFuncProps} from '../components/searchSection';
-import {iDictionary} from './storage';
+import moecostDb from './storage';
 import {cloneObj_JSON} from './common'
 import {
     CanStackItems,
@@ -7,7 +7,8 @@ import {
     MultiRecipesDefault,
     NpcSaleItems,
     Recipes,
-    tJSON_recipe} from './jsonReader';
+    tJSON_recipe,
+    tJSON_npcSaleItem} from './jsonReader';
 
 export type tMessage = {
     重大度: "error" | "warning" | "info" | "success"
@@ -381,11 +382,10 @@ export type tBuildTreeResult = {
 }
 type tBuildTree = (
     targets:tSearchSectionRtnFuncProps,
-    dictionary:iDictionary | undefined,
     qtyRole: tQtyRole,
     qty: number
 ) => tBuildTreeResult;
-const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
+const buildTree : tBuildTree = (targets, qtyRole, qty) => {
     // エラー有無確認処理
     const ErrorObj = handleError(targets,qty);
     if(ErrorObj) return {
@@ -397,8 +397,11 @@ const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
         fullyMinimumQuantity: 0
     } as tBuildTreeResult
 
+    // npc販売情報取得(アプリ設定によってwarのみのアイテム除外)
+    const NpcUseObj = buildNpcUseObj();
+
     // メインツリー構築
-    const mainTreeD = buildMainTree(targets,dictionary);
+    const mainTreeD = buildMainTree(targets,NpcUseObj);
     // 共通中間素材を別ツリーに切りだし
     const mainTreeAndCommonTreeD = splitCommonAndMain(mainTreeD);
     // 余剰作成数なしでの最小作成個数算出
@@ -421,6 +424,16 @@ const buildTree : tBuildTree = (targets, dictionary, qtyRole, qty) => {
         fullyMinimumQuantity: minimumCreation
     }
 }
+
+const buildNpcUseObj:() => tJSON_npcSaleItem[] = () => {
+    const isUseWar = moecostDb.アプリ設定.その他設定.War販売物使用;
+    if(isUseWar) return NpcSaleItems;
+    return NpcSaleItems.filter(items => items.販売情報.some(npc => npc.時代 !== "War Age"));
+}
+
+
+
+
 
 type tHandleError = (targets:tSearchSectionRtnFuncProps, qty:number) => null | tMessage;
 const handleError:tHandleError = (targets, qty) => {
@@ -463,33 +476,30 @@ const handleError:tHandleError = (targets, qty) => {
 }
 
 
-type tBuildMainTree = (targets:tSearchSectionRtnFuncProps,dictionary:iDictionary | undefined) => tTreeNodeD_creation[]
-const buildMainTree:tBuildMainTree = (targets,dictionary) => {
+type tBuildMainTree = (targets:tSearchSectionRtnFuncProps,npcUseObj:tJSON_npcSaleItem[]) => tTreeNodeD_creation[]
+const buildMainTree:tBuildMainTree = (targets,npcUseObj) => {
     // 再起呼び出し部（レシピ登録時に材料をキーに呼び出す）
     type tReCall = (targetName:string,qty:number,sc:t特殊消費,created:string[]) => tTreeNodeD;
     const reCall:tReCall = (targetName, qty, sc, created) => {
-        // ユーザー指定確認
-        if(dictionary){
-            const userMethod = dictionary.内容.find(d => d.アイテム === targetName);
-            if(userMethod){
-                if(userMethod.調達方法 === "NPC"){
-                    const npcSaleInfo = NpcSaleItems.find(i => i.アイテム === targetName);
-                    if(npcSaleInfo){
-                        return fNpc(targetName, qty, sc, npcSaleInfo.最低販売価格);
-                    }
-                } else if(userMethod.調達方法 === "生産"){
-                    const recipe = Recipes.find(r => r.レシピ名 === userMethod.レシピ名);
-                    if(recipe){
-                        return fCreationOrUnknown(targetName, qty, sc, created, recipe);
-                    }
-                } else if(userMethod.調達方法 === "自力調達"){
-                    return fUser(targetName, qty, sc, userMethod.調達価格)
+        const userMethod = moecostDb.辞書.内容.find(d => d.アイテム === targetName);
+        if(userMethod){
+            if(userMethod.調達方法 === "NPC"){
+                const npcSaleInfo = npcUseObj.find(i => i.アイテム === targetName);
+                if(npcSaleInfo){
+                    return fNpc(targetName, qty, sc, npcSaleInfo.最低販売価格);
                 }
+            } else if(userMethod.調達方法 === "生産"){
+                const recipe = Recipes.find(r => r.レシピ名 === userMethod.レシピ名);
+                if(recipe){
+                    return fCreationOrUnknown(targetName, qty, sc, created, recipe);
+                }
+            } else if(userMethod.調達方法 === "自力調達"){
+                return fUser(targetName, qty, sc, userMethod.調達価格)
             }
         }
 
         // NPC存在有無確認
-        const npcSaleInfo = NpcSaleItems.find(i => i.アイテム === targetName);
+        const npcSaleInfo = npcUseObj.find(i => i.アイテム === targetName);
         if(npcSaleInfo){
             return fNpc(targetName, qty, sc, npcSaleInfo.最低販売価格);
         }
@@ -584,8 +594,7 @@ const buildMainTree:tBuildMainTree = (targets,dictionary) => {
             rtnFCreation.副産物 = recipe.副産物.map(b => {
                 // 単価設定判別
                 const price = (() => {
-                    if(! dictionary) return null;
-                    const obj = dictionary.内容.find(i => i.アイテム === b.アイテム);
+                    const obj = moecostDb.辞書.内容.find(i => i.アイテム === b.アイテム);
                     if(! obj) return null;
                     if(obj.調達方法 !== "自力調達") return null;
                     return obj.調達価格;

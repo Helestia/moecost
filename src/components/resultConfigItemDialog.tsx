@@ -41,7 +41,6 @@ import Typography               from '@material-ui/core/Typography';
 import List                     from '@material-ui/core/List';
 import ListItem                 from '@material-ui/core/ListItem';
 import ListItemText             from '@material-ui/core/ListItemText';
-import ListItemIcon             from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction  from '@material-ui/core/ListItemSecondaryAction';
 
 
@@ -181,6 +180,7 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
         }
         moecostDb.registerDictionary(newDictionary);
         props.changeTrigger();
+        props.close();
     }
 
     return (
@@ -244,8 +244,13 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                 </DialogContent>
                 <DialogActions className={classes.dialogAction}>
                     <Button
+                        color="default"
+                        onClick={closeDialog}
+                    >
+                        キャンセル
+                    </Button>
+                    <Button
                         color="primary"
-                        variant="contained"
                         disabled={tabSelected !== "summary"}
                         onClick={handleSubmit}>
                         登録
@@ -364,7 +369,7 @@ const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
                 <ListItem>
                     <ListItemText primary={
                         <FormControlRabel
-                            control={<Radio />}
+                            control={<Radio size="small" />}
                             label={<Typography>NPC購入</Typography>}
                             value="NPC"
                             checked={props.procurement === "NPC"}
@@ -385,7 +390,7 @@ const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
                                 <ListItemText
                                     primary={
                                     <FormControlRabel
-                                        control={<Radio />}
+                                        control={<Radio size="small" />}
                                         label={<Typography>生産 - {r.レシピ.レシピ名}</Typography>}
                                         value={valueName}
                                         checked={props.procurement === valueName}
@@ -405,7 +410,7 @@ const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
                     <ListItemText
                         primary={
                             <FormControlRabel
-                                control={<Radio />}
+                                control={<Radio size="small" />}
                                 label={<Typography>生産作成</Typography>}
                                 value={valueName}
                                 checked={props.procurement === valueName}
@@ -422,8 +427,8 @@ const RenderSummary:React.FC<tRenderSummaryProps> = (props) => {
                 <ListItemText
                     primary={
                         <FormControlRabel
-                            control={<Radio />}
-                            label={<Typography>単価設定</Typography>}
+                            control={<Radio size="small" />}
+                            label={<Typography>自力調達(単価指定)</Typography>}
                             value="自力調達"
                             checked={props.procurement === "自力調達"}
                         />
@@ -663,7 +668,7 @@ const RetrieveItemData_Recipe = (itemName:string, dictionary:iDictionary | undef
     const recipeAll = Recipes.filter(r => r.生成物.アイテム === itemName);
     const propBuildTrees = recipeAll.map(r => {return {レシピ名:r.レシピ名, 生成アイテム:[r.生成物.アイテム]}})
     
-    const buildTreeResults = propBuildTrees.map(p => buildTree(p,dictionary,"fully",0));
+    const buildTreeResults = propBuildTrees.map(p => buildTree(p,"fully",0));
     const lists = buildTreeResults.map(tree => makeListArrayFromTree(tree.main, tree.common, [], []));
     
     const result: tRetrieveItemData_RecipeResult[] = [];
