@@ -14,11 +14,17 @@ function App() {
   const [searched, setSearched] = React.useState<tSearchSectionRtnFuncProps>(undefined);
   const theme = createMuiTheme({
     palette : {
-      type : (configDisplay.表示設定.ダークモード) ? "dark" : "light"
+      type : (configDisplay.表示設定.ダークモード) ? "dark" : "light",
+      primary:{
+        main: (configDisplay.表示設定.ダークモード) ? "#78f" : "#34b",
+        light:(configDisplay.表示設定.ダークモード) ? "#9af" : "#56d",
+        dark: (configDisplay.表示設定.ダークモード) ? "#56d" : "#12a",
+      }
     },
     typography : {
-      fontSize: 14
+      fontSize: 14,
     },
+
     props:{
       MuiTextField: {
         variant: "outlined"

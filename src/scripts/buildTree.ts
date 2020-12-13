@@ -1,6 +1,5 @@
 import {tSearchSectionRtnFuncProps} from '../components/searchSection';
 import moecostDb from './storage';
-import {cloneObj_JSON} from './common'
 import {
     CanStackItems,
     Durabilities,
@@ -890,6 +889,7 @@ type iCalcMinimumCreationNumber = (main:tTreeNodeD_creation[],commons:tTreeNodeD
 const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     // 素材情報
     type tMaterialData = {
+        アイテム: string,
         作成数:number,
         要求数: number
     }
@@ -907,13 +907,9 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     type tGetMaterialData = (
         tree:tTreeNodeD,
         multipleCreationSet:number,
-        multipleAmountNumber:number,
-        md: tMaterialData[]) => tMaterialData[];
-    const getMaterialData:tGetMaterialData = (node,multipleCreationSet,multipleAmountNumber,md) => {
-        if(node.調達方法 === "NPC" || node.調達方法 === "未設定" || node.調達方法 === "自力調達"){
-            return md;
-        }
-        if(node.調達方法 === "共通素材"){        
+        multipleAmountNumber:number) => tMaterialData[];
+    const getMaterialData:tGetMaterialData = (node,multipleCreationSet,multipleAmountNumber) => {
+        if(node.調達方法 === "共通素材"){
             const orderQuantity = multipleAmountNumber * node.個数.上位レシピ要求個数;
             const commonObj = (() => {
                 const obj = commonUsage.find(c => node.アイテム名 === c.アイテム名);
@@ -925,43 +921,35 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
                 commonUsage.push(pushobj);
                 return pushobj;
             })();
-            commonObj.使用状況.push(gcdCreateAndAmount(multipleCreationSet, orderQuantity));
-            return md;
+            commonObj.使用状況.push(gcdCreateAndAmount(multipleCreationSet, orderQuantity,node.アイテム名));
+            return [];
         }
         if(node.調達方法 === "作成"){            
             const orderQuantity = node.特殊消費 === "消費" ? multipleAmountNumber : multipleAmountNumber * node.個数.上位レシピ要求個数;
             const newCreationNumber = multipleCreationSet * node.個数.セット作成個数;
-            const pushObj = gcdCreateAndAmount(newCreationNumber, orderQuantity);
-            let resultObj:tMaterialData[] = cloneObj_JSON(md);
-            resultObj.push(pushObj);
-            node.材料.forEach(m => {
-                resultObj = getMaterialData(
-                    m,
-                    pushObj.作成数,
-                    pushObj.要求数,
-                    resultObj);
-            });
-            return resultObj;
+            const thisResult = gcdCreateAndAmount(newCreationNumber, orderQuantity,node.アイテム名);
+            const materialResult = node.材料.map(m => getMaterialData(m, thisResult.作成数, thisResult.要求数)).flat();
+            return [thisResult].concat(materialResult);
         }
-        // ここまでは到達しない…はず
-        return md;
+        // その他の調達方法ではそのままreturn
+        return [];
     }
 
-    const gcdCreateAndAmount = (create:number,amount:number) => {
-        const gcdResult = gcd(create, amount);        
+    const gcdCreateAndAmount:(create:number,amount:number,item:string)=>tMaterialData = (create:number,amount:number,item:string) => {
+        const gcdResult = gcd(create, amount);
         return {
+            アイテム: item,
             作成数: create / gcdResult,
             要求数: amount / gcdResult
         }
     }
 
-    
     type tGetMaterialDataParent_main = (tree:tTreeNodeD_creation) => tTreeData
     const getMaterialDataParent_main:tGetMaterialDataParent_main = (tree) => {
         // ツリー内の乗数算出
         return {
             アイテム名 : tree.アイテム名,
-            素材情報 : (getMaterialData(tree,1,1,[]))
+            素材情報 : (getMaterialData(tree,1,1))
         }
     }
 
@@ -975,30 +963,38 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
                 素材情報: []
             };
         }
+        console.log(JSON.stringify(tree.アイテム名));
+        console.log(JSON.stringify(usageObj));
         // 初期値取得処理
-        //  要求値の乗算加算値
-        const ProductAmount = usageObj.使用状況.reduce<number>((acc,cur) => {return acc * cur.要求数},1);
-        //  作成数 * 要求乗算数 / 要求数
-        const CmATdA = usageObj.使用状況.map(o => o.作成数 * ProductAmount / o.要求数);
-        // 上記配列の最小公倍数算出
+        //  要求値の最小公倍数
+        const lcmAmount = lcmArray(usageObj.使用状況.map(d => d.要求数));
+        console.log(JSON.stringify(lcmAmount));
+        //  作成数 * 要求公倍数 / 要求数
+        const CmATdA = usageObj.使用状況.map(o => o.作成数 * lcmAmount / o.要求数);
+        console.log(JSON.stringify(CmATdA));
+        // 上記配列の最小公倍数
         const CmATdA_lcm = lcmArray(CmATdA);
+        console.log(JSON.stringify(CmATdA_lcm));
         // 最小作成コンバイン数算出
         const miniCombArray = CmATdA.map(i => CmATdA_lcm / i);
+        console.log(JSON.stringify(miniCombArray));
         // 最小作成コンバイン数合算
-        const miniComb = miniCombArray.reduce<number>((acc,cur) => {return acc + cur},0);
+        const miniComb = miniCombArray.reduce((acc,cur) => acc + cur,0);
+        console.log(JSON.stringify(miniComb));
         // 計算結果
-        const newCreationNumber = tree.個数.セット作成個数 * CmATdA_lcm / gcd(tree.個数.セット作成個数, miniComb)
-        const treeTopResult = gcdCreateAndAmount(newCreationNumber,ProductAmount);
+        const newCreationNumber = tree.個数.セット作成個数 * CmATdA_lcm;
+        const newAmountNumber = lcmAmount * miniComb;
+        console.log(JSON.stringify(newCreationNumber));
+        console.log(JSON.stringify(newAmountNumber));
+        const treeTopResult = gcdCreateAndAmount(newCreationNumber,newAmountNumber,tree.アイテム名);
+        console.log(JSON.stringify(treeTopResult));
 
         // 下位素材の調査
-        let md:tMaterialData[] = [treeTopResult];
-        tree.材料.forEach(node => {
-            md = getMaterialData(node,treeTopResult.作成数,treeTopResult.要求数,md);
-        });
+        const treeMaterialsData = tree.材料.map(node => getMaterialData(node,treeTopResult.作成数,treeTopResult.要求数)).flat();
         
         return {
             アイテム名 : tree.アイテム名,
-            素材情報: md
+            素材情報: [treeTopResult].concat(treeMaterialsData)
         }
     }
     /**
@@ -1028,8 +1024,8 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
         if(args.length === 1) return args[0];
         if(args.length === 2) return lcm(args[0], args[1]);
         const args0 = args[0];
-        args.shift();
-        return lcm(args0,lcmArray(args));
+        const nextArgs = args.filter((a,i) => i !== 0);
+        return lcm(args0,lcmArray(nextArgs));
     }
 
     const commonUsage: tCommonUsage[] = [];
@@ -1040,8 +1036,9 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const materialData_Common = commonTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const concatMandC = materialData_Main.concat(materialData_Common);
+    console.log(JSON.stringify(concatMandC));
     // 全要求数の乗算
-    const AllAmountProduct = concatMandC.reduce<number>((a,c) => a * c.要求数,1);
+    const AllAmountProduct = concatMandC.reduce((a,c) => a * c.要求数,1);
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
     const AllCmATdA:number[] = concatMandC.map(d => d.作成数 * AllAmountProduct / d.要求数);

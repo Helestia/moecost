@@ -301,7 +301,7 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
                         </Tabs>
                     </AppBar>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <PanelDispConf
                         isDisplay={tabSelected === "dispConf"}
                         isUseDark={dispConf_isUseDark}

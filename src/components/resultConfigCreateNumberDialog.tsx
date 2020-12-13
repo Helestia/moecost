@@ -49,38 +49,49 @@ type tResultInputCreateNumber = {
 
 const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props) => {
     const [befOpen, setBefOpen] = React.useState<boolean>(false);
-    const [number,setNumber] = React.useState<number>(props.number);
+    const [inputedNumber,setInputedNumber] = React.useState<number>(props.number);
     const [route,setRoute] = React.useState<tQtyRoleResult>(props.route);
-    const [sliderMaxState,setSliderMaxState] = React.useState<number>(0)
+    const [sliderMax,setSliderMax] = React.useState<number>(0);
+    const [sliderMaxIsUserConfig,setSliderMaxIsUserConfig] = React.useState(false);
+
     const classes = useClasses();
 
-    const sliderOptions:number[] = (()=> {
-        if(route === "surplus") return sliderOptionsSurplus;
-        const result:number[] = []
-        // 5コンバイン
-        result.push(props.minimumNumber * 5);
-        // 15コンバイン
-        result.push(props.minimumNumber * 15);
-        // 500未満で最大
+    const initSliderOptions : (r:tQtyRoleResult) => number[] = (r) => {
+        if(r === "surplus") return sliderOptionsSurplus;
+        const comb05 = props.minimumNumber * 5;
+        const comb15 = props.minimumNumber * 15;
         const min500 = Math.floor(500 / props.minimumNumber) * props.minimumNumber;
-        if(props.minimumNumber*15 < min500) result.push(min500);
-        // 1000未満で最大
         const min1000 = Math.floor(1000 / props.minimumNumber) * props.minimumNumber;
-        if(props.minimumNumber*15 < min1000) result.push(min1000);
-        // 2000未満で最大
         const min2000 = Math.floor(2000 / props.minimumNumber) * props.minimumNumber;
-        if(props.minimumNumber*15 < min2000) result.push(min2000);
-        return result;
-    })();
+        if(min2000 < comb15) return [comb05,comb15];
+        if(min1000 < comb15) return [comb05,comb15,min2000];
+        if(min500 < comb15) return [comb05,comb15,min1000,min2000];
+        return [comb05,comb15,min500,min1000,min2000];
+    }
+
+    const sliderOptions = initSliderOptions(route);
+
+    const registerSliderMax: (order:number,options:number[]) => void = (order,options) => {
+        const maxOptions = options.find(op => op > order);
+        if(maxOptions === undefined){
+            setSliderMax(order);
+            setSliderMaxIsUserConfig(true);
+        } else {
+            setSliderMax(maxOptions);
+            setSliderMaxIsUserConfig(false);
+        }
+    }
+    const changeInputedNumber: (nextNumber:number) => void = (nextNumber) => {
+        setInputedNumber(nextNumber);
+        if(sliderMaxIsUserConfig) setSliderMax(nextNumber);
+    }
 
     // 初期化処理
     if((! befOpen) && props.isOpen){
-        setNumber(props.number);
+        setInputedNumber(props.number);
         setRoute(props.route);
 
-        const sliderMax = sliderOptions.find(n => props.number < n);
-        if(sliderMax) setSliderMaxState(sliderMax);
-        else setSliderMaxState(0);
+        registerSliderMax(props.number, sliderOptions);
 
         setBefOpen(true);
         return null;
@@ -95,39 +106,62 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
 
     // 結果送信 & ダイアログクローズ
     const sendResult = () => {
-        props.changeTrigger(number,route);
+        props.changeTrigger(inputedNumber,route);
         closeDialog();
     }
 
-    const handleNumberInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
-        setNumber(Number(e.target.value));
-    }
+    const handleNumberInputChange = (e:React.ChangeEvent<HTMLInputElement>) => changeInputedNumber(Number(e.target.value));
+
     const handleNumberInputBlur = (e:React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if(route === "fully"){
             const mvr = Number(e.target.value) % props.minimumNumber;
-            if(mvr !== 0){
-                const result = Number(e.target.value) - mvr;
-                e.target.value = String(result);
-                setNumber(result);
-            }
+            if(mvr !== 0) changeInputedNumber(Number(e.target.value) - mvr);
         }
     }
 
     const handleNumberSlider = (e:React.ChangeEvent<{}>, value:number| number[]) => {
-        if(typeof value === "number") setNumber(value);
-        else setNumber(value[0]);
+        if(typeof value === "number") setInputedNumber(value);
+        else setInputedNumber(value[0]);
     }
 
+    const handleChangeSliderRadio:(e:React.ChangeEvent<HTMLInputElement>, value:string) => void = (e,value) => {
+        const numberValue = Number(value);
+        if(numberValue === -1){
+            setSliderMax(inputedNumber);
+            setSliderMaxIsUserConfig(true);
+        } else {
+            setSliderMax(numberValue);
+            setSliderMaxIsUserConfig(false);
+        }
+    }
+
+
+
+
+
+/*
     const handleChangeSliderRadio = (num:number) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
         if(! checked) return;
 
-        if(num === 0) setSliderMaxState(number);
-        else setSliderMaxState(num);
-        if(num < number && num !== 0) setNumber(num);
+        if(num === 0) setSliderMax(inputedNumber);
+        else setSliderMax(num);
+        if(num < inputedNumber && num !== 0) setInputedNumber(num);
     }
+*/
 
     const handleChangeRoute = (route:tQtyRoleResult) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
-        if(checked) setRoute(route);
+        if(checked){
+            setRoute(route);
+            const nextSliderOptions = initSliderOptions(route);
+            const nextSliderMax = nextSliderOptions.find(so => inputedNumber <= so);
+            if(nextSliderMax) setSliderMax(nextSliderMax);
+            else setSliderMax(inputedNumber);
+            if(route === "fully"){
+                const nextNumber = Math.floor(inputedNumber / props.minimumNumber) * props.minimumNumber;
+                if(nextNumber === 0) setInputedNumber(props.minimumNumber);
+                else setInputedNumber(nextNumber);
+            }
+        }
     }
 
     // スライダーに変数が多いので、専用関数を作成
@@ -161,11 +195,11 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
             ]
         }
         const min=0;
-        const max=sliderMaxState;
+        const max=sliderMax;
         const step = (route === "fully") ? props.minimumNumber : 1
         const marks= (max > 5) ? createMarks(max) : true;
         return <Slider
-            value={number}
+            value={inputedNumber}
             className={classes.slider}
             max={max}
             min={min}
@@ -176,19 +210,21 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
     }
     // スライダー上限設定用ラジオボタン群
     const renderSliderRadio = () => {
+        
         return (
-            <RadioGroup>
+            <RadioGroup onChange={handleChangeSliderRadio}>
                 <Box display="flex" alignItems="center" flexWrap="wrap">
                 {
                     sliderOptions.map(n => 
                         <FormControlLabel
                             key={"resultConfigCreateNumberDialog_ListNo_" + n}
                             label={numDeform(n)}
-                            control={<Radio size="small" onChange={handleChangeSliderRadio(n)} />}
-                            checked={n === sliderMaxState} />
+                            value={String(n)}
+                            control={<Radio size="small" />}
+                            />
                     )
                 }
-                <FormControlLabel label="指定個数" control={<Radio size="small" onChange={handleChangeSliderRadio(0)} />} checked={sliderMaxState === 0} />
+                <FormControlLabel label="指定個数" control={<Radio size="small" />} value="-1" />
                 </Box>
             </RadioGroup>
         )
@@ -213,7 +249,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
                     <Box>
                         <FormLabel>作成個数指定</FormLabel>
                     </Box>
-                    <TextField type="number" onChange={handleNumberInputChange} onBlur={handleNumberInputBlur} label="作成個数直接指定" size="small" margin="dense" value={number} />
+                    <TextField type="number" onChange={handleNumberInputChange} onBlur={handleNumberInputBlur} label="作成個数直接指定" size="small" margin="dense" value={inputedNumber} />
                     {renderSlider()}
                     {renderSliderRadio()}
                 </DialogContent>
