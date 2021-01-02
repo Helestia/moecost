@@ -1,4 +1,5 @@
 import React from 'react';
+import {tHandleOpenSnackbar} from '../App';
 
 import buildTree, {tBuildTreeResult}        from '../scripts/buildTree';
 import {numDeform}                          from '../scripts/common';
@@ -87,6 +88,7 @@ type tResultConfigItemDialogProps = {
     userDictionary: iDictionary | undefined
     itemName: string,
     close: () => void,
+    handleOpenSnackbar: tHandleOpenSnackbar,
     changeTrigger : () => void
 }
 const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) => {
@@ -139,20 +141,14 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
     const hasNpcSale = (npcs === undefined) ? false: true; 
 
     // ダイアログクローズ
-    const closeDialog = () => {
-        props.close();
-    }
+    const closeDialog = () => props.close();
 
     const handleTabChange = (e:React.ChangeEvent<{}>, tab:string) => setTabSelected(tab);
-
     const handleRadio = (str:string) => setRadioSelected(str);
-
     const handleUserCost = (num:number) => setUserCostValue(num);
 
     // 登録情報の最新化
-    const handleSubmit = () => {
-        moecostDb.refleshProperties(submitItemData);
-    }
+    const handleSubmit = () => moecostDb.refleshProperties(submitItemData);
 
     // 登録情報の修正
     const submitItemData = () => {
@@ -178,7 +174,17 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
             辞書名: moecostDb.辞書.辞書名,
             内容: dictionaryObj
         }
-        moecostDb.registerDictionary(newDictionary);
+        moecostDb.registerDictionary(newDictionary)
+            .catch(() => {
+                props.handleOpenSnackbar(
+                    "error",
+                    (<>
+                        <Typography>設定情報のブラウザへの保存に失敗しています。</Typography>
+                        <Typography>リトライなどを行っても正常にできない場合は、バグ報告等をいただければと思います。</Typography>
+                    </>),
+                    null
+                )
+            })
         props.changeTrigger();
         props.close();
     }

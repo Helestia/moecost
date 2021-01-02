@@ -60,20 +60,20 @@ export const SuggestionArea:React.FC<iSuggestionAreaProps> = (props) => {
     }
     const handleTChange : (e:React.ChangeEvent<HTMLInputElement>) => void = (e) => {
         const setVal = e.target.value
-            .replace("\\","\\\\")
-            .replace("*","\\*")
-            .replace("+","\\+")
-            .replace(".","\\.")
-            .replace("?","\\?")
-            .replace("{","\\{")
-            .replace("}","\\}")
-            .replace("[","\\[")
-            .replace("]","\\]")
-            .replace("(","\\(")
-            .replace(")","\\)")
-            .replace("^","\\^")
-            .replace("$","\\$")
-            .replace("|","\\|");
+            .replace(/\\/g,"\\\\")
+            .replace(/\*/g,"\\*")
+            .replace(/\+/g,"\\+")
+            .replace(/\./g,"\\.")
+            .replace(/\?/g,"\\?")
+            .replace(/\{/g,"\\{")
+            .replace(/\}/g,"\\}")
+            .replace(/\[/g,"\\[")
+            .replace(/\]/g,"\\]")
+            .replace(/\(/g,"\\(")
+            .replace(/\)/g,"\\)")
+            .replace(/\^/g,"\\^")
+            .replace(/\$/g,"\\$")
+            .replace(/\|/g,"\\|");
         setStrValue(setVal);
         if(setVal.length === 0){
             setValue(defSuggestion);

@@ -1,14 +1,15 @@
-import React from 'react'
+import React from 'react';
+import {tHandleOpenSnackbar} from '../App';
 import moecostDb,{iApplicationConfig} from '../scripts/storage';
 
 import AppBar        from '@material-ui/core/AppBar';
-import Dialog        from '@material-ui/core/Dialog';
 import Button        from '@material-ui/core/Button';
 import Box           from '@material-ui/core/Box';
+import Dialog        from '@material-ui/core/Dialog';
 import DialogTitle   from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import Divider       from '@material-ui/core/Divider'
+import Divider       from '@material-ui/core/Divider';
 import Tabs          from '@material-ui/core/Tabs';
 import Tab           from '@material-ui/core/Tab';
 import TextField     from '@material-ui/core/TextField';
@@ -46,7 +47,7 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
         maxWidth: "40vw"
     },
     listItem:{
-        paddingLeft:"2em"
+        paddingLeft:"3em"
     },
     dialogAction: {
         alignSelf: "flex-end"
@@ -64,21 +65,17 @@ type tPanelDispTreeChangeSwitchProps =
 
 type tPanelCalcChangeSwitchProps = "clc_isUseWarNpc";
 
-
-
-
-
-
-
-type tConfigDisplayDialog = {
+type tAppPrefeerenceDialog = {
     isOpen : boolean,
     close : () => void,
-    changeDisplayConfig : () => void
+    handleOpenSnackbar: tHandleOpenSnackbar,
+    changeAppPreference : () => void
 }
 
-const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
+const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
     const [befOpen, setBefOpen] = React.useState(false);
-    const [tabSelected, setTabSelected] = React.useState("");
+
+    const [tabSelected, setTabSelected] = React.useState("dispConf");
 
     const [dispConf_isUseDark,             setDispConf_isUseDark]             = React.useState(false);
     const [dispConf_isUseSmallTable,       setDispConf_isUseSmallTable]       = React.useState(false);
@@ -216,14 +213,24 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
                 War販売物使用: calc_isUseWarNpc
             }
         } as iApplicationConfig
-        moecostDb.registerAppConf(newDbObj);
-        props.changeDisplayConfig();
+        moecostDb.registerAppPreference(newDbObj)
+            .then(() => props.handleOpenSnackbar(
+                "success",
+                <Typography>設定情報のブラウザへの保存が正常に完了しました。</Typography>
+            ))
+            .catch(() => props.handleOpenSnackbar(
+                "error",
+                <>
+                    <Typography>設定情報のブラウザへの保存に失敗しています。</Typography>
+                    <Typography>リトライなどを行っても正常にできない場合は、バグ報告等をいただければと思います。</Typography>
+                </>,
+                null
+            ));
+        props.changeAppPreference();
         props.close();
     }
 
-    function handleTabChange (e:React.ChangeEvent<{}>, tab:string) {
-        setTabSelected(tab);
-    }
+    const handleTabChange = (e:React.ChangeEvent<{}>, tab:string) => setTabSelected(tab);
 
     const handleSwitchDispConf = (str:tPanelDispConfChangeSwitchProps) => {
         if(str === "isUseDark") setDispConf_isUseDark(! dispConf_isUseDark);
@@ -268,6 +275,7 @@ const ConfigDisplayDialog:React.FC<tConfigDisplayDialog> = (props) => {
     const handleSwitchCalc = (str:tPanelCalcChangeSwitchProps) => {
         if(str === "clc_isUseWarNpc") setCalc_isUseWarNpc(! calc_isUseWarNpc);
     }
+
 
     return (
         <Dialog
@@ -1131,18 +1139,4 @@ const PanelCalc:React.FC<tPanelCalcProps> = (props) => {
     );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export default ConfigDisplayDialog;
+export default AppPreferenceDialog;

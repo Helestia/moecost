@@ -33,8 +33,6 @@ const useClasses = makeStyles((theme:Theme)=>
     })
 );
 
-
-
 // スライダーの上限候補
 const sliderOptionsSurplus:number[] = [10,100,500,1000,2000,4000]
 
@@ -136,19 +134,6 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
     }
 
 
-
-
-
-/*
-    const handleChangeSliderRadio = (num:number) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
-        if(! checked) return;
-
-        if(num === 0) setSliderMax(inputedNumber);
-        else setSliderMax(num);
-        if(num < inputedNumber && num !== 0) setInputedNumber(num);
-    }
-*/
-
     const handleChangeRoute = (route:tQtyRoleResult) => (e:React.ChangeEvent<HTMLInputElement>,checked:boolean) => {
         if(checked){
             setRoute(route);
@@ -221,7 +206,7 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
                             label={numDeform(n)}
                             value={String(n)}
                             control={<Radio size="small" />}
-                            />
+                        />
                     )
                 }
                 <FormControlLabel label="指定個数" control={<Radio size="small" />} value="-1" />
@@ -249,7 +234,16 @@ const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props
                     <Box>
                         <FormLabel>作成個数指定</FormLabel>
                     </Box>
-                    <TextField type="number" onChange={handleNumberInputChange} onBlur={handleNumberInputBlur} label="作成個数直接指定" size="small" margin="dense" value={inputedNumber} />
+                    <TextField
+                        type="number"
+                        onChange={handleNumberInputChange}
+                        onBlur={handleNumberInputBlur}
+                        label="作成個数直接指定"
+                        size="small"
+                        margin="dense"
+                        value={inputedNumber}
+                        helperText="0指定時は、条件を満たす最小個数"
+                    />
                     {renderSlider()}
                     {renderSliderRadio()}
                 </DialogContent>

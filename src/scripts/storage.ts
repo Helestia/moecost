@@ -4,6 +4,7 @@ class moecostDbClass extends Dexie {
     private useDictionary : Dexie.Table<iUseDictionary,1>;
     private dictionary : Dexie.Table<iDictionary,string>;
     private applicationConfig : Dexie.Table<iApplicationConfig,1>;
+    private vendor: Dexie.Table<iVendor,string>
 
     辞書 : iDictionary;
     使用辞書 : iUseDictionary;
@@ -15,37 +16,42 @@ class moecostDbClass extends Dexie {
         this.version(1).stores({
             applicationConfig : "",
             useDictionary : "",
-            dictionary : "辞書名"
+            dictionary : "辞書名",
+            vendor: "ベンダー名"
         });
         // 初期化
         this.useDictionary = this.table("useDictionary");
         this.dictionary = this.table("dictionary");
         this.applicationConfig = this.table("applicationConfig");
+        this.vendor = this.table("vendor");
         this.辞書 = defaultStrage.辞書;
         this.使用辞書 = defaultStrage.使用辞書;
         this.アプリ設定 = defaultStrage.アプリ設定;
     }
-
+    /**
+     * moecostDbクラス内のデータ情報の更新
+     * 
+     * @param callBack 完了後に呼び出すコールバック関数
+     */
     async refleshProperties (callBack?: () => void) {
-        this.アプリ設定 = await this.retrieveAppConfig();
+        this.アプリ設定 = await this.retrieveAppPreference();
         this.使用辞書 = await this.retrieveUseDictionary();
         this.辞書 = await this.retrieveDictionary(this.使用辞書.使用中辞書);
-        if(callBack) {
-            callBack();
-        }
-    }
 
-    private async retrieveDictionary (dictionaryName : string) {
-        let RD = await this.dictionary.get(dictionaryName).catch(() => {
-            return defaultStrage.辞書;
-        });
-        if(RD === undefined){
-            RD = defaultStrage.辞書;
-        }
+        if(callBack) callBack();
+    }
+    /**
+     * 辞書情報の読み取り
+     * 
+     * @param dictionaryName 読み取る辞書名
+     */
+    async retrieveDictionary (dictionaryName : string) {
+        const RD = await this.dictionary.get(dictionaryName).catch(() => defaultStrage.辞書);
+        if(RD === undefined) return defaultStrage.辞書;
         return RD;
     }
 
-    private async retrieveAppConfig () {
+    private async retrieveAppPreference () {
         const RAppConfig = await this.applicationConfig
             .get(1)
             .catch(() => defaultStrage.アプリ設定)
@@ -60,43 +66,98 @@ class moecostDbClass extends Dexie {
         if(RUseDictionary === undefined) return defaultStrage.使用辞書;
         return RUseDictionary;
     }
-
-    registerAppConf (prop : iApplicationConfig) {
-        this.applicationConfig.put(prop,1);
+    /**
+     * アプリ設定の更新
+     * @param prop 更新内容
+     */
+    registerAppPreference (prop : iApplicationConfig) {
         this.アプリ設定 = prop;
+        return this.applicationConfig.put(prop,1);
     }
-
+    /**
+     * 辞書情報の更新
+     * @param prop 更新辞書情報
+     */
     registerDictionary(prop : iDictionary) {
-        this.dictionary.put(prop,prop.辞書名);
         this.辞書 = prop;
+        return this.dictionary.put(prop,prop.辞書名);
+    }
+    /**
+     * 辞書情報の削除
+     * @param prop 
+     */
+    deleteDictionary(prop: string) {
+        return this.dictionary.delete(prop)
     }
 
+    /**
+     * 使用中の辞書名の変更
+     * 
+     * @param prop 使用する辞書名
+     */
     registerUseDictionary (prop: iUseDictionary) {
-        this.useDictionary.put(prop,1);
         this.使用辞書 = prop;
+        return this.useDictionary.put(prop,1);
     }
-    // 全ての設定の削除・初期化
-    async clearAll () {
-        let dictionarys = await this.dictionary.toArray();
-        dictionarys.forEach(dict => {
-            this.dictionary.delete(dict.辞書名);
-        });
-        this.applicationConfig.delete(1);
-        this.useDictionary.delete(1);
+    /**
+     * アプリ内の全データの初期化処理
+     */
+    clearAll () {
+        const jobs = [
+            this.vendor.clear(),
+            this.dictionary.clear(),
+            this.useDictionary.clear(),
+            this.applicationConfig.clear()
+        ];
 
-        this.アプリ設定 = defaultStrage.アプリ設定;
-        this.使用辞書 = defaultStrage.使用辞書;
-        this.辞書 = defaultStrage.辞書;
+        return Promise.all(jobs)
+            .then(() => {
+                this.アプリ設定 = defaultStrage.アプリ設定;
+                this.使用辞書 = defaultStrage.使用辞書;
+                this.辞書 = defaultStrage.辞書;
+            });
+    }
+
+    /**
+     * アプリ内の全データの削除処理
+     */
+    deleteDatabase () {
+        return this.delete()
+    }
+    
+    // 全ての辞書の取得
+    async retrieveAllDictionary () {
+        return await this.dictionary.toArray()
+            .then(dictionaries => dictionaries)
+            .catch(() => [] as iDictionary[])
     }
 
     // 全ての辞書名の取得
     async retrieveAllDictionaryNames () {
-        let dictionarys = await this.dictionary.toArray();
-        if(dictionarys.length === 0) return [defaultStrage.辞書.辞書名];
-        return dictionarys.map(dict => dict.辞書名);
+        const dictionaries = await this.retrieveAllDictionary();
+        return dictionaries.map(d => d.辞書名);
     }
-    // 辞書の削除
+
+    // 全てのベンダー情報の取得
+    async retrieveAllVendor () {
+        return await this.vendor.toArray()
+            .then(vendors => vendors)
+            .catch(() => [] as iVendor[]);
+    }
+
+    // ベンダー情報の登録
+    registerVendor (vendor:iVendor) {
+        return this.vendor.put(vendor, vendor.ベンダー名)
+    }
+
+    // ベンダー情報の削除
+    deleteVendor (vendorName:string) {
+        return this.vendor.delete(vendorName);
+    }
+
+
 }
+
 
 const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ設定:iApplicationConfig} = {
     辞書 : {
@@ -185,8 +246,19 @@ export type tDictionary_ItemInfo_creation = {
     レシピ名 : string
 }
 
+export interface iVendor {
+    ベンダー名: string,
+    売物: tVendor_sale[]
+}
 
-
+export type tVendor_sale = {
+    アイテム: string,
+    設定時原価: number,
+    廃棄副産物: string[],
+    廃棄余剰生産: string[],
+    生産個数: number,
+    販売価格: number
+}
 
 
 

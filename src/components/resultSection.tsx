@@ -1,4 +1,6 @@
 import React from 'react';
+import {tHandleOpenSnackbar} from '../App';
+
 import ResultAlertSection                   from './resultAlertSection';
 import ResultSummarySection                 from './resultSummarySection';
 import ResultCostSheet                      from './ResultCostSheet';
@@ -15,10 +17,11 @@ import moecostDb, { iDictionary }           from '../scripts/storage';
 import {createStyles, Theme, makeStyles}    from '@material-ui/core/styles';
 
 interface iResultSectionProps {
+    handleOpenSnackbar: tHandleOpenSnackbar,
     searched: tSearchSectionRtnFuncProps
 }
 
-    // 子要素で共通するスタイル情報
+// 子要素で共通するスタイル情報
 const useChildrenStyles = makeStyles((theme:Theme) => 
     createStyles({
         accordionTitleStyle : {
@@ -172,6 +175,7 @@ const ResultSection:React.FC<iResultSectionProps> = (props) => {
                 isOpen={isOpenConfigItemDialog}
                 userDictionary={userDictionary}
                 itemName={configItemDialogTarget}
+                handleOpenSnackbar={props.handleOpenSnackbar}
                 close={closeConfigItemDialog}
                 changeTrigger={changeTriggerItem} />
         </>

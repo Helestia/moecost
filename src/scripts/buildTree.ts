@@ -963,31 +963,21 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
                 素材情報: []
             };
         }
-        console.log(JSON.stringify(tree.アイテム名));
-        console.log(JSON.stringify(usageObj));
         // 初期値取得処理
         //  要求値の最小公倍数
         const lcmAmount = lcmArray(usageObj.使用状況.map(d => d.要求数));
-        console.log(JSON.stringify(lcmAmount));
         //  作成数 * 要求公倍数 / 要求数
         const CmATdA = usageObj.使用状況.map(o => o.作成数 * lcmAmount / o.要求数);
-        console.log(JSON.stringify(CmATdA));
         // 上記配列の最小公倍数
         const CmATdA_lcm = lcmArray(CmATdA);
-        console.log(JSON.stringify(CmATdA_lcm));
         // 最小作成コンバイン数算出
         const miniCombArray = CmATdA.map(i => CmATdA_lcm / i);
-        console.log(JSON.stringify(miniCombArray));
         // 最小作成コンバイン数合算
         const miniComb = miniCombArray.reduce((acc,cur) => acc + cur,0);
-        console.log(JSON.stringify(miniComb));
         // 計算結果
         const newCreationNumber = tree.個数.セット作成個数 * CmATdA_lcm;
         const newAmountNumber = lcmAmount * miniComb;
-        console.log(JSON.stringify(newCreationNumber));
-        console.log(JSON.stringify(newAmountNumber));
         const treeTopResult = gcdCreateAndAmount(newCreationNumber,newAmountNumber,tree.アイテム名);
-        console.log(JSON.stringify(treeTopResult));
 
         // 下位素材の調査
         const treeMaterialsData = tree.材料.map(node => getMaterialData(node,treeTopResult.作成数,treeTopResult.要求数)).flat();
@@ -1036,14 +1026,13 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     const materialData_Main = mainTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const materialData_Common = commonTreeData.reduce<tMaterialData[]>((a,c) => a.concat(c.素材情報), []);
     const concatMandC = materialData_Main.concat(materialData_Common);
-    console.log(JSON.stringify(concatMandC));
     // 全要求数の乗算
-    const AllAmountProduct = concatMandC.reduce((a,c) => a * c.要求数,1);
+    const AllAmountLcm = lcmArray(concatMandC.map(d => d.要求数));
 
     // 各素材において、作成数 * 全要求数乗算結果 / 要求数
-    const AllCmATdA:number[] = concatMandC.map(d => d.作成数 * AllAmountProduct / d.要求数);
+    const AllCmATdA:number[] = concatMandC.map(d => d.作成数 * AllAmountLcm / d.要求数);
     // 最小作成数
-    return lcmArray(AllCmATdA) / AllAmountProduct;
+    return lcmArray(AllCmATdA) / AllAmountLcm;
 }
 
 type tDecideCreateQuantityResult = {
