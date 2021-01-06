@@ -1,14 +1,14 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../App';
-import moecostDb,{iDictionary} from '../scripts/storage';
-import FileReaderButton from './fileReaderButton';
+import {tHandleOpenSnackbar} from '../../../App';
+import moecostDb,{iDictionary} from '../../../scripts/storage';
+import FileReaderButton from '../../commons/buttons/fileReaderButton';
 import {
     numDeform,
-    downloadTextFileProsess} from '../scripts/common';
+    downloadTextFileProsess} from '../../../scripts/common';
 
 import {
     tryJsonParse,
-    varidateJson_dictionary} from '../scripts/varidateJsonFile';   
+    varidateJson_dictionary} from '../../../scripts/varidateJsonFile';
 
 import Accordion        from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';

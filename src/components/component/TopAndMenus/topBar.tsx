@@ -1,5 +1,5 @@
 import React from 'react';
-import { tHandleOpenSnackbar } from '../App';
+import { tHandleOpenSnackbar } from '../../../App';
 import AppPreferenceDialog from './appPreferenceDialog'
 import DispChangeLogDialog from './dispChangeLogDialog'
 import AllDataDialog       from './allDataDialog';
@@ -66,7 +66,7 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
             anchor="left"
             open={props.isMenuOpened}
             onClose={handleClose}
-            >
+        >
             <Toolbar>
                 <List>
                     <ListItem button onClick={handleOpenAppPreferenceDialog}>
@@ -93,22 +93,17 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
                         <NewReleasesIcon />
                         バージョン情報・更新履歴
                     </ListItem>
-
-
-
-
-                    
-
                 </List>
 
             </Toolbar>
-            
+            {/*ダイアログ関係*/}
             <AppPreferenceDialog 
                 isOpen={isOpenAppPreferenceDialog}
                 handleOpenSnackbar={props.handleOpenSnackbar}
                 close={handleCloseAppPreferenceDialog}
                 changeAppPreference={props.changeAppPreference}
             />
+
             <DictionaryPreferenceDialog
                 isOpen={isOpenDictionaryPreferenceDialog}
                 handleOpenSnackbar={props.handleOpenSnackbar}
@@ -126,6 +121,7 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
                 isOpen={isOpenChangeLogDialog}
                 close={handleCloseChangeLogDialog}
             />
+
         </Drawer>
 
 

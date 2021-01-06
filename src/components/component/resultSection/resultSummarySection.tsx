@@ -6,12 +6,12 @@ import {
     tMaterial,
     tSurplus,
     tSkill
-} from '../scripts/makeListArrayFromTree'
-import {numDeform, cloneObj_JSON} from '../scripts/common';
+} from '../../../scripts/makeListArrayFromTree'
+import {numDeform, cloneObj_JSON} from '../../../scripts/common';
 
-import Accordion         from '@material-ui/core/Accordion';
-import AccordionSummary  from '@material-ui/core/AccordionSummary';
-import AccordionDetails  from '@material-ui/core/AccordionDetails';
+import Accordion     from '../../commons/accordion/accordion';
+import useStyleHover from '../../commons/styles/useStyleHover';
+
 import TableContainer    from '@material-ui/core/TableContainer';
 import Table             from '@material-ui/core/Table';
 import TableBody         from '@material-ui/core/TableBody';
@@ -19,7 +19,6 @@ import TableCell         from '@material-ui/core/TableCell';
 import Typography        from '@material-ui/core/Typography';
 import Tooltip           from '@material-ui/core/Tooltip';
 import Paper             from '@material-ui/core/Paper';
-import ExpandMoreIcon    from '@material-ui/icons/ExpandMore';
 import makeStyles        from '@material-ui/styles/makeStyles';
 import { TableRow } from '@material-ui/core';
 
@@ -31,9 +30,8 @@ const useStyles = makeStyles({
     strikeOut: {
         textDecorationLine: "line-through"
     }
-})
+});
 
- 
 type tResultSummarySectionProps = {
     isExpanded: boolean,
     recipeName: string,
@@ -43,16 +41,15 @@ type tResultSummarySectionProps = {
     byproducts: tByproduct[],
     durabilities: tDurability[],
     skills: tSkill[],
-    needRecipe: string[],
+    needRecipes: string[],
     handleExpand: () => void,
     changeNotTargetSurpluses : (newItems:string[]) => void,
     changeNotTargetByproducts : (newItems:string[]) => void,
-    useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
-    openConfigCreateNumberDialog: () => void
+    handleOpenQtyDialog: () => void
 }
 const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const classes = useStyles();
-    const childrenStyles = props.useChildrenStyles();
+    const classHover = useStyleHover();
 
     // 各フィールドで表示する情報の取得
     type tData = {
@@ -147,8 +144,8 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const renderCreateCount = () => (
         <Tooltip title="作成個数の変更">
             <TableRow 
-                className={childrenStyles.activeStrings}
-                onClick={props.openConfigCreateNumberDialog}>
+                className={classHover.hover}
+                onClick={props.handleOpenQtyDialog}>
                 <TableCell component="th">
                     <Typography>作成個数</Typography>
                 </TableCell>
@@ -183,20 +180,20 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         )
     };
     
-    const renderNeedRecipe = () => {
-        if(props.needRecipe.length === 0) return null;
-        const needRecipeText = props.needRecipe.join(" / ");
+    const renderneedRecipes = () => {
+        if(props.needRecipes.length === 0) return null;
+        const needRecipesText = props.needRecipes.join(" / ");
         const renderJSX = (() => {
-            if(needRecipeText.length > 20) return (
+            if(needRecipesText.length > 20) return (
                 <Typography>
-                    {needRecipeText.split(" / ").map((r,i) => {
+                    {needRecipesText.split(" / ").map((r,i) => {
                         if(i === 0) return <>{r}</>
                         return <><br />{r}</>
                     })}
                 </Typography>
             );
             return (
-                <Typography>{needRecipeText}</Typography>
+                <Typography>{needRecipesText}</Typography>
             );
         })();
 
@@ -232,7 +229,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         return (
             <TableRow
                 onClick={handleToggleNotTargetByproduct}
-                className={childrenStyles.activeStrings}>
+                className={classHover.hover}>
                 <TableCell component="th">
                     <Typography>副産物価格</Typography>
                 </TableCell>
@@ -265,7 +262,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         return (
             <TableRow
                 onClick={handleToggleNotTargetSurplus}
-                className={childrenStyles.activeStrings}>
+                className={classHover.hover}>
                 <TableCell component="th">
                     <Typography>余剰生産価格</Typography>
                 </TableCell>
@@ -336,32 +333,26 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     return (
         <Accordion
             expanded={props.isExpanded}
-            onChange={props.handleExpand}>
-            <AccordionSummary
-                className={childrenStyles.accordionTitleStyle}
-                expandIcon={<ExpandMoreIcon />}
-                >
-                生産概要
-            </AccordionSummary>
-            <AccordionDetails>
-                <TableContainer
-                    component={Paper}
-                    className={classes.TableRoot}>
-                    <Table>
-                        <TableBody>
-                            {renderRecipeName()}
-                            {renderCreateCount()}
-                            {renderNeedSkills()}
-                            {renderNeedRecipe()}
-                            {renderMaterialCost()}
-                            {renderByproductRebate()}
-                            {renderSurplusRebate()}
-                            {renderDurabilityRebate()}
-                            {renderResultUnitCost()}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </AccordionDetails>
+            onChange={props.handleExpand}
+            summary="概要"
+        >
+            <TableContainer
+                component={Paper}
+                className={classes.TableRoot}>
+                <Table>
+                    <TableBody>
+                        {renderRecipeName()}
+                        {renderCreateCount()}
+                        {renderNeedSkills()}
+                        {renderneedRecipes()}
+                        {renderMaterialCost()}
+                        {renderByproductRebate()}
+                        {renderSurplusRebate()}
+                        {renderDurabilityRebate()}
+                        {renderResultUnitCost()}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </Accordion>
     )
 }

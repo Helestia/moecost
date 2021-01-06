@@ -1,6 +1,6 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../App';
-import moecostDb,{iApplicationConfig} from '../scripts/storage';
+import {tHandleOpenSnackbar} from '../../../App';
+import moecostDb,{iApplicationConfig} from '../../../scripts/storage';
 
 import AppBar        from '@material-ui/core/AppBar';
 import Button        from '@material-ui/core/Button';

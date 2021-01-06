@@ -1,11 +1,18 @@
 import React from 'react';
 import ResultItemNameCell from './resultItemNameCell';
-import { tMaterial, tByproduct, tDurability, tSurplus, tCreation } from '../scripts/makeListArrayFromTree';
-import {numDeform, cloneObj_JSON} from '../scripts/common';
 
-import Accordion         from '@material-ui/core/Accordion';
-import AccordionSummary  from '@material-ui/core/AccordionSummary';
-import AccordionDetails  from '@material-ui/core/AccordionDetails';
+import {
+    tMaterial,
+    tByproduct,
+    tDurability,
+    tSurplus,
+    tCreation }         from '../../../scripts/makeListArrayFromTree';
+import {
+    numDeform,
+    cloneObj_JSON}      from '../../../scripts/common';
+
+import Accordion from '../../commons/accordion/accordion';
+
 import Box               from '@material-ui/core/Box'
 import Button            from '@material-ui/core/Button'
 import IconButton        from '@material-ui/core/IconButton'
@@ -18,12 +25,11 @@ import TableCell         from '@material-ui/core/TableCell';
 import TableRow          from '@material-ui/core/TableRow';
 import Typography        from '@material-ui/core/Typography'
 import Paper             from '@material-ui/core/Paper';
-import ExpandMoreIcon    from '@material-ui/icons/ExpandMore';
 
 import DeleteIcon        from '@material-ui/icons/Delete';
 import RestoreIcon       from '@material-ui/icons/Restore';
 
-import {createStyles, Theme, makeStyles, useTheme} from '@material-ui/core/styles';
+import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
 
 
 const useStyles = makeStyles((theme:Theme) => 
@@ -56,9 +62,8 @@ type tResultCostSheet= {
     handleExpand: () => void,
     changeNotTargetSurpluses : (newItems:string[]) => void,
     changeNotTargetByproducts : (newItems:string[]) => void,
-    useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>,
     handleItemClick: (itemName:string) => void,
-    openConfigCreateNumberDialog: () => void
+    handleOpenQtyDialog: () => void
 }
 
 type tReduceResult = {
@@ -71,8 +76,7 @@ const reduceResultDefault: tReduceResult = {
 }
 
 const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
-    const childrenStyles = props.useChildrenStyles();
-    const classes = useStyles(useTheme());
+    const classes = useStyles();
 
     // アイテム名クリック
     const handleItemNameClick = (str:string) => {props.handleItemClick(str)};
@@ -659,25 +663,20 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
     return (
         <Accordion
             expanded={props.isExpanded}
-            onChange={props.handleExpand}>
-            <AccordionSummary
-                className={childrenStyles.accordionTitleStyle}
-                expandIcon={<ExpandMoreIcon />}>
-                素材・余剰生産品・副産物一覧
-            </AccordionSummary>
-            <AccordionDetails>
-                <Box>
-                    {renderTableMaterial()}
-                    {renderTableByproduct()}
-                    {renderTableSurplus()}
-                    {renderTableDurability()}
-                    {renderTableCreate()}
-                    <Button
-                        variant="outlined"
-                        onClick={props.openConfigCreateNumberDialog}
-                        className={classes.button}>作成個数の変更</Button>
-                </Box>
-            </AccordionDetails>
+            onChange={props.handleExpand}
+            summary="素材・余剰生産品・副産物一覧"
+        >
+            <Box>
+                {renderTableMaterial()}
+                {renderTableByproduct()}
+                {renderTableSurplus()}
+                {renderTableDurability()}
+                {renderTableCreate()}
+                <Button
+                    variant="outlined"
+                    onClick={props.handleOpenQtyDialog}
+                    className={classes.button}>作成個数の変更</Button>
+            </Box>
         </Accordion>
     )
 

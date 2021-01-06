@@ -1,13 +1,11 @@
 import React from 'react';
-import {tMessage} from '../scripts/buildTree';
-import {Alert, AlertTitle} from '@material-ui/lab'
-import Box from '@material-ui/core/Box'
-import Typography from '@material-ui/core/Typography'
-import {makeStyles} from '@material-ui/styles';
 
-interface iResultAlertSection {
-    messages:tMessage[]
-}
+import {tMessage}           from '../../../scripts/buildTree';
+
+import {Alert, AlertTitle}  from '@material-ui/lab'
+import Box                  from '@material-ui/core/Box'
+import Typography           from '@material-ui/core/Typography'
+import {makeStyles}         from '@material-ui/styles';
 
 const useStyles = makeStyles({
     root: {
@@ -20,8 +18,10 @@ const useStyles = makeStyles({
     }
 })
 
-
-const ResultAlertSection:React.FC<iResultAlertSection> = (props) => {
+type tResultAlertSection = {
+    messages:tMessage[]
+}
+const ResultAlertSection:React.FC<tResultAlertSection> = (props) => {
     const classes = useStyles();
     return (
         <Box className={classes.root}>

@@ -1,29 +1,26 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../App';
+import {tHandleOpenSnackbar} from '../../../App';
 
-import buildTree, {tBuildTreeResult}        from '../scripts/buildTree';
-import {numDeform}                          from '../scripts/common';
+import buildTree, {tBuildTreeResult}        from '../../../scripts/buildTree';
+import {numDeform}                          from '../../../scripts/common';
 import makeListArrayFromTree,
-    {tMakeListArrayResult}                  from '../scripts/makeListArrayFromTree';
+    {tMakeListArrayResult}                  from '../../../scripts/makeListArrayFromTree';
 import {
     MultiRecipesDefault,
     NpcSaleItems,
     Recipes,
     tJSON_recipe,
-    tJSON_npcSaleItem} from '../scripts/jsonReader';
+    tJSON_npcSaleItem} from '../../../scripts/jsonReader';
 import moecostDb,{ 
     iDictionary, 
     tDictionary_ItemInfo_user,
     tDictionary_ItemInfo_npc,
-    tDictionary_ItemInfo_creation} from '../scripts/storage';
+    tDictionary_ItemInfo_creation} from '../../../scripts/storage';
+
+import DialogNormal             from '../../commons/dialog/dialogNormal';
 
 import AppBar                   from '@material-ui/core/AppBar';
-import Box                      from '@material-ui/core/Box'
-import Button                   from '@material-ui/core/Button'
-import Dialog                   from '@material-ui/core/Dialog';
-import DialogTitle              from '@material-ui/core/DialogTitle';
-import DialogContent            from '@material-ui/core/DialogContent';
-import DialogActions            from '@material-ui/core/DialogActions';
+import Button                   from '@material-ui/core/Button';
 import TableContainer           from '@material-ui/core/TableContainer';
 import Table                    from '@material-ui/core/Table';
 import TableHead                from '@material-ui/core/TableHead';
@@ -85,14 +82,11 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 
 type tResultConfigItemDialogProps = {
     isOpen: boolean,
-    userDictionary: iDictionary | undefined
     itemName: string,
     close: () => void,
-    handleOpenSnackbar: tHandleOpenSnackbar,
-    changeTrigger : () => void
+    handleOpenSnackbar: tHandleOpenSnackbar
 }
 const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) => {
-    const [befOpen,setBefOpen] = React.useState(false);
     const [tabSelected, setTabSelected] = React.useState("summary");
 
     const [radioSelected,setRadioSelected] = React.useState("");
@@ -100,20 +94,17 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
 
     const classes = useStyles();
     
-    // リセット処理
-    if((! befOpen) && props.isOpen){
+    const handleInitialize = () => {
         setTabSelected("summary");
         // 選択肢を設定
         type tDefConf = {"調達方法": string, "ユーザー価格": number};
         const defConf:tDefConf = (() => {
-            if(props.userDictionary){
-                const dictObj = props.userDictionary.内容.find(d => d.アイテム === props.itemName);
-                if(dictObj){
-                    if(dictObj.調達方法 === "NPC") return {調達方法:"NPC", ユーザー価格:0};
-                    if(dictObj.調達方法 === "生産") return {調達方法:"生産_" + dictObj.レシピ名, ユーザー価格:0};
-                    return {調達方法:"自力調達", ユーザー価格:dictObj.調達価格};
-                };
-            }
+            const dictObj = moecostDb.辞書.内容.find(d => d.アイテム === props.itemName);
+            if(dictObj){
+                if(dictObj.調達方法 === "NPC") return {調達方法:"NPC", ユーザー価格:0};
+                if(dictObj.調達方法 === "生産") return {調達方法:"生産_" + dictObj.レシピ名, ユーザー価格:0};
+                return {調達方法:"自力調達", ユーザー価格:dictObj.調達価格};
+            };
             const npcObj = NpcSaleItems.find(n => n.アイテム === props.itemName);
             if(npcObj) return {調達方法:"NPC", ユーザー価格:0};
             const recipeObj = Recipes.filter(r => r.生成物.アイテム === props.itemName);
@@ -127,14 +118,9 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
         })();
         setRadioSelected(defConf.調達方法);
         setUserCostValue(defConf.ユーザー価格);
-
-        setBefOpen(true);
-    }
-    if(befOpen && (! props.isOpen)){
-        setBefOpen(false);
     }
 
-    const recipes = RetrieveItemData_Recipe(props.itemName, props.userDictionary)
+    const recipes = RetrieveItemData_Recipe(props.itemName)
     const npcs = RetrieveItemData_Npc(props.itemName);
 
     const hasRecipe = (recipes.length === 0) ? false : true;
@@ -185,19 +171,15 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                     null
                 )
             })
-        props.changeTrigger();
         props.close();
     }
 
     return (
-        <Dialog
-            open={props.isOpen}
-            onClose={closeDialog}
-            fullWidth
-            maxWidth="lg"
-            scroll="paper">
-            <Box className={classes.dialogRoot}>
-                <DialogTitle>
+        <DialogNormal
+            isOpen={props.isOpen}
+            handleClose={closeDialog}
+            title={
+                <>
                     <Typography>アイテム情報の確認 - {props.itemName}</Typography>
                     <AppBar position="static" color="default">
                         <Tabs
@@ -224,31 +206,10 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                             />
                         </Tabs>
                     </AppBar>
-                </DialogTitle>
-                <DialogContent>
-                    <RenderSummary
-                        itemName={props.itemName}
-                        tabSelected={(tabSelected === "summary")}
-                        recipes={recipes}
-                        npcs={npcs}
-                        procurement={radioSelected}
-                        userCost={userCostValue}
-                        handleRadio={handleRadio}
-                        handleUserCost={handleUserCost}
-                        handleSubmit={submitItemData}
-                    />
-                    <RenderNpc
-                        tabSelected={(tabSelected === "npc")}
-                        npcs={npcs}
-                        itemName={props.itemName}
-                    />
-                    <RenderRecipe
-                        tabSelected={(tabSelected === "recipe")}
-                        recipes={recipes}
-                        itemName={props.itemName}
-                    />
-                </DialogContent>
-                <DialogActions className={classes.dialogAction}>
+                </>
+            }
+            actions={
+                <>
                     <Button
                         color="default"
                         onClick={closeDialog}
@@ -261,9 +222,33 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                         onClick={handleSubmit}>
                         登録
                     </Button>
-                </DialogActions>
-            </Box>
-        </Dialog>
+                </>
+            }
+            maxWidth="lg"
+            initialize={handleInitialize}
+        >
+            <RenderSummary
+                itemName={props.itemName}
+                tabSelected={(tabSelected === "summary")}
+                recipes={recipes}
+                npcs={npcs}
+                procurement={radioSelected}
+                userCost={userCostValue}
+                handleRadio={handleRadio}
+                handleUserCost={handleUserCost}
+                handleSubmit={submitItemData}
+            />
+            <RenderNpc
+                tabSelected={(tabSelected === "npc")}
+                npcs={npcs}
+                itemName={props.itemName}
+            />
+            <RenderRecipe
+                tabSelected={(tabSelected === "recipe")}
+                recipes={recipes}
+                itemName={props.itemName}
+            />
+        </DialogNormal>
     )
 }
 
@@ -670,11 +655,11 @@ type tRetrieveItemData_RecipeResult = {
 }
 
 
-const RetrieveItemData_Recipe = (itemName:string, dictionary:iDictionary | undefined) => {
+const RetrieveItemData_Recipe = (itemName:string) => {
     const recipeAll = Recipes.filter(r => r.生成物.アイテム === itemName);
     const propBuildTrees = recipeAll.map(r => {return {レシピ名:r.レシピ名, 生成アイテム:[r.生成物.アイテム]}})
     
-    const buildTreeResults = propBuildTrees.map(p => buildTree(p,"fully",0));
+    const buildTreeResults = propBuildTrees.map(p => buildTree(p.レシピ名, p.生成アイテム, "fully", 0));
     const lists = buildTreeResults.map(tree => makeListArrayFromTree(tree.main, tree.common, [], []));
     
     const result: tRetrieveItemData_RecipeResult[] = [];

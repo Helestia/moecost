@@ -2,19 +2,17 @@ import React from 'react';
 
 import ResultItemNameCell   from './resultItemNameCell'
 
-import moecostDb            from '../scripts/storage';
-import {numDeform}          from '../scripts/common';
+import moecostDb            from '../../../scripts/storage';
+import {numDeform}          from '../../../scripts/common';
 import {
     tTreeNode,
     tTreeNode_creation,
     tTreeNode_common,
     tTreeNode_npc,
     tTreeNode_unknown,
-    tTreeNode_user}         from '../scripts/buildTree';
+    tTreeNode_user}         from '../../../scripts/buildTree';
 
-import Accordion            from '@material-ui/core/Accordion';
-import AccordionSummary     from '@material-ui/core/AccordionSummary';
-import AccordionDetails     from '@material-ui/core/AccordionDetails';
+import Accordion            from '../../commons/accordion/accordion';
 
 import TableContainer       from '@material-ui/core/TableContainer'
 import Table                from '@material-ui/core/Table';
@@ -22,13 +20,11 @@ import TableBody            from '@material-ui/core/TableBody';
 import TableRow             from '@material-ui/core/TableRow';
 import Box                  from '@material-ui/core/Box'
 import Paper                from '@material-ui/core/Paper';
-import ExpandMoreIcon       from '@material-ui/icons/ExpandMore';
 import Typography           from '@material-ui/core/Typography'
 import {
     makeStyles,
     createStyles,
-    Theme,
-    useTheme}               from '@material-ui/core/styles';
+    Theme}               from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme:Theme) => createStyles({
     box: {
@@ -57,13 +53,11 @@ type tResultCreationTree = {
     main: tTreeNode_creation[],
     common: tTreeNode_creation[],
     handleExpand: () => void,
-    handleItemClick: (str:string) => void,
-    useChildrenStyles: (props?: any) => Record<"accordionTitleStyle"| "activeStrings", string>
+    handleItemClick: (str:string) => void
 }
 
 const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
-    const childrenStyles = props.useChildrenStyles();
-    const classes = useStyles(useTheme());
+    const classes = useStyles();
 
     // テーブルセルクリックのハンドル
     const handleItemCellClick = (str:string) => {props.handleItemClick(str)};
@@ -264,18 +258,13 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
     return (
         <Accordion
             expanded={props.isExpanded}
-            onChange={props.handleExpand}>
-            <AccordionSummary
-                className={childrenStyles.accordionTitleStyle}
-                expandIcon={<ExpandMoreIcon />}>
-                生産ツリー
-            </AccordionSummary>
-            <AccordionDetails>
-                <Box className={classes.box}>
-                    {renderCommons()}
-                    {renderMain()}
-                </Box>
-            </AccordionDetails>
+            onChange={props.handleExpand}
+            summary="生産ツリー"
+        >
+            <Box className={classes.box}>
+                {renderCommons()}
+                {renderMain()}
+            </Box>
         </Accordion>
     )
 }

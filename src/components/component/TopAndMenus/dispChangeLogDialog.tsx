@@ -1,5 +1,5 @@
 import React from 'react';
-import {History} from '../scripts/jsonReader';
+import {History} from '../../../scripts/jsonReader';
 import Box from '@material-ui/core/Box'
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';

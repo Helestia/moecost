@@ -1,29 +1,33 @@
 import React from 'react';
-import TopBar from './components/topBar'
-import SearchSection, {tSearchSectionRtnFuncProps} from './components/searchSection'
-import ResultSection from './components/resultSection';
+import TopBar from './components/component/TopAndMenus/topBar'
+import SearchSection from './components/component/searchSection/searchSection'
+import ResultSection from './components/component/resultSection/resultSection';
 import moecostDb,{iApplicationConfig} from './scripts/storage';
 
 import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline                    from '@material-ui/core/CssBaseline';
-import Snackbar                       from '@material-ui/core/Snackbar';
+import Snackbar,{SnackbarCloseReason} from '@material-ui/core/Snackbar';
 import Alert                          from '@material-ui/lab/Alert';
 
 // スナックバーの標準のタイムアウト時間
 const defSnackbarTimeout = 5000;
 
 type tSnackbarSeverity = "success" | "warning" | "info" | "error" | undefined;
-export type tHandleOpenSnackbar = (variant:tSnackbarSeverity, message:React.ReactNode, timeout?:number|null) => void;
 
 function App() {
 // 設定情報
   const [configDisplay,setConfigDisplay] = React.useState<iApplicationConfig>(moecostDb.アプリ設定);
-  const [searched, setSearched] = React.useState<tSearchSectionRtnFuncProps>(undefined);
-
-  const [isOpenSnackbar,setIsOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity,setSnackbarSeverity] = React.useState<"error" | "warning" | "info" | "success" | undefined>(undefined);
-  const [snackbarMessage,setSnackbarMessage] = React.useState<React.ReactNode>(<></>);
-  const [snackbarTimeout,setSnackbarTimeout] = React.useState<number|null>(null);
+  const {
+    recipe,
+    items,
+    handleChangeRecipe} = useSearched();
+  const {
+    snackbarIsOpen,
+    snackbarSeverity,
+    snackbarMessage,
+    snackbarAutoHideDuration,
+    handleOpenSnackbar,
+    handleCloseSnackbar} = useSnackbar();
 
   const theme = createMuiTheme({
     palette : {
@@ -73,26 +77,9 @@ function App() {
     }
   });
 
-  // 検索結果の取得
-  const rtnFuncFirstSection = (rtnFuncProp : tSearchSectionRtnFuncProps) => {
-    setSearched(rtnFuncProp);
-  }
-
   // 表示設定更新
   const changeAppPreference = () => setConfigDisplay(moecostDb.アプリ設定);
 
-  // メッセージ表示（スナックバー）
-  const handleOpenSnackbar:tHandleOpenSnackbar = (status,children,timeout) => {
-    setIsOpenSnackbar(true);
-    setSnackbarSeverity(status);
-    setSnackbarMessage(children);
-    if(timeout === undefined) setSnackbarTimeout(defSnackbarTimeout);
-    else setSnackbarTimeout(timeout);
-  }
-  const handleCloseSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
-    if(reason === "clickaway") return;
-    setIsOpenSnackbar(false);
-  }
 
   // 初回処理・moecostDbの初期化・ステート取得
   React.useEffect(()=>{
@@ -108,29 +95,32 @@ function App() {
         changeAppPreference={changeAppPreference}
         handleOpenSnackbar={handleOpenSnackbar} />
       <SearchSection
-        rtnFunc={rtnFuncFirstSection} />
+        handleChangeRecipe={handleChangeRecipe} />
       <ResultSection
-        searched={searched}
+        recipe={recipe}
+        items={items}
         handleOpenSnackbar={handleOpenSnackbar} />
       <RenderSnackbar
-        isOpen={isOpenSnackbar}
+        isOpen={snackbarIsOpen}
         severity={snackbarSeverity}
         message={snackbarMessage}
-        timeout={snackbarTimeout}
+        timeout={snackbarAutoHideDuration}
         onClose={handleCloseSnackbar}
       />
     </ThemeProvider>
   );
 }
 
-type tRenderSnackbar = {
+
+// スナックバー関連処理
+type tRenderSnackbarProps = {
   isOpen: boolean
   severity: tSnackbarSeverity,
   message: React.ReactNode,
   timeout: number | null,
   onClose: () => void
 }
-const RenderSnackbar:React.FC<tRenderSnackbar> = (props) => {
+const RenderSnackbar:React.FC<tRenderSnackbarProps> = (props) => {
   return (
     <Snackbar
       open={props.isOpen}
@@ -145,6 +135,67 @@ const RenderSnackbar:React.FC<tRenderSnackbar> = (props) => {
       </Alert>
     </Snackbar>
   )
+}
+
+type tUseSearched = () => {
+  recipe:string,
+  items:string[],
+  handleChangeRecipe:(recipe:string,createItems:string[]) => void
+}
+const useSearched:tUseSearched = () => {
+  const [recipe,setRecipe] = React.useState("");
+  const [items,setCreateItems] = React.useState<string[]>([]);
+
+  const handleChangeRecipe = (recipe:string,items:string[]) => {
+    setRecipe(recipe);
+    setCreateItems(items);
+  }
+
+  return {
+    recipe:recipe,
+    items:items,
+    handleChangeRecipe:handleChangeRecipe
+  }
+}
+
+export type tHandleOpenSnackbar = (
+  severity: tSnackbarSeverity,
+  message: React.ReactNode,
+  autoHideDuration?: number|null) => void
+type tUseSnackbar = () => {
+  snackbarIsOpen:boolean,
+  snackbarSeverity:tSnackbarSeverity,
+  snackbarMessage:React.ReactNode,
+  snackbarAutoHideDuration: number|null,
+  handleOpenSnackbar: tHandleOpenSnackbar,
+  handleCloseSnackbar: (event?:React.SyntheticEvent,reason?:SnackbarCloseReason) => void
+}
+const useSnackbar:tUseSnackbar = () => {
+  const [isOpenSnackbar,setIsOpenSnackbar] = React.useState(false);
+  const [snackbarSeverity,setSnackbarSeverity] = React.useState<tSnackbarSeverity>(undefined);
+  const [snackbarMessage,setSnackbarMessage] = React.useState<React.ReactNode>(<></>);
+  const [snackbarTimeout,setSnackbarTimeout] = React.useState<number|null>(null);
+
+  const handleOpenSnackbar:tHandleOpenSnackbar = (severity,message,autoHideDuration) => {
+    setIsOpenSnackbar(true);
+    setSnackbarSeverity(severity);
+    setSnackbarMessage(message);
+    if(autoHideDuration === undefined) setSnackbarTimeout(defSnackbarTimeout);
+    else setSnackbarTimeout(autoHideDuration);
+  }
+  const handleCloseSnackbar = (event?:React.SyntheticEvent,reason?:SnackbarCloseReason) =>{
+    if(reason === "clickaway") return;
+    setIsOpenSnackbar(false);
+  }
+
+  return {
+    snackbarIsOpen:isOpenSnackbar,
+    snackbarSeverity: snackbarSeverity,
+    snackbarMessage: snackbarMessage,
+    snackbarAutoHideDuration: snackbarTimeout,
+    handleOpenSnackbar: handleOpenSnackbar,
+    handleCloseSnackbar: handleCloseSnackbar
+  }
 }
 
 export default App;

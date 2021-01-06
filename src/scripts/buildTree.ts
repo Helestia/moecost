@@ -1,4 +1,3 @@
-import {tSearchSectionRtnFuncProps} from '../components/searchSection';
 import moecostDb from './storage';
 import {
     CanStackItems,
@@ -374,24 +373,25 @@ export type tQtyRoleResult = "surplus" | "fully";
 export type tBuildTreeResult = {
     main:tTreeNode_creation[],
     common:tTreeNode_creation[],
-    qtyRoluResult: tQtyRoleResult,
+    qtyRoleResult: tQtyRoleResult,
     totalQuantity: number,
     fullyMinimumQuantity: number,
     message:tMessage[]
 }
 type tBuildTree = (
-    targets:tSearchSectionRtnFuncProps,
+    recipe: string,
+    items: string[],
     qtyRole: tQtyRole,
     qty: number
 ) => tBuildTreeResult;
-const buildTree : tBuildTree = (targets, qtyRole, qty) => {
+const buildTree : tBuildTree = (recipe, items, qtyRole, qty) => {
     // エラー有無確認処理
-    const ErrorObj = handleError(targets,qty);
+    const ErrorObj = handleError(recipe, items, qty);
     if(ErrorObj) return {
         main: [],
         common: [],
         message: [ErrorObj],
-        qtyRoluResult: "surplus",
+        qtyRoleResult: "surplus",
         totalQuantity: 0,
         fullyMinimumQuantity: 0
     } as tBuildTreeResult
@@ -400,13 +400,13 @@ const buildTree : tBuildTree = (targets, qtyRole, qty) => {
     const NpcUseObj = buildNpcUseObj();
 
     // メインツリー構築
-    const mainTreeD = buildMainTree(targets,NpcUseObj);
+    const mainTreeD = buildMainTree(recipe, items, NpcUseObj);
     // 共通中間素材を別ツリーに切りだし
     const mainTreeAndCommonTreeD = splitCommonAndMain(mainTreeD);
     // 余剰作成数なしでの最小作成個数算出
     const minimumCreation = calcMinimumQty(mainTreeAndCommonTreeD.main,mainTreeAndCommonTreeD.common);
     // 作成個数の設定
-    const createQuantity = decideCreateQuantity(targets,qtyRole,qty,minimumCreation);
+    const createQuantity = decideCreateQuantity(items, qtyRole,qty,minimumCreation);
     // ツリーに個数設定
     const mainTreeAndCommonTree = setQuantityToTree(
         mainTreeAndCommonTreeD.main,
@@ -418,7 +418,7 @@ const buildTree : tBuildTree = (targets, qtyRole, qty) => {
         main: mainTreeAndCommonTree.main,
         common: mainTreeAndCommonTree.common,
         message: [],
-        qtyRoluResult: createQuantity.qtyRole,
+        qtyRoleResult: createQuantity.qtyRole,
         totalQuantity: createQuantity.qty,
         fullyMinimumQuantity: minimumCreation
     }
@@ -430,29 +430,21 @@ const buildNpcUseObj:() => tJSON_npcSaleItem[] = () => {
     return NpcSaleItems.filter(items => items.販売情報.some(npc => npc.時代 !== "War Age"));
 }
 
-
-
-
-
-type tHandleError = (targets:tSearchSectionRtnFuncProps, qty:number) => null | tMessage;
-const handleError:tHandleError = (targets, qty) => {
-    if(targets === undefined) return {
+type tHandleError = (recipe:string, items:string[], qty:number) => null | tMessage;
+const handleError:tHandleError = (recipe, items, qty) => {
+    if(recipe === "") return {
         重大度: "error",
         タイトル: "レシピが指定されていません",
-        メッセージ : ["レシピが指定されていません。","本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
+        メッセージ : ["レシピが指定されていません。","本来このメッセージは表示されないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
     }
-    if(targets.生成アイテム.length === 1){
-        if(Recipes.every(r => r.レシピ名 !== targets.レシピ名)) return {
+    if(items.length === 1){
+        if(Recipes.every(r => r.レシピ名 !== recipe)) return {
             重大度:"error",
             タイトル: "レシピが見つかりませんでした",
-            メッセージ:["作成予定のレシピが見つかりませんでした。",`作成予定のアイテム${targets.レシピ名}`,"本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
+            メッセージ:["作成予定のレシピが見つかりませんでした。",`作成予定のアイテム${recipe}`,"本来このメッセージは発生しないはずです。","よろしければこのメッセージが表示された経緯等を報告いただけると助かります。"]
         }
     } else {
-        const noRecipe: string[] = [];
-        targets.生成アイテム.forEach(t => {
-            const recipe = Recipes.find(r => t === r.レシピ名);
-            if(! recipe) noRecipe.push(t);
-        });
+        const noRecipe: string[] = items.filter(item => Recipes.every(r => r.生成物.アイテム !== item))
         if(noRecipe.length !== 0) return {
             重大度:"error",
             タイトル: "一部のレシピが見つかりませんでした",
@@ -465,7 +457,6 @@ const handleError:tHandleError = (targets, qty) => {
         タイトル: "作成個数の指定がマイナス値です",
         メッセージ:["目標とする作成個数にマイナスが指定されています。","再度計算しなおすように指示してください。"]
     }
-
     if(! Number.isInteger(qty)) return {
         重大度:"error",
         タイトル: "作成個数の指定が整数でありません",
@@ -475,8 +466,8 @@ const handleError:tHandleError = (targets, qty) => {
 }
 
 
-type tBuildMainTree = (targets:tSearchSectionRtnFuncProps,npcUseObj:tJSON_npcSaleItem[]) => tTreeNodeD_creation[]
-const buildMainTree:tBuildMainTree = (targets,npcUseObj) => {
+type tBuildMainTree = (recipe:string, items:string[], npcUseObj:tJSON_npcSaleItem[]) => tTreeNodeD_creation[]
+const buildMainTree:tBuildMainTree = (recipe, items, npcUseObj) => {
     // 再起呼び出し部（レシピ登録時に材料をキーに呼び出す）
     type tReCall = (targetName:string,qty:number,sc:t特殊消費,created:string[]) => tTreeNodeD;
     const reCall:tReCall = (targetName, qty, sc, created) => {
@@ -720,16 +711,14 @@ const buildMainTree:tBuildMainTree = (targets,npcUseObj) => {
         }
     }
 
-    // 処理部
-    if(targets === undefined) return []; // これは処理されないはず
-    if(targets.生成アイテム.length === 1){
-        const recipe = Recipes.find(r => r.レシピ名 === targets.レシピ名);
-        if(recipe) return [fCreation(targets.生成アイテム[0], 1, "消失", [], recipe)];
+    if(items.length === 1){
+        const recipeObj = Recipes.find(r => r.レシピ名 === recipe);
+        if(recipeObj) return [fCreation(items[0], 1, "消失", [], recipeObj)];
         return [];
     }
-    return targets.生成アイテム.map(ts => {
-        const recipe = Recipes.find(r => r.生成物.アイテム === ts);
-        if(recipe){return fCreation(ts, 1, "消失", [], recipe)};
+    return items.map(item => {
+        const recipeObj = Recipes.find(r => r.生成物.アイテム === item);
+        if(recipeObj){return fCreation(item , 1, "消失", [], recipeObj)};
         return null;
     }).filter(<T>(x:T | null) : x is T => x !== null);
 }
@@ -1040,11 +1029,11 @@ type tDecideCreateQuantityResult = {
     qtyRole: tQtyRoleResult
 }
 type tDecideCreateQuantity = (
-    targets:tSearchSectionRtnFuncProps,
+    items: string[],
     qtyRole: tQtyRole,
     qty: number,
     mini:number) => tDecideCreateQuantityResult;
-const decideCreateQuantity:tDecideCreateQuantity = (targets, qtyRole, qty, mini) => {
+const decideCreateQuantity:tDecideCreateQuantity = (items, qtyRole, qty, mini) => {
     const fSurplus: () => tDecideCreateQuantityResult = () => {
         if(qty === 0)return {
             qty: 1,
@@ -1069,11 +1058,10 @@ const decideCreateQuantity:tDecideCreateQuantity = (targets, qtyRole, qty, mini)
             qtyRole: "fully"
         };
     }
-    if(targets === undefined)           return fSurplus(); // この処理はありえない…
-    if(qtyRole === "surplus")           return fSurplus();
-    if(qtyRole === "fully")             return fFully();
-    if(targets.生成アイテム.length > 1) return fSurplus();
-    if(CanStackItems.includes(targets.生成アイテム[0])) return fFully();
+    if(qtyRole === "surplus")   return fSurplus();
+    if(qtyRole === "fully")     return fFully();
+    if(items.length > 1)        return fSurplus();
+    if(CanStackItems.includes(items[0])) return fFully();
     return fSurplus();
 }
 
