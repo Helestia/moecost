@@ -29,11 +29,12 @@ import {
 const useStyles = makeStyles((theme:Theme) => createStyles({
     box: {
         maxWidth: "100%"
-
+    },
+    tableContainerBox: {
+        marginBottom: theme.spacing(2)
     },
     tableContainer : {
         display: "inline-box",
-        marginTop: theme.spacing(2),
         width: "auto",
         maxWidth: "100%"
     },
@@ -88,7 +89,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
     
     const renderTable = (nodeArray:tBuildTableObjElement[][],prefix:string,index:number) => (
         <Box
-            className={classes.box}
+            className={classes.tableContainerBox}
             key={prefix + "_" + index}
         >
             <TableContainer
@@ -259,7 +260,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
         <Accordion
             expanded={props.isExpanded}
             onChange={props.handleExpand}
-            summary="生産ツリー"
+            summary={<Typography component="span" variant="h6">生産ツリー</Typography>}
         >
             <Box className={classes.box}>
                 {renderCommons()}

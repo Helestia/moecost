@@ -69,9 +69,16 @@ function App() {
     overrides:{
       MuiAccordionSummary:{
         root: {
+          minHeight: "40px",
           "&:hover": {
             backgroundColor: (configDisplay.表示設定.ダークモード) ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)"
           }
+        },
+        content: {
+          margin:"8px 0"
+        },
+        expandIcon: {
+          padding: "8px"
         }
       }
     }

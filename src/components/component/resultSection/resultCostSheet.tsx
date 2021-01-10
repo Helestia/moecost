@@ -23,6 +23,7 @@ import TableBody         from '@material-ui/core/TableBody';
 import TableFooter       from '@material-ui/core/TableFooter'
 import TableCell         from '@material-ui/core/TableCell';
 import TableRow          from '@material-ui/core/TableRow';
+import Tooltip           from '@material-ui/core/Tooltip';
 import Typography        from '@material-ui/core/Typography'
 import Paper             from '@material-ui/core/Paper';
 
@@ -253,14 +254,19 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                         </>)
                                     }
                                     <TableCell>
-                                        <IconButton
-                                            onClick={handleToggleNotTarget_byproduct(b.アイテム名)}
-                                            size="small">
-                                            {b.計算対象外
-                                                ? <RestoreIcon />
-                                                : <DeleteIcon />
-                                            }
-                                        </IconButton>
+                                        <Tooltip
+                                            title="原価反映／廃棄の切り替え"
+                                            arrow
+                                        >
+                                            <IconButton
+                                                onClick={handleToggleNotTarget_byproduct(b.アイテム名)}
+                                                size="small">
+                                                {b.計算対象外
+                                                    ? <RestoreIcon />
+                                                    : <DeleteIcon />
+                                                }
+                                            </IconButton>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -272,6 +278,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                     ? <TableCell align="right"><Typography color="error">{numDeform(byproductTotal.money) + "+ α"}</Typography></TableCell>
                                     : <TableCell align="right"><Typography>{numDeform(byproductTotal.money)}</Typography></TableCell>
                                 }
+                                <TableCell />
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -352,14 +359,19 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                         </>)
                                     }
                                     <TableCell>
-                                        <IconButton
-                                            onClick={handleToggleNotTarget_surplus(s.アイテム名)}
-                                            size="small">
-                                            {s.計算対象外
-                                                ? <RestoreIcon />
-                                                : <DeleteIcon />
-                                            }
-                                        </IconButton>
+                                        <Tooltip
+                                            title="原価反映／廃棄の切り替え"
+                                            arrow
+                                        >
+                                            <IconButton
+                                                onClick={handleToggleNotTarget_surplus(s.アイテム名)}
+                                                size="small">
+                                                {s.計算対象外
+                                                    ? <RestoreIcon />
+                                                    : <DeleteIcon />
+                                                }
+                                            </IconButton>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -371,6 +383,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                     ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
                                     : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
                                 }
+                                <TableCell />
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -664,7 +677,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
         <Accordion
             expanded={props.isExpanded}
             onChange={props.handleExpand}
-            summary="素材・余剰生産品・副産物一覧"
+            summary={<Typography component="span" variant="h6">原価表</Typography>}
         >
             <Box>
                 {renderTableMaterial()}
@@ -675,7 +688,10 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                 <Button
                     variant="outlined"
                     onClick={props.handleOpenQtyDialog}
-                    className={classes.button}>作成個数の変更</Button>
+                    className={classes.button}
+                >
+                    作成個数の変更
+                </Button>
             </Box>
         </Accordion>
     )

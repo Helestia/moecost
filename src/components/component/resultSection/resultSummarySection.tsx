@@ -61,11 +61,6 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         hasUnknown:false
     }
 
-    type tDataHasStrike = {
-        hasStrike: boolean,
-        nonStrike: tData,
-        Strike: tData
-    }
     const initialDataHasStrike = {
         hasStrike: false,
         nonStrike: cloneObj_JSON(initialData),
@@ -142,7 +137,10 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     );
 
     const renderCreateCount = () => (
-        <Tooltip title="作成個数の変更">
+        <Tooltip
+            title="作成個数の変更"
+            arrow
+        >
             <TableRow 
                 className={classHover.hover}
                 onClick={props.handleOpenQtyDialog}>
@@ -180,7 +178,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         )
     };
     
-    const renderneedRecipes = () => {
+    const renderNeedRecipes = () => {
         if(props.needRecipes.length === 0) return null;
         const needRecipesText = props.needRecipes.join(" / ");
         const renderJSX = (() => {
@@ -227,66 +225,76 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     const renderByproductRebate = () => {
         if(props.byproducts.length === 0) return null;
         return (
-            <TableRow
-                onClick={handleToggleNotTargetByproduct}
-                className={classHover.hover}>
-                <TableCell component="th">
-                    <Typography>副産物価格</Typography>
-                </TableCell>
-                <TableCell
-                    align="right">
-                    {(byproductData.hasStrike)
-                        ? <Typography
-                            color={(byproductData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
-                            className={classes.strikeOut}>
-                            {(byproductData.nonStrike.hasUnknown)
-                                ? numDeform(byproductData.nonStrike.money) + " + 未設定価格"
-                                : numDeform(byproductData.nonStrike.money)}
-                        </Typography>
-                        : null
-                    }
-                    <Typography
-                        color={(byproductData.strike.hasUnknown) ? "error" : "textPrimary"}>
-                        {(byproductData.strike.hasUnknown)
-                            ? numDeform(byproductData.strike.money) + " + 未設定価格"
-                            : numDeform(byproductData.strike.money)
+            <Tooltip
+                title="副産物の原価反映／廃棄を切替"
+                arrow
+            >
+                <TableRow
+                    onClick={handleToggleNotTargetByproduct}
+                    className={classHover.hover}>
+                    <TableCell component="th">
+                        <Typography>副産物価格</Typography>
+                    </TableCell>
+                    <TableCell
+                        align="right">
+                        {(byproductData.hasStrike)
+                            ? <Typography
+                                color={(byproductData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
+                                className={classes.strikeOut}>
+                                {(byproductData.nonStrike.hasUnknown)
+                                    ? numDeform(byproductData.nonStrike.money) + " + 未設定価格"
+                                    : numDeform(byproductData.nonStrike.money)}
+                            </Typography>
+                            : null
                         }
-                    </Typography>
-                </TableCell>
-            </TableRow>
+                        <Typography
+                            color={(byproductData.strike.hasUnknown) ? "error" : "textPrimary"}>
+                            {(byproductData.strike.hasUnknown)
+                                ? numDeform(byproductData.strike.money) + " + 未設定価格"
+                                : numDeform(byproductData.strike.money)
+                            }
+                        </Typography>
+                    </TableCell>
+                </TableRow>
+            </Tooltip>
         );
     }
 
     const renderSurplusRebate = () => {
         if(props.surpluses.length === 0) return null;
         return (
-            <TableRow
-                onClick={handleToggleNotTargetSurplus}
-                className={classHover.hover}>
-                <TableCell component="th">
-                    <Typography>余剰生産価格</Typography>
-                </TableCell>
-                <TableCell
-                    align="right">
-                    {(surplusData.hasStrike)
-                        ? <Typography
-                            color={(surplusData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
-                            className={classes.strikeOut}>
-                            {(surplusData.nonStrike.hasUnknown)
-                                ? numDeform(surplusData.nonStrike.money) + " ± 未設定価格"
-                                : numDeform(surplusData.nonStrike.money)
+            <Tooltip
+                title="余剰生産品の原価反映／廃棄を切替"
+                arrow
+            >
+                <TableRow
+                    onClick={handleToggleNotTargetSurplus}
+                    className={classHover.hover}>
+                    <TableCell component="th">
+                        <Typography>余剰生産価格</Typography>
+                    </TableCell>
+                    <TableCell
+                        align="right">
+                        {(surplusData.hasStrike)
+                            ? <Typography
+                                color={(surplusData.nonStrike.hasUnknown) ? "error" : "textPrimary"}
+                                className={classes.strikeOut}>
+                                {(surplusData.nonStrike.hasUnknown)
+                                    ? numDeform(surplusData.nonStrike.money) + " ± 未設定価格"
+                                    : numDeform(surplusData.nonStrike.money)
+                                }
+                            </Typography>
+                            : null
+                        }
+                        <Typography color={(surplusData.strike.hasUnknown) ? "error" : "textPrimary"}>
+                            {(surplusData.strike.hasUnknown)
+                                ? numDeform(surplusData.strike.money) + " ± 未設定価格"
+                                : numDeform(surplusData.strike.money)
                             }
                         </Typography>
-                        : null
-                    }
-                    <Typography color={(surplusData.strike.hasUnknown) ? "error" : "textPrimary"}>
-                        {(surplusData.strike.hasUnknown)
-                            ? numDeform(surplusData.strike.money) + " ± 未設定価格"
-                            : numDeform(surplusData.strike.money)
-                        }
-                    </Typography>
-                </TableCell>
-            </TableRow>
+                    </TableCell>
+                </TableRow>
+            </Tooltip>
         )
     }
 
@@ -334,7 +342,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
         <Accordion
             expanded={props.isExpanded}
             onChange={props.handleExpand}
-            summary="概要"
+            summary={<Typography component="span" variant="h6">概要</Typography>}
         >
             <TableContainer
                 component={Paper}
@@ -344,7 +352,7 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
                         {renderRecipeName()}
                         {renderCreateCount()}
                         {renderNeedSkills()}
-                        {renderneedRecipes()}
+                        {renderNeedRecipes()}
                         {renderMaterialCost()}
                         {renderByproductRebate()}
                         {renderSurplusRebate()}

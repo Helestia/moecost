@@ -1,9 +1,10 @@
 import React from 'react';
 
-import MuiAccordion        from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import MuiAccordionActions from '@material-ui/core/AccordionActions';
+import MuiAccordion         from '@material-ui/core/Accordion';
+import MuiAccordionSummary  from '@material-ui/core/AccordionSummary';
+import MuiAccordionDetails  from '@material-ui/core/AccordionDetails';
+import MuiAccordionActions  from '@material-ui/core/AccordionActions';
+import MuiDivider           from '@material-ui/core/Divider';
 
 import ExpandMoreIcon   from '@material-ui/icons/ExpandMore';
 
@@ -39,9 +40,12 @@ const Accordion:React.FC<tAccordion> = (props) => {
             </MuiAccordionDetails>
             {(props.actions)
                 ? (
-                    <MuiAccordionActions>
-                        {props.actions}
-                    </MuiAccordionActions>
+                    <>
+                        <MuiDivider />
+                        <MuiAccordionActions>
+                            {props.actions}
+                        </MuiAccordionActions>
+                    </>
                 )
                 : null
             }

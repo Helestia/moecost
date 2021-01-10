@@ -310,15 +310,4 @@ const useResultConfigQtyDialog = (
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
 export default ResultConfigCreateNumberDialog;

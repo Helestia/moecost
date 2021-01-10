@@ -171,7 +171,7 @@ const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ
         表示設定: {
             ダークモード : false,
             smallテーブル: false,
-            検索候補表示数 : 30,
+            検索候補表示数 : 100,
             初期表示設定 : {
                 概要 : true,
                 原価表 : true,

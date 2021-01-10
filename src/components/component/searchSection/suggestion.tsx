@@ -1,27 +1,47 @@
 import React from 'react';
-import moecostDb   from '../../../scripts/storage';
-import {numDeform} from '../../../scripts/common';
-import {Recipes,SeriesCreationItems} from '../../../scripts/jsonReader';
+import moecostDb            from '../../../scripts/storage';
+import {numDeform}          from '../../../scripts/common';
+import {
+    Recipes,
+    SeriesCreationItems}    from '../../../scripts/jsonReader';
 
-import AutoComplete, {createFilterOptions, AutocompleteChangeReason} from '@material-ui/lab/Autocomplete';
-import {FilterOptionsState} from '@material-ui/lab/useAutocomplete'
+import AutoComplete,
+    {createFilterOptions,
+    AutocompleteChangeReason}   from '@material-ui/lab/Autocomplete';
+import {FilterOptionsState}     from '@material-ui/lab/useAutocomplete'
 
-import Box         from '@material-ui/core/Box'
-import Button      from '@material-ui/core/Button'
-import TextField   from '@material-ui/core/TextField';
-import Typography  from '@material-ui/core/Typography';
-import {useTheme}  from '@material-ui/core/styles';
+import Box          from '@material-ui/core/Box'
+import Button       from '@material-ui/core/Button'
+import TextField    from '@material-ui/core/TextField';
+import Typography   from '@material-ui/core/Typography';
+import {
+    makeStyles,
+    createStyles,
+    Theme}          from '@material-ui/core/styles';
 
 // suggestion情報
-export type tSuggestion = {
+type tSuggestion = {
     "レシピ名":string,
     "シリーズレシピ" : boolean
 }
 
-export const defSuggestion : tSuggestion = {
+const defSuggestion : tSuggestion = {
     "レシピ名" : "",
     "シリーズレシピ" : false
 }
+
+const useStyles = makeStyles((theme:Theme) => createStyles({
+    rootBox:{
+        display:"flex",
+        flexWrap:"wrap",
+        marginTop:theme.spacing(2)
+    },
+    Autocomplete:{
+        width:"40em",
+        minWidth:"0px"
+    }
+}))
+
 
 type tSuggestionAreaProps = {
     handleReturnSearch : (recipe:string) => void
@@ -41,17 +61,17 @@ const SuggestionArea:React.FC<tSuggestionAreaProps> = (props) => {
         handleOnChange,
         handleInputChange,
         handleSubmit} = useSuggestion(props.handleReturnSearch)
-    const theme = useTheme();
+    const classes = useStyles();
 
     const handleButtonClick = () => handleSubmit();
 
     return (
         <Box
-            display="flex"
-            flexWrap="wrap"
-            marginTop={theme.spacing(2) + "px"}
+            className={classes.rootBox}
         >
-            <Box>
+            <Box
+                className={classes.Autocomplete}
+            >
                 <AutoComplete
                     size="small"
                     value={value}
@@ -65,7 +85,6 @@ const SuggestionArea:React.FC<tSuggestionAreaProps> = (props) => {
                     renderInput={(p) =>
                         <TextField {...p}
                             onChange={handleInputChange}
-                            style={{width:"450px"}}
                             label="レシピ検索"
                             variant="outlined"
                             helperText={helperText}

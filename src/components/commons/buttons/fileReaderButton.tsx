@@ -13,6 +13,7 @@ const useStylesImport = makeStyles(() => createStyles({
 type tFileReaderButton = {
     color: "primary" | "secondary" | "inherit" | "default"
     disabled: boolean,
+    onSubmit?: () => void, 
     onLoad: (fileContent:string) => void,
     error : () => void
 }
@@ -34,6 +35,7 @@ const FileReaderButton:React.FC<tFileReaderButton> = (props) => {
         const fileReader = new FileReader();
         fileReader.readAsText(inputFileRef.current.files[0]);
         fileReader.onload = handleLoadFile.bind(null,fileReader);
+        if(props.onSubmit) props.onSubmit();
     }
 
     const handleLoadFile = (fileReader:FileReader) => {
