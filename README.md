@@ -27,6 +27,7 @@ http://moecost.starfree.jp
   - Material-ui/lab
   - Material-ui/icons
 - Dexie
+- ajv
 - TypeScript
 
 # 使用データ
@@ -51,3 +52,13 @@ $ npm start
 MITライセンスとします。
 詳細はLICENSREを確認してください。
 
+## データのライセンスについて
+
+`./src/reference/`フォルダ内の下記ファイルについては、[moecoop-data](https://github.com/coop-mojo/moecoop-data)をご確認ください。
+- `canStackItems.json`
+- `recipes.json`
+- `durabilities.json`
+- `npcSaleItems.json`
+- `recipes.json`
+
+これらのファイルは、[moecoop-data](https://github.com/coop-mojo/moecoop-data)での成果物を、[moecost-jsonconv](https://github.com/Helestia/moecost-jsonconv)で加工して使用しています。
