@@ -6,8 +6,8 @@ import {
     tryJsonParse,
     varidateJson_alldata}    from '../../../scripts/varidateJsonFile';
 
-import useAccordionList from '../../commons/hooks/useAccordionList';
-import useDialogParent  from '../../commons/hooks/useDialogParent';
+import useAccordionList from '../../commons/accordion/useAccordionList';
+import useDialogParent  from '../../commons/dialog/useDialogParent';
 
 import DialogNormal from '../../commons/dialog/dialogNormal';
 import DialogEnded  from '../../commons/dialog/dialogEnded';

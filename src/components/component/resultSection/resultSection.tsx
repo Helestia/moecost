@@ -8,8 +8,8 @@ import ResultCreationTree                   from './resultCreationTree';
 import ResultConfigCreateNumberDialog       from './resultConfigCreateNumberDialog';
 import ResultConfigItemDialog               from './resultConfigItemDialog';
 
-import useAccordionList from '../../commons/hooks/useAccordionList';
-import useDialogParent  from '../../commons/hooks/useDialogParent';
+import useAccordionList from '../../commons/accordion/useAccordionList';
+import useDialogParent  from '../../commons/dialog/useDialogParent';
 
 import buildTree,
     {tQtyRole,tQtyRoleResult} from '../../../scripts/buildTree';

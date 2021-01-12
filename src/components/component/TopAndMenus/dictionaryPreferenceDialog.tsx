@@ -2,7 +2,7 @@ import React from 'react';
 import {tHandleOpenSnackbar} from '../../../App';
 import moecostDb,{iDictionary} from '../../../scripts/storage';
 
-import useAccordionControl from '../../commons/hooks/useAccordionList';
+import useAccordionControl from '../../commons/accordion/useAccordionList';
 
 import FileReaderButton from '../../commons/buttons/fileReaderButton';
 import DialogNormal from '../../commons/dialog/dialogNormal';
