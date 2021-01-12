@@ -18,8 +18,9 @@ import moecostDb,{
     tDictionary_ItemInfo_creation} from '../../../scripts/storage';
 
 import DialogNormal             from '../../commons/dialog/dialogNormal';
+import Tabs, {tTabState}        from '../../commons/tabs/tabs';
+import useTabs                  from '../../commons/tabs/useTabs'
 
-import AppBar                   from '@material-ui/core/AppBar';
 import Button                   from '@material-ui/core/Button';
 import TableContainer           from '@material-ui/core/TableContainer';
 import Table                    from '@material-ui/core/Table';
@@ -32,9 +33,6 @@ import RadioGroup               from '@material-ui/core/RadioGroup';
 import TextField                from '@material-ui/core/TextField';
 import FormControlRabel         from '@material-ui/core/FormControlLabel';
 import Paper                    from '@material-ui/core/Paper'
-
-import Tabs                     from '@material-ui/core/Tabs';
-import Tab                      from '@material-ui/core/Tab';
 import Typography               from '@material-ui/core/Typography';
 import List                     from '@material-ui/core/List';
 import ListItem                 from '@material-ui/core/ListItem';
@@ -87,15 +85,38 @@ type tResultConfigItemDialogProps = {
     handleOpenSnackbar: tHandleOpenSnackbar
 }
 const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) => {
-    const [tabSelected, setTabSelected] = React.useState("summary");
+    const tabHooks = useTabs("summary",calcTabState())
 
     const [radioSelected,setRadioSelected] = React.useState("");
     const [userCostValue,setUserCostValue] = React.useState(0);
 
     const classes = useStyles();
     
+    function calcTabState() {
+        const hasRecipe = Recipes.some(recipe => recipe.生成物.アイテム === props.itemName);
+        const hasNpcSale = NpcSaleItems.some(npcs => npcs.アイテム === props.itemName);
+
+        const result : tTabState[] = [
+            {
+                value: "summary",
+                label: "概要・入手方法選択"
+            },
+            {
+                value: "npc",
+                label: "NPC販売情報",
+                disabled: (! hasNpcSale)
+            },
+            {
+                value: "recipe",
+                label: "生産情報",
+                disabled: (! hasRecipe)
+            }
+        ]
+        return result;
+    }
+
     const handleInitialize = () => {
-        setTabSelected("summary");
+        tabHooks.initialize();
         // 選択肢を設定
         type tDefConf = {"調達方法": string, "ユーザー価格": number};
         const defConf:tDefConf = (() => {
@@ -123,13 +144,9 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
     const recipes = RetrieveItemData_Recipe(props.itemName)
     const npcs = RetrieveItemData_Npc(props.itemName);
 
-    const hasRecipe = (recipes.length === 0) ? false : true;
-    const hasNpcSale = (npcs === undefined) ? false: true; 
-
     // ダイアログクローズ
     const closeDialog = () => props.close();
 
-    const handleTabChange = (e:React.ChangeEvent<{}>, tab:string) => setTabSelected(tab);
     const handleRadio = (str:string) => setRadioSelected(str);
     const handleUserCost = (num:number) => setUserCostValue(num);
 
@@ -181,31 +198,12 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
             title={
                 <>
                     <Typography>アイテム情報の確認 - {props.itemName}</Typography>
-                    <AppBar position="static" color="default">
-                        <Tabs
-                            value={tabSelected}
-                            onChange={handleTabChange}
-                            variant="fullWidth"
-                            indicatorColor="primary"
-                        >
-                            <Tab
-                                value="summary"
-                                label="概要・入手方法選択"
-                            />
-                            <Tab
-                                value="npc"
-                                label="NPC販売情報"
-                                className={(! hasNpcSale) ? classes.disableTab : ""}
-                                disabled={(! hasNpcSale)}
-                            />
-                            <Tab
-                                value="recipe"
-                                label="生産情報"
-                                className={(! hasRecipe) ? classes.disableTab : ""}
-                                disabled={(! hasRecipe)}
-                            />
-                        </Tabs>
-                    </AppBar>
+                    <Tabs
+                        value={tabHooks.selected}
+                        reactKeyPrefix="resultSection_resultComfingItemDialog_Tabs_"
+                        tabInfo={calcTabState()}
+                        handleChange={tabHooks.handleChange}
+                    />
                 </>
             }
             actions={
@@ -218,7 +216,7 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                     </Button>
                     <Button
                         color="primary"
-                        disabled={tabSelected !== "summary"}
+                        disabled={tabHooks.selected !== "summary"}
                         onClick={handleSubmit}>
                         登録
                     </Button>
@@ -229,7 +227,7 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
         >
             <RenderSummary
                 itemName={props.itemName}
-                tabSelected={(tabSelected === "summary")}
+                tabSelected={(tabHooks.selected === "summary")}
                 recipes={recipes}
                 npcs={npcs}
                 procurement={radioSelected}
@@ -239,12 +237,12 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
                 handleSubmit={submitItemData}
             />
             <RenderNpc
-                tabSelected={(tabSelected === "npc")}
+                tabSelected={(tabHooks.selected === "npc")}
                 npcs={npcs}
                 itemName={props.itemName}
             />
             <RenderRecipe
-                tabSelected={(tabSelected === "recipe")}
+                tabSelected={(tabHooks.selected === "recipe")}
                 recipes={recipes}
                 itemName={props.itemName}
             />
@@ -551,10 +549,10 @@ type tRenderRecipeProps = {
 }
 const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
     const classes = useStyles();
+
     if(! props.tabSelected) return null;
     if(! props.recipes) return null;
     
-
     const renderRouletteRow = (recipe:tJSON_recipe) => {
         if((! recipe.ギャンブル) && (! recipe.ペナルティ)) return null;
         const text = (()=> {

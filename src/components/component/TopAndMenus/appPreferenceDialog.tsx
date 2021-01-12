@@ -1,8 +1,9 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../../../App';
-import moecostDb,{iApplicationConfig} from '../../../scripts/storage';
+import {tHandleOpenSnackbar}    from '../../../App';
+import moecostDb                from '../../../scripts/storage';
+import Tabs , {tTabState}       from '../../commons/tabs/tabs';
+import useTabs                  from '../../commons/tabs/useTabs';
 
-import AppBar        from '@material-ui/core/AppBar';
 import Button        from '@material-ui/core/Button';
 import Box           from '@material-ui/core/Box';
 import Dialog        from '@material-ui/core/Dialog';
@@ -10,8 +11,6 @@ import DialogTitle   from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import Divider       from '@material-ui/core/Divider';
-import Tabs          from '@material-ui/core/Tabs';
-import Tab           from '@material-ui/core/Tab';
 import TextField     from '@material-ui/core/TextField';
 import Tooltip       from '@material-ui/core/Tooltip';
 import Typography    from '@material-ui/core/Typography';
@@ -52,7 +51,27 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
     dialogAction: {
         alignSelf: "flex-end"
     }
-}))
+}));
+
+const tabsStatus: tTabState[] = [
+    {
+        value: "dispConf",
+        label: <Typography>表示設定</Typography>
+    },
+    {
+        value: "dispTree",
+        label: (
+        <>
+            <Typography>ツリー</Typography>
+            <Typography>表示設定</Typography>
+        </>
+        )
+    },
+    {
+        value: "calc",
+        label: <Typography>計算設定</Typography>
+    }
+]
 
 type tPanelDispConfChangeSwitchProps = "isUseDark" | "isUseSmallTable" | "isDefDispSummary" | "isDefDispCostSheet" | "isDefDispCreationTree";
 
@@ -75,7 +94,7 @@ type tAppPrefeerenceDialog = {
 const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
     const [befOpen, setBefOpen] = React.useState(false);
 
-    const [tabSelected, setTabSelected] = React.useState("dispConf");
+    const tabHooks = useTabs("dispConf",tabsStatus);
 
     const [dispConf_isUseDark,             setDispConf_isUseDark]             = React.useState(false);
     const [dispConf_isUseSmallTable,       setDispConf_isUseSmallTable]       = React.useState(false);
@@ -116,7 +135,10 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
     const classes = useStyles();
 
     if((! befOpen) && props.isOpen){
-        // indexeddbのリフレッシュ
+        
+        setBefOpen(true);
+        tabHooks.initialize();
+
         moecostDb.refleshProperties(dialogInitialize);
     }
     function dialogInitialize (){
@@ -158,9 +180,6 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
 
         setCalc_isUseWarNpc(moecostDb.アプリ設定.その他設定.War販売物使用);
 
-        setTabSelected("dispConf");
-        // 初期化完了フラグ
-        setBefOpen(true);
     }
 
     function handleSubmit () {
@@ -212,7 +231,7 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
             その他設定: {
                 War販売物使用: calc_isUseWarNpc
             }
-        } as iApplicationConfig
+        }
         moecostDb.registerAppPreference(newDbObj)
             .then(() => props.handleOpenSnackbar(
                 "success",
@@ -229,8 +248,6 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
         props.changeAppPreference();
         props.close();
     }
-
-    const handleTabChange = (e:React.ChangeEvent<{}>, tab:string) => setTabSelected(tab);
 
     const handleSwitchDispConf = (str:tPanelDispConfChangeSwitchProps) => {
         if(str === "isUseDark") setDispConf_isUseDark(! dispConf_isUseDark);
@@ -287,31 +304,16 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
             <Box className={classes.dialogRoot}>
                 <DialogTitle>
                     <Typography>アプリケーション設定変更</Typography>
-                    <AppBar position="static" color="default">
-                        <Tabs
-                            value={tabSelected}
-                            onChange={handleTabChange}
-                            variant="fullWidth"
-                            indicatorColor="primary"
-                        >
-                            <Tab
-                                value="dispConf"
-                                label="表示設定"
-                            />
-                            <Tab
-                                value="dispTree"
-                                label={<>ツリー<br />表示設定</>}
-                            />
-                            <Tab
-                                value="calc"
-                                label="計算設定"
-                            />
-                        </Tabs>
-                    </AppBar>
+                    <Tabs
+                        value={tabHooks.selected}
+                        reactKeyPrefix="topAndMenus_AppPreferenceDialog_Tabs_"
+                        tabInfo={tabsStatus}
+                        handleChange={tabHooks.handleChange}
+                    />
                 </DialogTitle>
                 <DialogContent dividers>
                     <PanelDispConf
-                        isDisplay={tabSelected === "dispConf"}
+                        isDisplay={tabHooks.selected === "dispConf"}
                         isUseDark={dispConf_isUseDark}
                         isUseSmallTable={dispConf_isUseSmallTable}
                         suggestMax={dispConf_suggestMax}
@@ -322,7 +324,7 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
                         handleChangeSuggestion={handleChangeSuggestion}
                     />
                     <PanelDispTree
-                        isDisplay={tabSelected === "dispTree"}
+                        isDisplay={tabHooks.selected === "dispTree"}
                         crtIsSkill={dispTree_creation_isSkill}
                         crtIsTechnique={dispTree_creation_isTechnique}
                         crtIsDurable={dispTree_creation_isDurable}
@@ -348,7 +350,7 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
                         handleSwitch={handleSwitchDispTree}
                     />
                     <PanelCalc
-                        isDisplay={tabSelected === "calc"}
+                        isDisplay={tabHooks.selected === "calc"}
                         isUseWarNpc={calc_isUseWarNpc}
                         handleSwitch={handleSwitchCalc}
                     />
