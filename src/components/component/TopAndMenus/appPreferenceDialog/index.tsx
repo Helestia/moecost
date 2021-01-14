@@ -71,10 +71,16 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
         props.changeAppPreference);
     const classes = useStyles();
 
+    const initialize = () => {
+        hooks.handler.initialize();
+        tabHooks.initialize();
+    }
+
     return (
         <DialogNormal
             isOpen={props.isOpen}
             handleClose={props.close}
+            initialize={initialize}
             maxWidth="lg"
             title={
                 <>
@@ -101,7 +107,6 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
                     </Button>
                 </>
             }
-            initialize={hooks.handler.initialize}
         >
             <Box
                 width="100%"
