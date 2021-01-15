@@ -125,32 +125,44 @@ class moecostDbClass extends Dexie {
         return this.delete()
     }
     
-    // 全ての辞書の取得
+    /**
+     * 全ての辞書情報全体を取得取得
+     */
     async retrieveAllDictionary () {
         return await this.dictionary.toArray()
             .then(dictionaries => dictionaries)
             .catch(() => [] as iDictionary[])
     }
 
-    // 全ての辞書名の取得
+    /**
+     * 全ての辞書名の取得
+     */
     async retrieveAllDictionaryNames () {
         const dictionaries = await this.retrieveAllDictionary();
         return dictionaries.map(d => d.辞書名);
     }
 
-    // 全てのベンダー情報の取得
+    /**
+     * 全てのベンダー情報の取得
+     */
     async retrieveAllVendor () {
         return await this.vendor.toArray()
             .then(vendors => vendors)
             .catch(() => [] as iVendor[]);
     }
 
-    // ベンダー情報の登録
+    /**
+     * 特定のベンダーの登録
+     * @param vendor ベンダー情報
+     */
     registerVendor (vendor:iVendor) {
         return this.vendor.put(vendor, vendor.ベンダー名)
     }
 
-    // ベンダー情報の削除
+    /**
+     * 指定ベンダーの削除
+     * @param vendorName ベンダー名
+     */
     deleteVendor (vendorName:string) {
         return this.vendor.delete(vendorName);
     }
@@ -212,8 +224,17 @@ const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ
                 }
             }
         },
-        その他設定: {
-            War販売物使用 : false
+        計算設定: {
+            War販売物使用: false,
+            特殊消費: {
+                失敗時消失:{
+                    消費しない: false,
+                    原価ゼロ: false
+                },
+                未消費: {
+                    原価ゼロ: false
+                }
+            }
         }
     }
 }
@@ -307,8 +328,17 @@ export interface iApplicationConfig {
             }
         }
     },
-    その他設定: {
-        War販売物使用: boolean
+    計算設定: {
+        War販売物使用: boolean,
+        特殊消費: {
+            失敗時消失:{
+                消費しない: boolean,
+                原価ゼロ: boolean
+            },
+            未消費: {
+                原価ゼロ: boolean
+            }
+        }
     }
 }
 

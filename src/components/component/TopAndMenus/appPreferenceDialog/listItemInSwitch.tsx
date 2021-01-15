@@ -8,7 +8,8 @@ import Switch       from '@material-ui/core/Switch';
 type tListItemInSwitch = {
     helpText:Exclude<React.ReactNode,undefined | null>
     isChecked: boolean,
-    listItemClassName: string
+    listItemClassName: string,
+    disabled?: boolean
     onClick:() => void
 }
 
@@ -25,6 +26,7 @@ const ListItemInSwitch:React.FC<tListItemInSwitch> = (props) => (
             <ListItemText>{props.children}</ListItemText>
             <Switch
                 checked={props.isChecked}
+                disabled={props.disabled}
                 onClick={props.onClick}
             />
         </ListItem>
