@@ -898,8 +898,14 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
         multipleCreationSet:number,
         multipleAmountNumber:number) => tMaterialData[];
     const getMaterialData:tGetMaterialData = (node,multipleCreationSet,multipleAmountNumber) => {
+        // 特殊消費対応
+        const isNoLost = (() => {
+            if(node.特殊消費 === "未消費") return true;
+            if(node.特殊消費 === "失敗時消失" && moecostDb.アプリ設定.計算設定.特殊消費.失敗時消失.消費しない) return true;
+            return false;
+        })();
         if(node.調達方法 === "共通素材"){
-            const orderQuantity = multipleAmountNumber * node.個数.上位レシピ要求個数;
+            const orderQuantity = (isNoLost) ? 0 : multipleAmountNumber * node.個数.上位レシピ要求個数;
             const commonObj = (() => {
                 const obj = commonUsage.find(c => node.アイテム名 === c.アイテム名);
                 if(obj) return obj;
@@ -910,13 +916,26 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
                 commonUsage.push(pushobj);
                 return pushobj;
             })();
-            commonObj.使用状況.push(gcdCreateAndAmount(multipleCreationSet, orderQuantity,node.アイテム名));
+            const pushMaterialData:tMaterialData = (() => {
+                if(isNoLost) return {
+                    アイテム: node.アイテム名,
+                    作成数: 1,
+                    要求数: 1
+                }
+                return gcdCreateAndAmount(multipleCreationSet, orderQuantity,node.アイテム名);
+            })();
+            commonObj.使用状況.push(pushMaterialData);
             return [];
         }
-        if(node.調達方法 === "作成"){            
+        if(node.調達方法 === "作成"){
+            if(isNoLost) return [{
+                アイテム: node.アイテム名,
+                作成数: 1,
+                要求数: 1
+            }];
             const orderQuantity = node.特殊消費 === "消費" ? multipleAmountNumber : multipleAmountNumber * node.個数.上位レシピ要求個数;
             const newCreationNumber = multipleCreationSet * node.個数.セット作成個数;
-            const thisResult = gcdCreateAndAmount(newCreationNumber, orderQuantity,node.アイテム名);
+            const thisResult = gcdCreateAndAmount(newCreationNumber, orderQuantity, node.アイテム名);
             const materialResult = node.材料.map(m => getMaterialData(m, thisResult.作成数, thisResult.要求数)).flat();
             return [thisResult].concat(materialResult);
         }
@@ -1086,6 +1105,11 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
         if(node.調達方法 === "自力調達") return setQuantityToNode_user(node,quantity);
         return setQuantityToNode_unknown(node,quantity);
     }
+    const isLostNode = (node:tTreeNodeD) => {
+        if(node.特殊消費 === "未消費") return true;
+        if((node.特殊消費 === "失敗時消失") && moecostDb.アプリ設定.計算設定.特殊消費.失敗時消失.消費しない) return true;
+        return false;
+    }
     type tSetQuantityToNode_create = (node: tTreeNodeD_creation, quantity:number) => tTreeNode_creation;
     const setQuantityToNode_create:tSetQuantityToNode_create = (node,quantity) => {
         // 基礎部の作成
@@ -1148,7 +1172,10 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
     }
     type tSetQuantityToNode_create_nonDurable = (node: tTreeNodeD_creation_nonDurable, quantity:number) => tTreeNode_creation_nonDurable;
     const setQuantityToNode_create_nonDurable:tSetQuantityToNode_create_nonDurable = (node,quantity) => {
-        const useQuantity = quantity * node.個数.上位レシピ要求個数;
+        const isUnLost = isLostNode(node);
+        const useQuantity = (isUnLost) 
+            ? 1 
+            : quantity * node.個数.上位レシピ要求個数;
         const creationQuantity = Math.ceil(useQuantity / node.個数.セット作成個数) * node.個数.セット作成個数;
         return {
             アイテム名: node.アイテム名,
@@ -1207,8 +1234,14 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
     }
     type tSetQuantityToNode_common_nonDurable = (node:tTreeNodeD_common_nonDurable,quantity:number,commonObj:tCommonData) => tTreeNode_common_nonDurable;
     const setQuantityToNode_common_nonDurable:tSetQuantityToNode_common_nonDurable = (node,quantity,commonObj) => {
-        const useItem = quantity * node.個数.上位レシピ要求個数;
-        commonObj.要求個数 += useItem;
+        const isUnLost = isLostNode(node);
+        const useItem = (() => {
+            if(isUnLost) return 1;
+            const result = quantity * node.個数.上位レシピ要求個数;
+            commonObj.要求個数 += result;
+            return result;
+        })();
+        
         return {
             アイテム名: node.アイテム名,
             調達方法: "共通素材",
@@ -1249,7 +1282,10 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
     }
     type tSetQuantityToNode_npc_nonDurable = (node:tTreeNodeD_npc_nonDurable,quantity:number) => tTreeNode_npc_nonDurable;
     const setQuantityToNode_npc_nonDurable:tSetQuantityToNode_npc_nonDurable = (node,quantity) => {
-        const useItem = node.個数.上位レシピ要求個数 * quantity;
+        const isUnLost = isLostNode(node);
+        const useItem = (isUnLost) 
+            ? 1 
+            : quantity * node.個数.上位レシピ要求個数;
         return {
             アイテム名:node.アイテム名,
             調達方法: node.調達方法,
@@ -1294,7 +1330,10 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
     }
     type tSetQuantityToNode_user_nonDurable = (node:tTreeNodeD_user_nonDurable,quantity:number) => tTreeNode_user_nonDurable;
     const setQuantityToNode_user_nonDurable:tSetQuantityToNode_user_nonDurable = (node,quantity) => {
-        const useItem = node.個数.上位レシピ要求個数 * quantity;
+        const isUnLost = isLostNode(node);
+        const useItem = (isUnLost) 
+            ? 1 
+            : quantity * node.個数.上位レシピ要求個数;
         return {
             アイテム名:node.アイテム名,
             調達方法: node.調達方法,
@@ -1333,7 +1372,10 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
     }
     type tSetQuantityToNode_unknown_nonDurable = (node:tTreeNodeD_unknown_nonDurable,quantity:number) => tTreeNode_unknown_nonDurable;
     const setQuantityToNode_unknown_nonDurable:tSetQuantityToNode_unknown_nonDurable = (node,quantity) => {
-        const useItem = node.個数.上位レシピ要求個数 * quantity;
+        const isUnLost = isLostNode(node);
+        const useItem = (isUnLost) 
+            ? 1 
+            : quantity * node.個数.上位レシピ要求個数;
         return {
             アイテム名:node.アイテム名,
             調達方法: node.調達方法,
