@@ -89,14 +89,14 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
     },cloneObj_JSON(reduceResultDefault))
 
     const byproductTotal = props.byproducts.reduce((a,c) => {
-        if(c.計算対象外) return a;
+        if(c.廃棄対象) return a;
         if(c.価格設定有) a.money += c.合計金額;
         else a.hasUnknown = true;
         return a;
     },cloneObj_JSON(reduceResultDefault))
 
     const surplusTotal = props.surpluses.reduce((a,c) => {
-        if(c.計算対象外) return a;
+        if(c.廃棄対象) return a;
         if(c.未設定含) a.hasUnknown = true;
         a.money += c.余り合計金額;
         return a;
@@ -118,13 +118,13 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
         undepreciated:0});
     
     const handleToggleNotTarget_byproduct = (targetItem:string) => () => {
-        const nowNonTargets = props.byproducts.filter(b => b.計算対象外).map(b => b.アイテム名);
+        const nowNonTargets = props.byproducts.filter(b => b.廃棄対象).map(b => b.アイテム名);
         if(nowNonTargets.includes(targetItem)) props.changeNotTargetByproducts(nowNonTargets.filter(nt => nt !== targetItem));
         else props.changeNotTargetByproducts(nowNonTargets.concat(targetItem));
     }
 
     const handleToggleNotTarget_surplus = (targetItem:string) => () => {
-        const nowNonTargets = props.surpluses.filter(s => s.計算対象外).map(s => s.アイテム名);
+        const nowNonTargets = props.surpluses.filter(s => s.廃棄対象).map(s => s.アイテム名);
         if(nowNonTargets.includes(targetItem)) props.changeNotTargetSurpluses(nowNonTargets.filter(nt => nt !== targetItem));
         else props.changeNotTargetSurpluses(nowNonTargets.concat(targetItem));
     }
@@ -224,31 +224,31 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                         <Typography>{b.アイテム名}</Typography>
                                     </ResultItemNameCell>
                                     <TableCell
-                                        className={(b.計算対象外) ? classes.disableCell : ""}>
+                                        className={(b.廃棄対象) ? classes.disableCell : ""}>
                                         <Typography>{b.作成個数}</Typography>
                                     </TableCell>
                                     {(b.価格設定有) 
                                         ? (<>
                                             <TableCell
                                                 align="right"
-                                                className={(b.計算対象外) ? classes.disableCell : ""}>
+                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography>{numDeform(b.設定単価)}</Typography>
                                             </TableCell>
                                             <TableCell
                                                 align="right"
-                                                className={(b.計算対象外) ? classes.disableCell : ""}>
+                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography>{numDeform(b.合計金額)}</Typography>
                                             </TableCell>
                                         </>)
                                         : (<>
                                             <TableCell
                                                 align="center"
-                                                className={(b.計算対象外) ? classes.disableCell : ""}>
+                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography color="error">-</Typography>
                                             </TableCell>
                                             <TableCell
                                                 align="center"
-                                                className={(b.計算対象外) ? classes.disableCell : ""}>
+                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography color="error">-</Typography>
                                             </TableCell>
                                         </>)
@@ -261,7 +261,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                             <IconButton
                                                 onClick={handleToggleNotTarget_byproduct(b.アイテム名)}
                                                 size="small">
-                                                {b.計算対象外
+                                                {b.廃棄対象
                                                     ? <RestoreIcon />
                                                     : <DeleteIcon />
                                                 }
@@ -318,29 +318,29 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                     </ResultItemNameCell>
                                     <TableCell
                                         align="right"
-                                        className={(s.計算対象外) ? classes.disableCell : ""}>
+                                        className={(s.廃棄対象) ? classes.disableCell : ""}>
                                         <Typography>{s.作成個数}</Typography>
                                     </TableCell>
                                     <TableCell
                                         align="right"
-                                        className={(s.計算対象外) ? classes.disableCell : ""}>
+                                        className={(s.廃棄対象) ? classes.disableCell : ""}>
                                         <Typography>{s.余り個数}</Typography>
                                     </TableCell>
                                     {(s.未設定含) 
                                         ? (<>
                                             <TableCell
                                                 align="right"
-                                                className={(s.計算対象外) ? classes.disableCell : ""}>
+                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography
-                                                    color={(s.計算対象外) ? "initial" : "error"}>
+                                                    color={(s.廃棄対象) ? "initial" : "error"}>
                                                     {numDeform(s.単価)} ± α
                                                 </Typography>
                                             </TableCell>
                                             <TableCell
                                                 align="right"                                                
-                                                className={(s.計算対象外) ? classes.disableCell : ""}>
+                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography
-                                                    color={(s.計算対象外) ? "initial" : "error"}>
+                                                    color={(s.廃棄対象) ? "initial" : "error"}>
                                                     {numDeform(s.余り合計金額)} ± α
                                                 </Typography>
                                             </TableCell>
@@ -348,12 +348,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                         : (<>
                                             <TableCell
                                                 align="right"
-                                                className={(s.計算対象外) ? classes.disableCell : ""}>
+                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography>{numDeform(s.単価)}</Typography>
                                             </TableCell>
                                             <TableCell
                                                 align="right"
-                                                className={(s.計算対象外) ? classes.disableCell : ""}>
+                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
                                                 <Typography>{numDeform(s.余り合計金額)}</Typography>
                                             </TableCell>
                                         </>)
@@ -366,7 +366,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                             <IconButton
                                                 onClick={handleToggleNotTarget_surplus(s.アイテム名)}
                                                 size="small">
-                                                {s.計算対象外
+                                                {s.廃棄対象
                                                     ? <RestoreIcon />
                                                     : <DeleteIcon />
                                                 }

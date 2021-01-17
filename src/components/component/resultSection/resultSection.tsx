@@ -70,17 +70,20 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
     if(props.recipe === "") return null;
 
     if(hooks.isCanceledCalcuration) return <ResultAlertSection messages={hooks.messages} />
-
+    // ダイアログ関係のレンダリング
     const renderDialogs = () => (
         <>
+            {/*個数変更ダイアログ*/}
             <ResultConfigCreateNumberDialog 
                 isOpen={isOpenQtyD}
                 quantity={hooks.quantities.resultQty}
                 minimumQty={hooks.quantities.fullyMinimumQuantity}
                 role={hooks.quantities.resultRoute}
                 close={handleCloseQtyD}
-                changeQty={hooks.handle.changeQty}
+                changeQty={hooks.handler.changeQty}
             />
+            
+            {/*アイテム情報ダイアログ*/}
             <ResultConfigItemDialog
                 isOpen={isOpenItemD}
                 itemName={itemConfigTarget}
@@ -115,8 +118,8 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
                 durabilities={hooks.lists.durabilities}
                 skills={hooks.lists.skills}
                 needRecipes={hooks.lists.needRecipes}
-                changeNotTargetByproducts={hooks.handle.notTargetByproducts}
-                changeNotTargetSurpluses={hooks.handle.notTargetSurplus}
+                changeNotTargetByproducts={hooks.handler.trashItemsByproducts}
+                changeNotTargetSurpluses={hooks.handler.trashItemsSurplus}
                 handleOpenQtyDialog={handleOpenQtyD} />
 
             <ResultCostSheet
@@ -127,8 +130,8 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
                 surpluses={hooks.lists.surpluses}
                 byproducts={hooks.lists.byproducts}
                 creations={hooks.lists.creations}
-                changeNotTargetByproducts={hooks.handle.notTargetByproducts}
-                changeNotTargetSurpluses={hooks.handle.notTargetSurplus}
+                changeNotTargetByproducts={hooks.handler.trashItemsByproducts}
+                changeNotTargetSurpluses={hooks.handler.trashItemsSurplus}
                 handleItemClick={handleItemClick}
                 handleOpenQtyDialog={handleOpenQtyD} />
 
@@ -152,8 +155,9 @@ const useResultSection = (recipe:string,items:string[]) => {
 
     const [quantity,setQuantity] = React.useState(0);
     const [qtyRole,setQtyRole] = React.useState<tQtyRole>(undefined);
-    const [notTargetForByproducts,setNotTargetForByproducts] = React.useState<string[]>([]);
-    const [notTargetForSurplus,setNotTargetForSurplus] = React.useState<string[]>([]);
+    const [trashItemsByproduct,setTrashItemsByproduct] = React.useState<string[]>([]);
+    const [trashItemsSurplus,setTrashItemsSurplus] = React.useState<string[]>([]);
+    const [trashItemsNoLost, setTrashItemsNoLost] = React.useState<string[]>([]);
 
     // 初期化・判別処理
     const requireInitialize = (() => {
@@ -165,8 +169,8 @@ const useResultSection = (recipe:string,items:string[]) => {
             setBefItems(items.concat());
             setQuantity(0);
             setQtyRole(undefined);
-            setNotTargetForByproducts([]);
-            setNotTargetForSurplus([]);
+            setTrashItemsByproduct([]);
+            setTrashItemsSurplus([]);
             return true;
         } else {
             return false;
@@ -206,15 +210,18 @@ const useResultSection = (recipe:string,items:string[]) => {
                 lists: makeListArrayFromTree(
                     mainTrees,
                     commonTrees,
-                    notTargetForByproducts,
-                    notTargetForSurplus)
+                    trashItemsByproduct,
+                    trashItemsSurplus,
+                    trashItemsNoLost)
             }
         }
     })();
 
     // 以下リアクティブ
-    const handleNotTarget_Surpluses = (notTargets: string[]) => setNotTargetForSurplus(notTargets);
-    const handleNotTarget_Byproducts = (notTargets: string[]) => setNotTargetForByproducts(notTargets);
+    const handleTrashItem_Surpluses =   (trashItems: string[]) => setTrashItemsSurplus(trashItems);
+    const handleTrashItem_Byproducts =  (trashItems: string[]) => setTrashItemsByproduct(trashItems);
+    const handleTrashItem_NoLost =      (trashItems: string[]) => setTrashItemsNoLost(trashItems);
+
     const handleChangeQty = (qty:number, role:tQtyRoleResult) => {
         setQuantity(qty);
         setQtyRole(role);
@@ -242,13 +249,16 @@ const useResultSection = (recipe:string,items:string[]) => {
             skills: lists.スキル,
             needRecipes: lists.要レシピ
         },
-        notTarget: {
-            surpluses: notTargetForSurplus,
-            byProducts: notTargetForByproducts
+        trashItems: {
+            surpluses: trashItemsSurplus,
+            byProducts: trashItemsByproduct,
+            noLosts: trashItemsNoLost
         },
-        handle: {
-            notTargetByproducts: handleNotTarget_Byproducts,
-            notTargetSurplus: handleNotTarget_Surpluses,
+        handler: {
+            trashItemsByproducts: handleTrashItem_Byproducts,
+            trashItemsSurplus: handleTrashItem_Surpluses,
+            trashItemsNoLost: handleTrashItem_NoLost,
+            
             changeQty: handleChangeQty,
         },
         requireInitialize: requireInitialize

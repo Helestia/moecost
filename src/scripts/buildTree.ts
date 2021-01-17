@@ -54,7 +54,7 @@ type tTreeNode_creation_nonDurable = {
     材料 : tTreeNode[],
 }
 
-type tTreeNode_creation_durable = {
+export type tTreeNode_creation_durable = {
     アイテム名 : string,
     調達方法 : "作成",
     特殊消費: "消費"
@@ -101,7 +101,7 @@ type tTreeNode_npc_nonDurable = {
     }
 }
 
-type tTreeNode_npc_durable = {
+export type tTreeNode_npc_durable = {
     アイテム名 : string,
     調達方法 : "NPC",
     特殊消費: "消費",
@@ -133,7 +133,7 @@ type tTreeNode_user_nonDurable = {
     }
 }
 
-type tTreeNode_user_durable = {
+export type tTreeNode_user_durable = {
     アイテム名 : string,
     調達方法 : "自力調達",
     特殊消費: "消費",
@@ -161,7 +161,7 @@ type tTreeNode_common_nonDurable = {
     }
 }
 
-type tTreeNode_common_durable = {
+export type tTreeNode_common_durable = {
     アイテム名 : string,
     調達方法 : "共通素材",
     特殊消費: "消費"
@@ -183,7 +183,7 @@ type tTreeNode_unknown_nonDurable = {
     }
 }
 
-type tTreeNode_unknown_durable = {
+export type tTreeNode_unknown_durable = {
     アイテム名 : string,
     調達方法 : "未設定",
     特殊消費: "消費",
@@ -900,8 +900,7 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
     const getMaterialData:tGetMaterialData = (node,multipleCreationSet,multipleAmountNumber) => {
         // 特殊消費対応
         const isNoLost = (() => {
-            if(node.特殊消費 === "未消費") return true;
-            if(node.特殊消費 === "失敗時消失" && moecostDb.アプリ設定.計算設定.特殊消費.失敗時消失.消費しない) return true;
+            if(node.特殊消費 === "未消費" || node.特殊消費 === "失敗時消失") return true;
             return false;
         })();
         if(node.調達方法 === "共通素材"){
@@ -1106,8 +1105,7 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
         return setQuantityToNode_unknown(node,quantity);
     }
     const isLostNode = (node:tTreeNodeD) => {
-        if(node.特殊消費 === "未消費") return true;
-        if((node.特殊消費 === "失敗時消失") && moecostDb.アプリ設定.計算設定.特殊消費.失敗時消失.消費しない) return true;
+        if(node.特殊消費 === "未消費" || node.特殊消費 === "失敗時消失") return true;
         return false;
     }
     type tSetQuantityToNode_create = (node: tTreeNodeD_creation, quantity:number) => tTreeNode_creation;

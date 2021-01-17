@@ -76,28 +76,28 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
 
     // 副産物合計
     const byproductData = props.byproducts.reduce((a,c) => {
-        if(c.計算対象外) a.hasStrike = true;
+        if(c.廃棄対象) a.hasStrike = true;
         if(c.価格設定有) {
             a.nonStrike.money += c.合計金額;
-            if(! c.計算対象外) a.strike.money += c.合計金額;
+            if(! c.廃棄対象) a.strike.money += c.合計金額;
         }
         else {
             a.nonStrike.hasUnknown = true;
-            if(! c.計算対象外) a.strike.hasUnknown = true;
+            if(! c.廃棄対象) a.strike.hasUnknown = true;
         }
         return a;
     }, cloneObj_JSON(initialDataHasStrike));
 
     // 余剰作成品合計
     const surplusData = props.surpluses.reduce((a,c) => {
-        if(c.計算対象外) a.hasStrike = true;
+        if(c.廃棄対象) a.hasStrike = true;
         if(c.余り合計金額) {
             a.nonStrike.money += c.余り合計金額;
-            if(! c.計算対象外) a.strike.money += c.余り合計金額;
+            if(! c.廃棄対象) a.strike.money += c.余り合計金額;
         }
         if(c.未設定含) {
             a.nonStrike.hasUnknown = true;
-            if(! c.計算対象外) a.strike.hasUnknown = true;
+            if(! c.廃棄対象) a.strike.hasUnknown = true;
         }
         return a;
     }, cloneObj_JSON(initialDataHasStrike));
@@ -111,13 +111,13 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     }, cloneObj_JSON(initialData));
 
     const handleToggleNotTargetSurplus = () => {
-        const testAllTrue  = props.surpluses.every(s => s.計算対象外 === true);
+        const testAllTrue  = props.surpluses.every(s => s.廃棄対象 === true);
         if(testAllTrue) props.changeNotTargetSurpluses([]);
         else props.changeNotTargetSurpluses(props.surpluses.map(s => s.アイテム名));
     }
 
     const handleToggleNotTargetByproduct = () => {
-        const testAllTrue  = props.byproducts.every(s => s.計算対象外 === true);
+        const testAllTrue  = props.byproducts.every(s => s.廃棄対象 === true);
         if(testAllTrue) props.changeNotTargetByproducts([]);
         else props.changeNotTargetByproducts(props.byproducts.map(s => s.アイテム名));
     }
