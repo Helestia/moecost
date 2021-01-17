@@ -287,7 +287,7 @@ const useResultConfigQtyDialog = (
     }
 
     const handleSubmit = () => {
-        changeQty(quantity,role);
+        changeQty(quantity,selectedRole);
         close();
     }
 
