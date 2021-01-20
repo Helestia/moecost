@@ -140,21 +140,22 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
 }
 
 // スイッチ制御用文字列
-export type tSwitchTarget_app = "useDark" | "useSmallTable" | "defDispSummary" | "defDispCostSheet" | "defDispCreationTree";
-export type tSwitchTarget_treeCreation = "skill" | "technique" | "durable" | "spExpense" | "byproduct" | "surplus" | "createRemark" | "needRecipe" | "maxCreate" | "remark"
-export type tSwitchTarget_treeUserAndNpc = "durable" | "spExpense" | "price"
-export type tSwitchTarget_treeCommonAndUnknown = "durable" | "spExpense" | "message"
-export type tSwitchTarget_treeSet = "all" | "durable" | "spExpense" | "price" | "message"
+export type tSwitchTarget_app = "useDark" | "useSmallTable" | "dispCreationEverytime" | "defDispSummary" | "defDispCostSheet" | "defDispCreationTree";
+export type tSwitchTarget_treeCreation = "skill" | "technique" | "durable" | "spExpense" | "byproduct" | "surplus" | "createRemark" | "needRecipe" | "maxCreate" | "remark";
+export type tSwitchTarget_treeUserAndNpc = "durable" | "spExpense" | "price";
+export type tSwitchTarget_treeCommonAndUnknown = "durable" | "spExpense" | "message";
+export type tSwitchTarget_treeSet = "all" | "durable" | "spExpense" | "price" | "message";
 export type tSwitchTarget_calc = "useWarNpc" | "trashNoLost" | "trashByproduct" | "trashSurplus";
 
 const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClose:() => void, changeAppPreference: () => void) => {
     const [app_suggestMax, setApp_suggestMax] = React.useState(0);
 
-    const [app_isUseDark,             setApp_isUseDark]             = React.useState(false);
-    const [app_isUseSmallTable,       setApp_isUseSmallTable]       = React.useState(false);
-    const [app_isDefDispSummary,      setApp_isDefDispSummary]      = React.useState(true);
-    const [app_isDefDispCostSheet,    setApp_isDefDispCostSheet]    = React.useState(true);
-    const [app_isDefDispCreationTree, setApp_isDefDispCreationTree] = React.useState(true);
+    const [app_isUseDark,             setApp_isUseDark]                 = React.useState(false);
+    const [app_isUseSmallTable,       setApp_isUseSmallTable]           = React.useState(false);
+    const [app_isDispCreationEverytime, setApp_isDispCreationEverytime] = React.useState(false);
+    const [app_isDefDispSummary,      setApp_isDefDispSummary]          = React.useState(true);
+    const [app_isDefDispCostSheet,    setApp_isDefDispCostSheet]        = React.useState(true);
+    const [app_isDefDispCreationTree, setApp_isDefDispCreationTree]     = React.useState(true);
 
     const [treeCreation_isSkill,        setTreeCreation_isSkill]        = React.useState(true);
     const [treeCreation_isTechnique,    setTreeCreation_isTechnique]    = React.useState(true);
@@ -196,6 +197,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
 
         setApp_isUseDark(app.表示設定.ダークモード);
         setApp_isUseSmallTable(app.表示設定.smallテーブル);
+        setApp_isDispCreationEverytime(app.表示設定.常時最終作成物表示);
 
         const defDisp = app.表示設定.初期表示設定
         setApp_isDefDispSummary(defDisp.概要);
@@ -252,6 +254,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
             switch(target) {
                 case "useDark":                 return {targetDispatch:setApp_isUseDark, current:app_isUseDark};
                 case "useSmallTable":           return {targetDispatch:setApp_isUseSmallTable, current:app_isUseSmallTable};
+                case "dispCreationEverytime":   return {targetDispatch:setApp_isDispCreationEverytime, current:app_isDispCreationEverytime};
                 case "defDispSummary":          return {targetDispatch:setApp_isDefDispSummary, current:app_isDefDispSummary};
                 case "defDispCostSheet":        return {targetDispatch:setApp_isDefDispCostSheet, current:app_isDefDispCostSheet};
                 case "defDispCreationTree":     return {targetDispatch:setApp_isDefDispCreationTree, current:app_isDefDispCreationTree};
@@ -392,6 +395,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
             表示設定:{
                 ダークモード: app_isUseDark,
                 smallテーブル: app_isUseSmallTable,
+                常時最終作成物表示: app_isDispCreationEverytime,
                 検索候補表示数: app_suggestMax,
                 初期表示設定: {
                     概要: app_isDefDispSummary,
@@ -442,7 +446,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
                 }
             }
         };
-        console.log(resultDbStatus);
+
         moecostDb.registerAppPreference(resultDbStatus)
             .then(() => handleOpenSnackbar(
                 "success",
@@ -466,6 +470,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
             app: {
                 isUseDark: app_isUseDark,
                 isUseSmallTable: app_isUseSmallTable,
+                isDispCreationEverytime: app_isDispCreationEverytime,
                 suggestMax: app_suggestMax,
                 isDefDispSummary: app_isDefDispSummary,
                 isDefDispCostSheet: app_isDefDispCostSheet,

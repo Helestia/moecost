@@ -43,6 +43,7 @@ type tAppTabPanel = {
     status:{
         isUseDark: boolean,
         isUseSmallTable: boolean,
+        isDispCreationEverytime: boolean,
         suggestMax: number,
         isDefDispSummary: boolean,
         isDefDispCostSheet: boolean,
@@ -66,7 +67,7 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                 <List
                     className={classes.list}
                     dense
-                    subheader={<Typography variant="subtitle1">レシピ検索候補</Typography>}
+                    subheader={<Typography variant="subtitle1">表示設定全般</Typography>}
                 >
                     <ListItemInSwitch
                         helpText={<Typography variant="body2">アプリ全体の色設定を黒背景に変更します。</Typography>}
@@ -88,6 +89,19 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         listItemClassName={props.listItemClassName}
                     >
                         緻密表の使用
+                    </ListItemInSwitch>
+                    <ListItemInSwitch
+                        helpText={
+                            <>
+                                <Typography variant="body2">原価表に常に最終成果物を表示します。</Typography>
+                                <Typography variant="body2">OFFの場合、セット生産時のみ表示します。</Typography>
+                            </>
+                        }
+                        isChecked={props.status.isDispCreationEverytime}
+                        onClick={props.handler.switch.bind(null,"dispCreationEverytime",undefined)}
+                        listItemClassName={props.listItemClassName}
+                    >
+                        常時最終作成物表示
                     </ListItemInSwitch>
                 </List>
             </Paper>
