@@ -14,17 +14,18 @@ import {
     Theme}  from '@material-ui/core/styles';
 const useStyle = makeStyles((theme:Theme) => createStyles({
     rootBox: {
+        width:"100%",
         display:"flex",
+        justifyContent: "center",
         [theme.breakpoints.up("lg")] : {
             flexWrap: "wrap"
         },
         [theme.breakpoints.down("md")] : {
             flexDirection:"column",
-            width:"100%"
         }
     },
     paper: {
-        flex: "1 1",
+        flex: "auto",
         [theme.breakpoints.down("md")]: {
             width: "100%"
         }
@@ -40,9 +41,9 @@ type tAppTabPanel = {
     listItemClassName: string,
     status:{
         isUseWarNpc: boolean,
-        isFailLostUnlost: boolean,
-        isFailLostOverwrite: boolean,
-        isUnlostOverwrite: boolean
+        isTrashNoLost: boolean,
+        isTrashSurplus: boolean,
+        isTrashByproduct: boolean
     }
     handler:{
         switch: (target:tSwitchTarget_calc,terminus?:boolean) => void,
@@ -52,12 +53,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
     const classes = useStyle();
 
     if(! props.isDisplay) return null;
-
-    const hanldeChangeSwitchFailLostOverwrite = () => {
-        if(! props.status.isFailLostUnlost) return () => {};
-        return props.handler.switch.bind(null,"failLostOverwrite",undefined)
-    }
-    
     return (
         <Box className={classes.rootBox}>
             <Paper className={classes.paper}>
@@ -80,45 +75,31 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                 <List
                     className={classes.list}
                     dense
-                    subheader={<Typography variant="subtitle1">特殊消費:失敗時消失</Typography>}
+                    subheader={<Typography variant="subtitle1">目標物以外の廃棄設定</Typography>}
                 >
                     <ListItemInSwitch
-                        helpText={<Typography variant="body2">コンバイン成功を前提とし、必要個数を常に１に固定します。</Typography>}
-                        isChecked={props.status.isFailLostUnlost}
-                        onClick={props.handler.switch.bind(null,"failLostUnlost",undefined)}
+                        helpText={<Typography variant="body2">未消費系素材（未消費／失敗時消失）を使用時、初期で廃棄状態にセットします。</Typography>}
+                        isChecked={props.status.isTrashNoLost}
+                        onClick={props.handler.switch.bind(null,"trashNoLost",undefined)}
                         listItemClassName={props.listItemClassName}
                     >
-                        必要個数を1に固定
+                        消失しない素材
                     </ListItemInSwitch>
                     <ListItemInSwitch
-                        helpText={
-                            <>
-                                <Typography variant="body2">消失しないアイテムなので、原価をゼロとして計算します。</Typography>
-                                <Typography variant="body2">「必要個数を1に固定」を使用することが前提です。</Typography>
-                            </>
-                        }
-                        isChecked={props.status.isFailLostOverwrite}
-                        disabled={(! props.status.isFailLostUnlost)}
-                        onClick={hanldeChangeSwitchFailLostOverwrite()}
+                        helpText={<Typography variant="body2">副産物が生成されるレシピ作成時、初期で廃棄状態にセットします。</Typography>}
+                        isChecked={props.status.isTrashByproduct}
+                        onClick={props.handler.switch.bind(null,"trashByproduct",undefined)}
                         listItemClassName={props.listItemClassName}
                     >
-                        原価をゼロに固定
+                        副産物
                     </ListItemInSwitch>
-                </List>
-            </Paper>
-            <Paper className={classes.paper}>
-                <List
-                    className={classes.list}
-                    dense
-                    subheader={<Typography variant="subtitle1">特殊消費:未消費</Typography>}
-                >
                     <ListItemInSwitch
-                        helpText={<Typography variant="body2">消失しないアイテムなので、原価をゼロとして計算します。</Typography>}
-                        isChecked={props.status.isUnlostOverwrite}
-                        onClick={props.handler.switch.bind(null,"unLostOverwrite",undefined)}
+                        helpText={<Typography variant="body2">余分に作成された生産物が作成される場合、初期で廃棄状態にセットします。</Typography>}
+                        isChecked={props.status.isTrashSurplus}
+                        onClick={props.handler.switch.bind(null,"trashSurplus",undefined)}
                         listItemClassName={props.listItemClassName}
                     >
-                        原価をゼロに固定
+                        余剰生産品
                     </ListItemInSwitch>
                 </List>
             </Paper>

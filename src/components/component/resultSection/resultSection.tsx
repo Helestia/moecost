@@ -116,11 +116,14 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
                 surpluses={hooks.lists.surpluses}
                 byproducts={hooks.lists.byproducts}
                 durabilities={hooks.lists.durabilities}
+                noLostItems={hooks.lists.noLostItems}
                 skills={hooks.lists.skills}
                 needRecipes={hooks.lists.needRecipes}
-                changeNotTargetByproducts={hooks.handler.trashItemsByproducts}
-                changeNotTargetSurpluses={hooks.handler.trashItemsSurplus}
-                handleOpenQtyDialog={handleOpenQtyD} />
+                changeTrashItemsByproducts={hooks.handler.trashItemsByproducts}
+                changeTrashItemsSurpluses={hooks.handler.trashItemsSurplus}
+                changeTrashItemsNoLost={hooks.handler.trashItemsNoLost}
+                handleOpenQtyDialog={handleOpenQtyD}
+            />
 
             <ResultCostSheet
                 isExpanded={isExpandeds[1]}
@@ -129,11 +132,14 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
                 durabilities={hooks.lists.durabilities}
                 surpluses={hooks.lists.surpluses}
                 byproducts={hooks.lists.byproducts}
+                noLostItems={hooks.lists.noLostItems}
                 creations={hooks.lists.creations}
-                changeNotTargetByproducts={hooks.handler.trashItemsByproducts}
-                changeNotTargetSurpluses={hooks.handler.trashItemsSurplus}
+                changeTrashItemsByproducts={hooks.handler.trashItemsByproducts}
+                changeTrashItemsSurpluses={hooks.handler.trashItemsSurplus}
+                changeTrashItemsNoLost={hooks.handler.trashItemsNoLost}
                 handleItemClick={handleItemClick}
-                handleOpenQtyDialog={handleOpenQtyD} />
+                handleOpenQtyDialog={handleOpenQtyD}
+            />
 
             <ResultCreationTree
                 isExpanded={isExpandeds[2]}
@@ -149,15 +155,21 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
     )
 }
 
+export type tTrashState = {
+    アイテム:string,
+    廃棄:boolean
+}
+
+
 const useResultSection = (recipe:string,items:string[]) => {
     const [befRecipe,setBefRecipe] = React.useState("");
     const [befItems,setBefItems] = React.useState<string[]>([]);
 
     const [quantity,setQuantity] = React.useState(0);
     const [qtyRole,setQtyRole] = React.useState<tQtyRole>(undefined);
-    const [trashItemsByproduct,setTrashItemsByproduct] = React.useState<string[]>([]);
-    const [trashItemsSurplus,setTrashItemsSurplus] = React.useState<string[]>([]);
-    const [trashItemsNoLost, setTrashItemsNoLost] = React.useState<string[]>([]);
+    const [trashItemsByproduct,setTrashItemsByproduct] = React.useState<tTrashState[]>([]);
+    const [trashItemsSurplus,setTrashItemsSurplus] = React.useState<tTrashState[]>([]);
+    const [trashItemsNoLost, setTrashItemsNoLost] = React.useState<tTrashState[]>([]);
 
     // 初期化・判別処理
     const requireInitialize = (() => {
@@ -171,6 +183,7 @@ const useResultSection = (recipe:string,items:string[]) => {
             setQtyRole(undefined);
             setTrashItemsByproduct([]);
             setTrashItemsSurplus([]);
+            setTrashItemsNoLost([]);
             return true;
         } else {
             return false;
@@ -200,7 +213,8 @@ const useResultSection = (recipe:string,items:string[]) => {
                     最終作成物: [],
                     耐久消費: [],
                     スキル: [],
-                    要レシピ: []
+                    要レシピ: [],
+                    未消費素材: []
                 }
             }
         } else {
@@ -218,9 +232,28 @@ const useResultSection = (recipe:string,items:string[]) => {
     })();
 
     // 以下リアクティブ
-    const handleTrashItem_Surpluses =   (trashItems: string[]) => setTrashItemsSurplus(trashItems);
-    const handleTrashItem_Byproducts =  (trashItems: string[]) => setTrashItemsByproduct(trashItems);
-    const handleTrashItem_NoLost =      (trashItems: string[]) => setTrashItemsNoLost(trashItems);
+    const handleTrashItem_Surpluses =   (trashList: string[]) => {
+        const newTrashArray:tTrashState[] = lists.余剰作成.map(surplus => ({
+            アイテム: surplus.アイテム名,
+            廃棄: trashList.includes(surplus.アイテム名)
+        }));
+        setTrashItemsSurplus(newTrashArray);
+    }
+    const handleTrashItem_Byproducts =  (trashList: string[]) => {
+        const newTrashArray:tTrashState[] = lists.副産物.map(byproduct => ({
+            アイテム: byproduct.アイテム名,
+            廃棄: trashList.includes(byproduct.アイテム名)
+        }));
+        setTrashItemsByproduct(newTrashArray);
+    }
+
+    const handleTrashItem_NoLost = (trashList: string[]) => {
+        const newTrashArray:tTrashState[] = lists.未消費素材.map(noLost => ({
+            アイテム: noLost.アイテム名,
+            廃棄: trashList.includes(noLost.アイテム名)
+        }));
+        setTrashItemsNoLost(newTrashArray);
+    }
 
     const handleChangeQty = (qty:number, role:tQtyRoleResult) => {
         setQuantity(qty);
@@ -247,7 +280,8 @@ const useResultSection = (recipe:string,items:string[]) => {
             durabilities: lists.耐久消費,
             creations: lists.最終作成物,
             skills: lists.スキル,
-            needRecipes: lists.要レシピ
+            needRecipes: lists.要レシピ,
+            noLostItems: lists.未消費素材
         },
         trashItems: {
             surpluses: trashItemsSurplus,

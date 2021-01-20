@@ -15,6 +15,7 @@ import {
     Theme}  from '@material-ui/core/styles';
 const useStyle = makeStyles((theme:Theme) => createStyles({
     rootBox: {
+        width:"100%",
         display:"flex",
         [theme.breakpoints.up("lg")] : {
             flexWrap: "wrap"
@@ -25,7 +26,7 @@ const useStyle = makeStyles((theme:Theme) => createStyles({
         }
     },
     paper: {
-        flex: "1 1",
+        flex: "auto",
         [theme.breakpoints.down("md")]: {
             width: "100%"
         }

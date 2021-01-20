@@ -166,8 +166,6 @@ class moecostDbClass extends Dexie {
     deleteVendor (vendorName:string) {
         return this.vendor.delete(vendorName);
     }
-
-
 }
 
 
@@ -226,14 +224,10 @@ const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ
         },
         計算設定: {
             War販売物使用: false,
-            特殊消費: {
-                失敗時消失:{
-                    消費しない: false,
-                    原価ゼロ: false
-                },
-                未消費: {
-                    原価ゼロ: false
-                }
+            廃棄設定: {
+                副産物: false,
+                余剰生産物: false,
+                未消費素材: false
             }
         }
     }
@@ -330,14 +324,10 @@ export interface iApplicationConfig {
     },
     計算設定: {
         War販売物使用: boolean,
-        特殊消費: {
-            失敗時消失:{
-                消費しない: boolean,
-                原価ゼロ: boolean
-            },
-            未消費: {
-                原価ゼロ: boolean
-            }
+        廃棄設定: {
+            副産物: boolean,
+            余剰生産物: boolean,
+            未消費素材: boolean
         }
     }
 }

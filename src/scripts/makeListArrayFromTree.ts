@@ -1,17 +1,18 @@
 import {
     tTreeNode,
     tTreeNode_creation,
-    tTreeNode_creation_durable,
     tTreeNode_npc,
-    tTreeNode_npc_durable,
     tTreeNode_common,
-    tTreeNode_common_durable,
     tTreeNode_unknown,
-    tTreeNode_unknown_durable,
     tTreeNode_user,
-    tTreeNode_user_durable,
 } from './buildTree';
 import {cloneObj_JSON} from './common';
+import moecostDb from './storage';
+
+type tTrashState = {
+    アイテム: string,
+    廃棄:boolean
+}
 
 export type tMaterial = tMaterial_user  | tMaterial_npc | tMaterial_unknown;
 type tMaterial_user = {
@@ -136,7 +137,7 @@ type tNoLostItem_creation = {
 
 type tNoLostItem_user = {
     アイテム名: string,
-    調達方法: "作成",
+    調達方法: "自力調達",
     個数: number,
     単価: number,
     合計金額: number,
@@ -144,7 +145,7 @@ type tNoLostItem_user = {
 }
 type tNoLostItem_npc = {
     アイテム名: string,
-    調達方法: "作成",
+    調達方法: "NPC",
     個数: number,
     単価: number,
     合計金額: number,
@@ -183,16 +184,14 @@ const reCallResultDefault:tReCallResult = {
     未設定含: false
 }
 
-type tTreeNode_durables = tTreeNode_creation_durable | tTreeNode_common_durable | tTreeNode_user_durable | tTreeNode_npc_durable | tTreeNode_unknown_durable;
-
 type tMakeListArrayFromTree = (
     main: tTreeNode_creation[],
     common: tTreeNode_creation[],
-    trashItemsByproduct: string[],
-    trashItemsSruplus: string[],
-    trashItemsNoLost: string[]
+    trashStateItemsByproduct: tTrashState[],
+    trashStateItemsSurplus: tTrashState[],
+    trashStateItemsNoLost: tTrashState[]
 ) => tMakeListArrayResult
-const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsByproduct, trashItemsSruplus, trashItemsNoLost) => {
+const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateItemsByproduct,trashStateItemsSurplus,trashStateItemsNoLost) => {
     const materials:tMaterial[]          = [];
     const byproducts:tByproduct[]        = [];
     const surpluses:tSurplus[]           = [];
@@ -265,6 +264,12 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
      */
     const processByproducts: (node:tTreeNode_creation) => tReCallResult = (node) => {
         if(node.副産物 === undefined) return cloneObj_JSON(reCallResultDefault);
+        const isTrash = ((item:string) => {
+            const trashObj = trashStateItemsByproduct.find(obj => obj.アイテム === item);
+            if(trashObj !== undefined) return trashObj.廃棄;
+            return moecostDb.アプリ設定.計算設定.廃棄設定.副産物;
+        })
+
         node.副産物.forEach(b => {
             if(b.原価) byproducts.push({
                 アイテム名: b.アイテム名,
@@ -272,18 +277,18 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
                 価格設定有: true,
                 設定単価: b.原価.設定原価,
                 合計金額: b.原価.合計価格,
-                廃棄対象: trashItemsByproduct.includes(b.アイテム名)
+                廃棄対象: isTrash(b.アイテム名)
             });
             else byproducts.push({
                 アイテム名: b.アイテム名,
                 作成個数: b.作成個数,
                 価格設定有: false,
-                廃棄対象: trashItemsByproduct.includes(b.アイテム名)
+                廃棄対象: isTrash(b.アイテム名)
             });
         });
 
         return node.副産物.reduce((acc,cur) => {
-            if(trashItemsByproduct.includes(cur.アイテム名)) return acc;
+            if(isTrash(cur.アイテム名)) return acc;
 
             if(cur.原価) acc.価格 += cur.原価.設定原価;
             else acc.未設定含 = true;
@@ -293,9 +298,14 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
 
     const processSurplus:(node:tTreeNode_creation,parentResult:tReCallResult) => tReCallResult = (node,parentResult) => {
         if(node.個数.余剰作成個数 === 0) return cloneObj_JSON(reCallResultDefault);
+        const isThisNodeTrash = (() => {
+            const trashObj = trashStateItemsSurplus.find(obj => obj.アイテム === node.アイテム名);
+            if(trashObj !== undefined) return trashObj.廃棄;
+            return moecostDb.アプリ設定.計算設定.廃棄設定.余剰生産物;
+        })()
+
         const unitCost = parentResult.価格 / node.個数.作成個数;
         const surplusCost = unitCost * node.個数.余剰作成個数;
-        const isTrash = trashItemsSruplus.includes(node.アイテム名);
 
         surpluses.push({
             アイテム名: node.アイテム名,
@@ -304,10 +314,10 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
             単価: unitCost,
             余り合計金額: surplusCost,
             未設定含: parentResult.未設定含,
-            廃棄対象: isTrash
+            廃棄対象: isThisNodeTrash
         });
 
-        if(isTrash) return cloneObj_JSON(reCallResultDefault);
+        if(isThisNodeTrash) return cloneObj_JSON(reCallResultDefault);
 
         return {
             価格: surplusCost,
@@ -417,18 +427,22 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
 
     const processNoLost = (node:tTreeNode, parentResult:tReCallResult) => {
         if(node.特殊消費 !== "未消費" && node.特殊消費 !== "失敗時消失") return cloneObj_JSON(reCallResultDefault);
+        const isThisNodeTrash = (() => {
+            const trashObj = trashStateItemsNoLost.find(obj => obj.アイテム === node.アイテム名);
+            if(trashObj !== undefined) return trashObj.廃棄;
+            return moecostDb.アプリ設定.計算設定.廃棄設定.未消費素材;
+        })();
         const noLostItemObj = (() => {
             const findObj = noLostItems.find(noLostItem => noLostItem.アイテム名 === node.アイテム名 && noLostItem.調達方法 === node.調達方法);
             if(findObj !== undefined) return findObj;
             
-            const isNoTarget = trashItemsNoLost.includes(node.アイテム名);
             if(node.調達方法 === "作成"){
                 const usingQty = node.個数.作成個数 - node.個数.余剰作成個数;
                 const unitCost = parentResult.価格 / usingQty;
                 const result:tNoLostItem_creation = {
                     アイテム名: node.アイテム名,
                     調達方法: "作成",
-                    廃棄対象: isNoTarget,
+                    廃棄対象: isThisNodeTrash,
                     未設定含: parentResult.未設定含,
                     個数: 1,
                     単価: unitCost,
@@ -442,7 +456,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
                 const result:tNoLostItem_creation = {
                     アイテム名: node.アイテム名,
                     調達方法: "作成",
-                    廃棄対象: isNoTarget,
+                    廃棄対象: isThisNodeTrash,
                     未設定含: parentResult.未設定含,
                     個数: 1,
                     単価: unitCost,
@@ -454,8 +468,8 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
             if(node.調達方法 === "自力調達"){
                 const result:tNoLostItem_user = {
                     アイテム名: node.アイテム名,
-                    調達方法: "作成",
-                    廃棄対象: isNoTarget,
+                    調達方法: "自力調達",
+                    廃棄対象: isThisNodeTrash,
                     個数: 1,
                     単価: node.価格.調達単価,
                     合計金額: node.価格.合計金額
@@ -466,8 +480,8 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
             if(node.調達方法 === "NPC"){
                 const result:tNoLostItem_npc = {
                     アイテム名: node.アイテム名,
-                    調達方法: "作成",
-                    廃棄対象: isNoTarget,
+                    調達方法: "NPC",
+                    廃棄対象: isThisNodeTrash,
                     個数: 1,
                     単価: node.価格.調達単価,
                     合計金額: node.価格.合計金額
@@ -479,7 +493,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashItemsB
                 アイテム名: node.アイテム名,
                 調達方法: "未設定",
                 個数: 1,
-                廃棄対象: isNoTarget
+                廃棄対象: isThisNodeTrash
             }
             noLostItems.push(result);
             return result;

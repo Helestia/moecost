@@ -21,13 +21,13 @@ import {
 
 const useStyle = makeStyles((theme:Theme) => createStyles({
     rootBox: {
+        width:"100%",
         display:"flex",
         [theme.breakpoints.up("lg")] : {
             flexWrap: "wrap"
         },
         [theme.breakpoints.down("md")] : {
-            flexDirection:"column",
-            width:"100%"
+            flexDirection:"column"
         }
     },
     paper: {

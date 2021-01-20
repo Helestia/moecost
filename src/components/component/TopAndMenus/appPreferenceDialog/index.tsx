@@ -145,7 +145,7 @@ export type tSwitchTarget_treeCreation = "skill" | "technique" | "durable" | "sp
 export type tSwitchTarget_treeUserAndNpc = "durable" | "spExpense" | "price"
 export type tSwitchTarget_treeCommonAndUnknown = "durable" | "spExpense" | "message"
 export type tSwitchTarget_treeSet = "all" | "durable" | "spExpense" | "price" | "message"
-export type tSwitchTarget_calc = "useWarNpc" | "failLostUnlost" | "failLostOverwrite" | "unLostOverwrite";
+export type tSwitchTarget_calc = "useWarNpc" | "trashNoLost" | "trashByproduct" | "trashSurplus";
 
 const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClose:() => void, changeAppPreference: () => void) => {
     const [app_suggestMax, setApp_suggestMax] = React.useState(0);
@@ -183,10 +183,10 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
     const [treeUnknown_isSpExpense, setTreeUnknown_isSpExpense] = React.useState(true);
     const [treeUnknown_isMessage,   setTreeUnknown_isMessage]   = React.useState(true);
 
-    const [calc_isUseWarNpc         , setCalc_isUseWarNpc]          = React.useState(false);
-    const [calc_failLost_isUnlost   , setCalc_failLost_isUnlost]    = React.useState(false);
-    const [calc_failLost_isOverwrite, setCalc_failLost_isOverwrite] = React.useState(false);
-    const [calc_unLost_isOverwrite  , setCalc_unLost_isOverwrite]   = React.useState(false);
+    const [calc_isUseWarNpc   , setCalc_isUseWarNpc]    = React.useState(false);
+    const [calc_trashNoLost   , setCalc_trashNoLost]    = React.useState(false);
+    const [calc_trashByproduct, setCalc_trashByproduct] = React.useState(false);
+    const [calc_trashSurplus  , setCalc_trashSurplus]   = React.useState(false);
 
     const initialize = () => moecostDb.refleshProperties(initStatus);
 
@@ -236,9 +236,9 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
 
         const calc = app.計算設定;
         setCalc_isUseWarNpc(calc.War販売物使用);
-        setCalc_failLost_isUnlost(calc.特殊消費.失敗時消失.消費しない);
-        setCalc_failLost_isOverwrite(calc.特殊消費.失敗時消失.原価ゼロ);
-        setCalc_unLost_isOverwrite(calc.特殊消費.未消費.原価ゼロ);
+        setCalc_trashNoLost(calc.廃棄設定.未消費素材);
+        setCalc_trashByproduct(calc.廃棄設定.副産物);
+        setCalc_trashSurplus(calc.廃棄設定.余剰生産物);
     }
 
     const handleSwitchProcess = (dispatch: React.Dispatch<React.SetStateAction<boolean>>, current:boolean, terminus?:boolean) => {
@@ -377,20 +377,13 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
     const handleSwitchCalc = (target: tSwitchTarget_calc, terminus?:boolean) => {
         const {targetDispatch, current} = (() => {
             switch(target) {
-                case "useWarNpc":           return {targetDispatch:setCalc_isUseWarNpc ,current:calc_isUseWarNpc}
-                case "failLostUnlost":      return {targetDispatch:setCalc_failLost_isUnlost ,current:calc_failLost_isUnlost}
-                case "failLostOverwrite":   return {targetDispatch:setCalc_failLost_isOverwrite ,current:calc_failLost_isOverwrite}
-                case "unLostOverwrite":     return {targetDispatch:setCalc_unLost_isOverwrite ,current:calc_unLost_isOverwrite}
+                case "useWarNpc":       return {targetDispatch:setCalc_isUseWarNpc ,current:calc_isUseWarNpc}
+                case "trashNoLost":     return {targetDispatch:setCalc_trashNoLost ,current:calc_trashNoLost}
+                case "trashByproduct":  return {targetDispatch:setCalc_trashByproduct ,current:calc_trashByproduct}
+                case "trashSurplus":    return {targetDispatch:setCalc_trashSurplus ,current:calc_trashSurplus}
             }
         })();
         handleSwitchProcess(targetDispatch, current, terminus);
-
-        // unlostを使用しない場合、Overwriteもoffにする。
-        if(target === "failLostUnlost"){
-            if(terminus === false || (terminus === undefined && current === true)){
-                handleSwitchProcess(setCalc_failLost_isOverwrite,calc_failLost_isOverwrite,false)
-            }
-        }
     }
     const handleSuggestMax = (event:React.ChangeEvent<HTMLInputElement>) => setApp_suggestMax(Number(event.target.value));
 
@@ -442,14 +435,10 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
             },
             計算設定: {
                 War販売物使用: calc_isUseWarNpc,
-                特殊消費: {
-                    失敗時消失: {
-                        消費しない: calc_failLost_isUnlost,
-                        原価ゼロ: calc_failLost_isOverwrite
-                    },
-                    未消費: {
-                        原価ゼロ: calc_unLost_isOverwrite
-                    }
+                廃棄設定: {
+                    副産物: calc_trashByproduct,
+                    余剰生産物: calc_trashSurplus,
+                    未消費素材: calc_trashNoLost
                 }
             }
         };
@@ -516,9 +505,9 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
             },
             calc:{
                 isUseWarNpc: calc_isUseWarNpc,
-                isFailLostUnlost: calc_failLost_isUnlost,
-                isFailLostOverwrite: calc_failLost_isOverwrite,
-                isUnlostOverwrite: calc_unLost_isOverwrite
+                isTrashNoLost: calc_trashNoLost,
+                isTrashSurplus: calc_trashSurplus,
+                isTrashByproduct: calc_trashByproduct
             }
         },
         handler:{

@@ -6,7 +6,8 @@ import {
     tByproduct,
     tDurability,
     tSurplus,
-    tCreation }         from '../../../scripts/makeListArrayFromTree';
+    tCreation, 
+    tNoLostItem}         from '../../../scripts/makeListArrayFromTree';
 import {
     numDeform,
     cloneObj_JSON}      from '../../../scripts/common';
@@ -60,9 +61,11 @@ type tResultCostSheet= {
     durabilities: tDurability[],
     surpluses: tSurplus[],
     byproducts: tByproduct[],
+    noLostItems: tNoLostItem[],
     handleExpand: () => void,
-    changeNotTargetSurpluses : (newItems:string[]) => void,
-    changeNotTargetByproducts : (newItems:string[]) => void,
+    changeTrashItemsSurpluses : (newItems:string[]) => void,
+    changeTrashItemsByproducts : (newItems:string[]) => void,
+    changeTrashItemsNoLost:(newItems:string[]) => void,
     handleItemClick: (itemName:string) => void,
     handleOpenQtyDialog: () => void
 }
@@ -117,16 +120,22 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
         durable:0,
         undepreciated:0});
     
-    const handleToggleNotTarget_byproduct = (targetItem:string) => () => {
+    const handleTrashItems_byproduct = (targetItem:string) => () => {
         const nowNonTargets = props.byproducts.filter(b => b.廃棄対象).map(b => b.アイテム名);
-        if(nowNonTargets.includes(targetItem)) props.changeNotTargetByproducts(nowNonTargets.filter(nt => nt !== targetItem));
-        else props.changeNotTargetByproducts(nowNonTargets.concat(targetItem));
+        if(nowNonTargets.includes(targetItem)) props.changeTrashItemsByproducts(nowNonTargets.filter(nt => nt !== targetItem));
+        else props.changeTrashItemsByproducts(nowNonTargets.concat(targetItem));
     }
 
-    const handleToggleNotTarget_surplus = (targetItem:string) => () => {
+    const handleTrashItems_surplus = (targetItem:string) => () => {
         const nowNonTargets = props.surpluses.filter(s => s.廃棄対象).map(s => s.アイテム名);
-        if(nowNonTargets.includes(targetItem)) props.changeNotTargetSurpluses(nowNonTargets.filter(nt => nt !== targetItem));
-        else props.changeNotTargetSurpluses(nowNonTargets.concat(targetItem));
+        if(nowNonTargets.includes(targetItem)) props.changeTrashItemsSurpluses(nowNonTargets.filter(nt => nt !== targetItem));
+        else props.changeTrashItemsSurpluses(nowNonTargets.concat(targetItem));
+    }
+
+    const handleTrashItems_noLost = (targetItem:string) => () => {
+        const nowNonTargets = props.noLostItems.filter(s => s.廃棄対象).map(s => s.アイテム名);
+        if(nowNonTargets.includes(targetItem)) props.changeTrashItemsNoLost(nowNonTargets.filter(nt => nt !== targetItem));
+        else props.changeTrashItemsNoLost(nowNonTargets.concat(targetItem));
     }
 
     const renderTableMaterial = () => {
@@ -259,7 +268,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                             arrow
                                         >
                                             <IconButton
-                                                onClick={handleToggleNotTarget_byproduct(b.アイテム名)}
+                                                onClick={handleTrashItems_byproduct(b.アイテム名)}
                                                 size="small">
                                                 {b.廃棄対象
                                                     ? <RestoreIcon />
@@ -364,7 +373,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                                             arrow
                                         >
                                             <IconButton
-                                                onClick={handleToggleNotTarget_surplus(s.アイテム名)}
+                                                onClick={handleTrashItems_surplus(s.アイテム名)}
                                                 size="small">
                                                 {s.廃棄対象
                                                     ? <RestoreIcon />
@@ -620,6 +629,132 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
             </Box>
         )
     }
+    
+    const renderTableNoLost = () => {
+        if(props.noLostItems.length === 0) return null;
+
+        return (
+            <Box className={classes.boxRootSeconds}>
+                <Typography variant="h6">未消費素材</Typography>
+                <TableContainer
+                    component={Paper}
+                    className={classes.tableRoot}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell><Typography>アイテム名</Typography></TableCell>
+                                <TableCell><Typography>使用個数</Typography></TableCell>
+                                <TableCell><Typography>単価</Typography></TableCell>
+                                <TableCell><Typography>金額</Typography></TableCell>
+                                <TableCell><Typography>除外</Typography></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {props.noLostItems.map((item,i) => (
+                                <TableRow  key={"Result_NoLostTable_RowNo_" + i}>
+                                    <ResultItemNameCell
+                                        itemName={item.アイテム名}
+                                        handleClick={handleItemNameClick}
+                                        procurement={item.調達方法}
+                                    >
+                                        <Typography>{item.アイテム名}</Typography>
+                                    </ResultItemNameCell>
+                                    <TableCell
+                                        align="right"
+                                        className={(item.廃棄対象) ? classes.disableCell : ""}>
+                                        <Typography>{item.個数}</Typography>
+                                    </TableCell>
+                                    {(item.調達方法 === "未設定")
+                                        ? (<>
+                                            <TableCell
+                                                align="center"
+                                                className={(item.廃棄対象) ? classes.disableCell : ""}
+                                            >
+                                                <Typography color="error">
+                                                    -
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell
+                                                align="center"
+                                                className={(item.廃棄対象) ? classes.disableCell : ""}
+                                            >
+                                                <Typography color="error">
+                                                    -
+                                                </Typography>
+                                            </TableCell>
+                                        </>)
+                                        : (item.調達方法 === "作成" && item.未設定含) 
+                                            ? (<>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                >
+                                                    <Typography color="error">
+                                                        {numDeform(item.単価)} ± α
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                >
+                                                    <Typography color="error">
+                                                        {numDeform(item.合計金額)} ± α
+                                                    </Typography>
+                                                </TableCell>
+                                            </>)
+                                            : (<>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                >
+                                                    <Typography>
+                                                        {numDeform(item.単価)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                >
+                                                    <Typography>
+                                                        {numDeform(item.合計金額)}
+                                                    </Typography>
+                                                </TableCell>
+                                            </>)
+                                    }
+                                    <TableCell>
+                                        <Tooltip
+                                            title="原価反映／廃棄の切り替え"
+                                            arrow
+                                        >
+                                            <IconButton
+                                                onClick={handleTrashItems_noLost(item.アイテム名)}
+                                                size="small">
+                                                {item.廃棄対象
+                                                    ? <RestoreIcon />
+                                                    : <DeleteIcon />
+                                                }
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                                {surplusTotal.hasUnknown 
+                                    ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
+                                    : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
+                                }
+                                <TableCell />
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
+                </TableContainer>
+            </Box>
+        )
+    }
+
     const renderTableCreate = () => {
         if(props.creations.length <= 1) return null;
         return (
@@ -684,6 +819,7 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                 {renderTableByproduct()}
                 {renderTableSurplus()}
                 {renderTableDurability()}
+                {renderTableNoLost()}
                 {renderTableCreate()}
                 <Button
                     variant="outlined"
