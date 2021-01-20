@@ -182,6 +182,7 @@ const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ
             ダークモード : false,
             smallテーブル: false,
             検索候補表示数 : 100,
+            常時最終作成物表示: false,
             初期表示設定 : {
                 概要 : true,
                 原価表 : true,
@@ -282,6 +283,7 @@ export interface iApplicationConfig {
         検索候補表示数 : number,
         smallテーブル: boolean,
         ダークモード : boolean,
+        常時最終作成物表示: boolean,
         初期表示設定 :{
             概要 : boolean,
             原価表 : boolean,
