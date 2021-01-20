@@ -12,6 +12,8 @@ import {
     numDeform,
     cloneObj_JSON}      from '../../../scripts/common';
 
+import moecostDb from '../../../scripts/storage';
+
 import Accordion from '../../commons/accordion/accordion';
 
 import Box               from '@material-ui/core/Box'
@@ -756,7 +758,8 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
     }
 
     const renderTableCreate = () => {
-        if(props.creations.length <= 1) return null;
+        if( (! moecostDb.アプリ設定.表示設定.常時最終作成物表示) &&
+            (props.creations.length <= 1)) return null;
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">最終作成物</Typography>
