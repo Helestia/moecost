@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-151235224-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-151235224-1');
+    </script>
+    <!-- Google Analytics End -->
+    <title>もえこすと-使い方・ヘルプ・金額算出方法について</title>
+    <meta name="description" content="オンラインゲーム「Master of Epic」の生産品の原価計算用webツール「もえこすと」のヘルプファイルです。このツールでの金額算出方法について説明しています。">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="icon" href="../favicon.ico" />
+    <link rel="stylesheet" href="ress.css" />
+    <link rel="stylesheet" href="index.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      dt{
+        margin-left:1rem;
+      }
+      dd{
+        margin-left:3rem;
+        margin-bottom:0.5rem;
+      }
+      
+    </style>
+  </head>
+  <body>
+    <h1>もえこすと・ヘルプ・金額算出方法について</h1>
+    <section class="index">
+        <h2>目次</h2>
+        <ul>
+            <li><a href="#heading01">このページの目的</a></li>
+            <li><a href="#heading02">用語集</a></li>
+            <li><a href="#heading03">廃棄について</a></li>
+            <li><a href="#heading04">金額計算について</a></li>
+            <li><a href="#heading05">考慮事項・免責事項</a></li>
+        </ul>
+    </section>
+    <div class="paper">
+      <h3 id="heading01">このページの目的</h3>
+      <p>このページは、どのように金額計算がツール内で行われているかの詳細を共有することが目的です。</p>
+    </div>
+    <div class="paper">
+      <h3 id="heading02">用語集</h3>
+      <h4>金額の項目名</h4>
+      <dl>
+        <dt><dfn>材料</dfn></dt>
+        <dd>
+          生産を行う上で必要になる素材です。
+        </dd>
+        <dt><dfn>副産物</dfn></dt>
+        <dd>
+          主となる目的以外の生産物です。精米が必要で玄米を加工した際に出る米ぬか等が該当します。
+        </dd>
+        <dt><dfn>余剰生産品</dfn></dt>
+        <dd>
+          作成個数の関係で必要個数以上に作成した素材の余剰部分です。針金が3つ必要だが、5つ単位でしか作れないため、2つ余る等で使用されます。
+        </dd>
+        <dt><dfn>耐久消費素材</dfn></dt>
+        <dd>
+          素材が耐久度を持ち、生産ごとに耐久値が消費されて0になることで消滅するような素材です。ソウルオブ～なアイテムや、麺類を生産する際に使用するウドゥンスティック等が該当します。
+        </dd>
+        <dt><dfn>未消費素材</dfn></dt>
+        <dd>
+          生産物を作成しても消失しない素材です。大根おろしを作成する際の金物ヤスリや、複製で使用する原本（こちらは失敗時消失しますが、ツール上同等の扱いにしています）等が該当します。
+        </dd>
+      </dl>
+    </div>
+    <div class="paper">
+      <h3 id="heading03">廃棄について</h3>
+      <h4>廃棄の考え方・必要性</h4>
+      <p>副産物、余剰生産品、未消費素材に対して設定可能です。これらのアイテムについて、廃棄に設定することでその製品が持つ価値を材料に付与することが可能です。</p>
+      <p>大根おろしを作成するレシピを例にして考えると、材料は大根１つ、金物ヤスリ１つ（未消費）で大根おろしを10個作成することができます。大根のNPC販売価格が88gで、生産後に金物ヤスリは残るので、88g ÷ 10で8.8gが大根おろしの価値となります。</p>
+      <p>しかし、普段金物ヤスリをつかわない人は、大根おろし作るためだけに金物ヤスリをNPCで購入し、生産後に捨ててしまうでしょう。そういった場合、金物ヤスリの8gを原価に加えたいという考え方になります。</p>
+      <p>金物ヤスリを廃棄に設定することで、材料や余剰生産品などを廃棄扱いとして原価に上乗せすることができます。今回の例の場合は、金物ヤスリに廃棄を設定すると9.6g((88 + 8) ÷ 10)が大根おろしの価値になります。</p>
+      <h4>廃棄前と廃棄後で金額が変わる</h4>
+      <p>廃棄対象となるアイテムが複数存在し、廃棄可能なアイテムが別の廃棄可能なアイテムの素材として使用されている場合、廃棄前と廃棄後で合計金額に差が出ます。</p>
+      <p><a href="./img/calc001.gif" target="_blank"><img src="./img/calc001.gif" alt="金額が変わる例" title="クリックで元画像を開く"></a></p>
+      <p>これは正常な動作であり、不具合ではありません。</p>
+    </div>
+    <div class="paper">
+      <h3 id="heading04">金額計算について</h3>
+      <p>このツールでは、生産品の価値は下記の計算式で算出しています。</p>
+      <p><var>生産品全体の価値</var> = <var>材料費</var> - <var>廃棄しない副産物の価値</var> - <var>廃棄しない余剰生産品の価値</var> - <var>耐久消費素材の残価値</var></p>
+      <p><var>単価</var> = <var>生産品全体の価値</var> ÷ <var>生産個数</var></p>
+      <p></p>
+    </div>
+    <div class="paper">
+      <h3 id="heading05">考慮事項・免責事項</h3>
+      <h4>精度について</h4>
+      <p>このツールでは数値計算を全てJavaScriptで行っております。JavaScriptでは数値はIEEE754(倍精度浮動小数点数)で表現されるため、規格上の誤差が生じる可能性があります。</p>
+      <p>このツールでは画面上に表示する際に小数点以下第3位を四捨五入し、2位に丸めて表示しています。そのため、基本的にはIEEE754での丸め誤差はツール上での丸めに打ち消されています。</p>
+      <p>しかし、極端に多数の生産を行うような指示をツールに行った場合等に、誤差が顕現化する恐れがあります。</p>
+    </div>
+  </body>
+</html>
