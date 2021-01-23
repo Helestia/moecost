@@ -1,5 +1,5 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../../../App';
+import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
 import moecostDb,{iDictionary} from '../../../scripts/storage';
 
 import useAccordionControl from '../../commons/accordion/useAccordionList';

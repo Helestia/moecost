@@ -1,5 +1,5 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../../../App';
+import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
 
 import ResultAlertSection                   from './resultAlertSection';
 import ResultSummarySection                 from './resultSummarySection';

@@ -1,5 +1,5 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../../../App';
+import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
 
 import buildTree, {tBuildTreeResult}        from '../../../scripts/buildTree';
 import {numDeform}                          from '../../../scripts/common';

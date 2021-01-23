@@ -1,5 +1,5 @@
 import React from 'react';
-import { tHandleOpenSnackbar } from '../../../App';
+import { tHandleOpenSnackbar } from '../../commons/snackbar/useSnackbar';
 import AppPreferenceDialog from './appPreferenceDialog/index'
 import DispChangeLogDialog from './dispChangeLogDialog'
 import AllDataDialog       from './allDataDialog';

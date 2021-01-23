@@ -4,7 +4,7 @@ import AppTabPanel from './appTabPanel';
 import TreeDispTabPanel from './treeDispTabPanel';
 import CalcTabPanel from './calcTabPanel';
 
-import {tHandleOpenSnackbar}    from '../../../../App';
+import {tHandleOpenSnackbar}    from '../../../commons/snackbar/useSnackbar';
 import moecostDb,
     { iApplicationConfig }      from '../../../../scripts/storage';
 import Tabs , {tTabState}       from '../../../commons/tabs/tabs';
