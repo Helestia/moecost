@@ -148,16 +148,16 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
             if(! node.副産物) return null;
             const results = node.副産物.map((b,i) => {
                 const countObj = (b.作成個数 !== 1)
-                    ? <Typography> &times; {numDeform(b.作成個数)}</Typography>
+                    ? <> &times; {numDeform(b.作成個数)}</>
                     : null;
                 return <Typography key={key + "_ByProducts_" + i} variant="body2">{b.アイテム名}{countObj}</Typography>;
             });
-            return <Typography variant="body2">副産物: {
-                results.map((r,i) => {
-                    if(i === 0) return r;
-                    return <> / {r}</>
+            return (
+                <Typography variant="body2">副産物: {
+                    results.map(r => r )
                 }
-                )}</Typography>;
+                </Typography>
+            );
         })();
         const createRemarks = (() => {
             if(! appConfig.作成時備考) return null;

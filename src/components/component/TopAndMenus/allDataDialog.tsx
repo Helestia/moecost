@@ -1,5 +1,5 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../../../App';
+import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
 import moecostDb             from '../../../scripts/storage';
 
 import {

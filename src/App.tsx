@@ -1,18 +1,13 @@
 import React from 'react';
-import TopBar from './components/component/TopAndMenus/topBar'
-import SearchSection from './components/component/searchSection/searchSection'
+import TopBar from './components/component/TopAndMenus/topBar';
+import SearchSection from './components/component/searchSection/searchSection';
 import ResultSection from './components/component/resultSection/resultSection';
+import RenderSnackbar from './components/commons/snackbar/renderSnackbar';
+import useSnackbar from './components/commons/snackbar/useSnackbar';
 import moecostDb,{iApplicationConfig} from './scripts/storage';
 
 import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline                    from '@material-ui/core/CssBaseline';
-import Snackbar,{SnackbarCloseReason} from '@material-ui/core/Snackbar';
-import Alert                          from '@material-ui/lab/Alert';
-
-// スナックバーの標準のタイムアウト時間
-const defSnackbarTimeout = 5000;
-
-type tSnackbarSeverity = "success" | "warning" | "info" | "error" | undefined;
 
 function App() {
 // 設定情報
@@ -118,32 +113,6 @@ function App() {
   );
 }
 
-
-// スナックバー関連処理
-type tRenderSnackbarProps = {
-  isOpen: boolean
-  severity: tSnackbarSeverity,
-  message: React.ReactNode,
-  timeout: number | null,
-  onClose: () => void
-}
-const RenderSnackbar:React.FC<tRenderSnackbarProps> = (props) => {
-  return (
-    <Snackbar
-      open={props.isOpen}
-      onClose={props.onClose}
-      autoHideDuration={props.timeout}
-    >
-      <Alert
-        severity={props.severity}
-        onClose={props.onClose}
-      >
-        {props.message}
-      </Alert>
-    </Snackbar>
-  )
-}
-
 type tUseSearched = () => {
   recipe:string,
   items:string[],
@@ -162,46 +131,6 @@ const useSearched:tUseSearched = () => {
     recipe:recipe,
     items:items,
     handleChangeRecipe:handleChangeRecipe
-  }
-}
-
-export type tHandleOpenSnackbar = (
-  severity: tSnackbarSeverity,
-  message: React.ReactNode,
-  autoHideDuration?: number|null) => void
-type tUseSnackbar = () => {
-  snackbarIsOpen:boolean,
-  snackbarSeverity:tSnackbarSeverity,
-  snackbarMessage:React.ReactNode,
-  snackbarAutoHideDuration: number|null,
-  handleOpenSnackbar: tHandleOpenSnackbar,
-  handleCloseSnackbar: (event?:React.SyntheticEvent,reason?:SnackbarCloseReason) => void
-}
-const useSnackbar:tUseSnackbar = () => {
-  const [isOpenSnackbar,setIsOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity,setSnackbarSeverity] = React.useState<tSnackbarSeverity>(undefined);
-  const [snackbarMessage,setSnackbarMessage] = React.useState<React.ReactNode>(<></>);
-  const [snackbarTimeout,setSnackbarTimeout] = React.useState<number|null>(null);
-
-  const handleOpenSnackbar:tHandleOpenSnackbar = (severity,message,autoHideDuration) => {
-    setIsOpenSnackbar(true);
-    setSnackbarSeverity(severity);
-    setSnackbarMessage(message);
-    if(autoHideDuration === undefined) setSnackbarTimeout(defSnackbarTimeout);
-    else setSnackbarTimeout(autoHideDuration);
-  }
-  const handleCloseSnackbar = (event?:React.SyntheticEvent,reason?:SnackbarCloseReason) =>{
-    if(reason === "clickaway") return;
-    setIsOpenSnackbar(false);
-  }
-
-  return {
-    snackbarIsOpen:isOpenSnackbar,
-    snackbarSeverity: snackbarSeverity,
-    snackbarMessage: snackbarMessage,
-    snackbarAutoHideDuration: snackbarTimeout,
-    handleOpenSnackbar: handleOpenSnackbar,
-    handleCloseSnackbar: handleCloseSnackbar
   }
 }
 
