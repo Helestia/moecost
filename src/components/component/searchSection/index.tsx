@@ -1,7 +1,8 @@
-import React from 'react'
-import {Recipes} from '../../../scripts/jsonReader'
-import SuggestionArea from './suggestion'
-import SeriesRecipeSelect from './seriesRecipeSelect'
+import React from 'react';
+
+import {Recipes}                from '../../../scripts/jsonReader';
+import RenderRecipeFindBox      from './renderRecipeFindBox';
+import RenderSeriesItemSelector from './renderSeriesItemSelector'
 
 type tSearchSectionProps = {
     handleChangeRecipe:(recipe:string,items:string[]) => void
@@ -14,10 +15,10 @@ const SearchSection:React.FC<tSearchSectionProps> = (props) => {
         handleReturnSeriese} = useSearchSection(props.handleChangeRecipe);
     return (
         <>
-            <SuggestionArea
+            <RenderRecipeFindBox
                 handleReturnSearch={handleReturnSearch}
             />
-            <SeriesRecipeSelect
+            <RenderSeriesItemSelector
                 seriesName={serieseName}
                 handleReturnSeriese={handleReturnSeriese} 
             />

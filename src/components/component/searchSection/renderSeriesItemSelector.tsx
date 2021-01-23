@@ -15,7 +15,7 @@ import {
     createStyles,
     Theme}     from '@material-ui/core/styles'
 
-const definedStyles = makeStyles((theme:Theme)=>createStyles({
+const useStyles = makeStyles((theme:Theme)=>createStyles({
     cord : {
         margin: theme.spacing(1),
         width: 440
@@ -28,18 +28,18 @@ const definedStyles = makeStyles((theme:Theme)=>createStyles({
         margin: theme.spacing(1)
     }
 }));
-type seriesRecipeSelectProps = {
+
+type RenderSeriesItemSelectorProps = {
     seriesName : string,
     handleReturnSeriese : (items:string[]) => void
 }
-const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
+const RenderSeriesItemSelector:React.FC<RenderSeriesItemSelectorProps> = (props) => {
     const {
         ListItemNodes,
         isSubmitDisabled,
-        handleSubmit} = useSeriesRecipeSelect(props.seriesName,props.handleReturnSeriese);
-    const classes = definedStyles();
+        handleSubmit} = useRenderSeriesItemSelector(props.seriesName,props.handleReturnSeriese);
+    const classes = useStyles();
     
-    console.log("render SeriesRecipeSelect");
     if(props.seriesName === "") return null
 
     return (
@@ -62,21 +62,20 @@ const SeriesRecipeSelect:React.FC<seriesRecipeSelectProps> = (props) => {
 }
 
 
-type tUseSeriesRecipeSelectReturn = {
+type tUseRenderSeriesItemSelectorReturn = {
     ListItemNodes: React.ReactNodeArray,
     isSubmitDisabled: boolean,
     handleSubmit: () => void,
 }
-type tUseSeriesRecipeSelect = (
+type tUseRenderSeriesItemSelector = (
     seriesName:string,
     handleReturnSeriese : (items:string[]) => void)
-        => tUseSeriesRecipeSelectReturn
-const useSeriesRecipeSelect:tUseSeriesRecipeSelect = (seriesName,handleReturnSeriese) => {
+        => tUseRenderSeriesItemSelectorReturn
+const useRenderSeriesItemSelector:tUseRenderSeriesItemSelector = (seriesName,handleReturnSeriese) => {
     const [seriesItems,setSeriesItems] = React.useState<tJSON_seriesCreationItem_item[]>([]);
     const [isChecked,setIsChecked] = React.useState<boolean[]>([]);
-    const classes = definedStyles();
+    const classes = useStyles();
     
-
     React.useEffect(() => {
         if(seriesName === ""){
             setSeriesItems([]);
@@ -102,7 +101,7 @@ const useSeriesRecipeSelect:tUseSeriesRecipeSelect = (seriesName,handleReturnSer
     const ListItemNodes = seriesItems.map((s,i) => {
         return (
             <ListItem
-                key={`seriesRecipeSelecter_${s.接頭}_${s.アイテム}`}
+                key={`RenderSeriesItemSelectorer_${s.接頭}_${s.アイテム}`}
                 className={classes.listItem}
             >
                 <ListItemText
@@ -144,4 +143,4 @@ const useSeriesRecipeSelect:tUseSeriesRecipeSelect = (seriesName,handleReturnSer
     }
 }
 
-export default SeriesRecipeSelect;
+export default RenderSeriesItemSelector;

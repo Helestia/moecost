@@ -1,9 +1,11 @@
 import React from 'react';
-import TopBar from './components/component/TopAndMenus/topBar';
-import SearchSection from './components/component/searchSection/searchSection';
-import ResultSection from './components/component/resultSection/index';
+
+import TopBar         from './components/component/TopAndMenus/topBar';
+import SearchSection  from './components/component/searchSection/index';
+import ResultSection  from './components/component/resultSection/index';
+
 import RenderSnackbar from './components/commons/snackbar/renderSnackbar';
-import useSnackbar from './components/commons/snackbar/useSnackbar';
+import useSnackbar    from './components/commons/snackbar/useSnackbar';
 import moecostDb,{iApplicationConfig} from './scripts/storage';
 
 import {createMuiTheme,ThemeProvider} from '@material-ui/core/styles';

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import moecostDb            from '../../../scripts/storage';
 import {numDeform}          from '../../../scripts/common';
 import {
@@ -7,8 +8,10 @@ import {
 
 import AutoComplete,
     {createFilterOptions,
-    AutocompleteChangeReason}   from '@material-ui/lab/Autocomplete';
-import {FilterOptionsState}     from '@material-ui/lab/useAutocomplete'
+    AutocompleteChangeReason}
+                            from '@material-ui/lab/Autocomplete';
+import {FilterOptionsState} from '@material-ui/lab/useAutocomplete'
+
 
 import Box          from '@material-ui/core/Box'
 import Button       from '@material-ui/core/Button'
@@ -43,11 +46,11 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 }))
 
 
-type tSuggestionAreaProps = {
+type tRenderRecipeFindBox = {
     handleReturnSearch : (recipe:string) => void
 }
 
-const SuggestionArea:React.FC<tSuggestionAreaProps> = (props) => {
+const RenderRecipeFindBox:React.FC<tRenderRecipeFindBox> = (props) => {
     const {
         value,
         inputValue,
@@ -221,13 +224,9 @@ const useSuggestion:tUseSuggestion = (handleReturnSearch) => {
                 return;
         }
     }
-    
 
-    const handleInputChange = (event:React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
-    
+    const handleInputChange = (event:React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);    
     const handleSubmit = (suggest:tSuggestion=value) => handleReturnSearch(suggest.レシピ名);
-
-
 
     return {
         value:             value,
@@ -245,4 +244,4 @@ const useSuggestion:tUseSuggestion = (handleReturnSearch) => {
     }
 }
 
-export default SuggestionArea;
+export default RenderRecipeFindBox;
