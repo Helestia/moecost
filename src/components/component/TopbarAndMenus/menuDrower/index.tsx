@@ -3,7 +3,7 @@ import useDialogParent         from '../../../commons/dialog/useDialogParent';
 import { tHandleOpenSnackbar } from '../../../commons/snackbar/useSnackbar';
 
 import AppPreferenceDialog from './dialogs/appPreference/index';
-import AllDataDialog       from './allDataDialog';
+import AllDataDialog       from './dialogs/allData/index';
 import DictionaryPreferenceDialog from './dialogs/dictionaryPreference/index';
 
 import ChangeLogDialog      from './dialogs/changeLog';
