@@ -89,8 +89,6 @@ const ResultConfigItemDialog: React.FC<tResultConfigItemDialogProps> = (props) =
 
     const [radioSelected,setRadioSelected] = React.useState("");
     const [userCostValue,setUserCostValue] = React.useState(0);
-
-    const classes = useStyles();
     
     function calcTabState() {
         const hasRecipe = Recipes.some(recipe => recipe.生成物.アイテム === props.itemName);
