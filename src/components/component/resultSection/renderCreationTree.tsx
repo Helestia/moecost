@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ResultItemNameCell   from './resultItemNameCell'
+import ItemNameCell         from './common/itemNameCell'
 
 import moecostDb            from '../../../scripts/storage';
 import {numDeform}          from '../../../scripts/common';
@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 
 }));
 
-type tResultCreationTree = {
+type tRenderCreationTree = {
     isExpanded: boolean,
     main: tTreeNode_creation[],
     common: tTreeNode_creation[],
@@ -57,7 +57,7 @@ type tResultCreationTree = {
     handleItemClick: (str:string) => void
 }
 
-const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
+const RenderCreationTree:React.FC<tRenderCreationTree> = (props) => {
     const classes = useStyles();
 
     // テーブルセルクリックのハンドル
@@ -173,7 +173,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
             ? <Typography variant="body2">※{node.備考}</Typography>
             : null;
         return (
-            <ResultItemNameCell
+            <ItemNameCell
                 itemName={node.アイテム名}
                 procurement={node.調達方法}
                 handleClick={handleItemCellClick}
@@ -193,7 +193,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
                     {requireRecipes}
                     {remarks}
                 </Box>
-            </ResultItemNameCell>
+            </ItemNameCell>
         )
     }
     const renderTableCellOtherCreation = (node:tTreeNodeT_common | tTreeNodeT_user | tTreeNodeT_npc | tTreeNodeT_unknown, key:string) => {
@@ -237,7 +237,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
             return null;
         })();
         return (
-            <ResultItemNameCell
+            <ItemNameCell
                 itemName={node.アイテム名}
                 procurement={node.調達方法}
                 handleClick={handleItemCellClick}
@@ -252,7 +252,7 @@ const ResultCreationTree:React.FC<tResultCreationTree> = (props) => {
                     {costs}
                     {message}
                 </Box>
-            </ResultItemNameCell>
+            </ItemNameCell>
         );
     }
 
@@ -426,6 +426,6 @@ const buildTableObj:tBuildTbleObj = (main,common) => {
     }
 }
 
-export default ResultCreationTree;
+export default RenderCreationTree;
 
 

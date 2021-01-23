@@ -1,12 +1,12 @@
 import React from 'react';
 import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
 
-import ResultAlertSection                   from './resultAlertSection';
-import ResultSummarySection                 from './resultSummarySection';
-import ResultCostSheet                      from './resultCostSheet';
-import ResultCreationTree                   from './resultCreationTree';
-import ResultConfigCreateNumberDialog       from './resultConfigCreateNumberDialog';
-import ResultConfigItemDialog               from './resultConfigItemDialog';
+import RenderAlerts                   from './renderAlerts';
+import RenderSummarySection                 from './renderSummarySection';
+import RenderCostSheet                      from './renderCostSheet';
+import RenderCreationTree                   from './renderCreationTree';
+import RenderConfigQty from './dialogs/configCreateNumber';
+import RenderConfigItem from './dialogs/configItem/index';
 
 import useAccordionList from '../../commons/accordion/useAccordionList';
 import useDialogParent  from '../../commons/dialog/useDialogParent';
@@ -69,12 +69,14 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
 
     if(props.recipe === "") return null;
 
-    if(hooks.isCanceledCalcuration) return <ResultAlertSection messages={hooks.messages} />
+    // アラートセクション
+    const renderAlertSection = () => <RenderAlerts messages={hooks.messages} />;
+
     // ダイアログ関係のレンダリング
     const renderDialogs = () => (
         <>
             {/*個数変更ダイアログ*/}
-            <ResultConfigCreateNumberDialog 
+            <RenderConfigQty
                 isOpen={isOpenQtyD}
                 quantity={hooks.quantities.resultQty}
                 minimumQty={hooks.quantities.fullyMinimumQuantity}
@@ -84,7 +86,7 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
             />
             
             {/*アイテム情報ダイアログ*/}
-            <ResultConfigItemDialog
+            <RenderConfigItem
                 isOpen={isOpenItemD}
                 itemName={itemConfigTarget}
                 handleOpenSnackbar={props.handleOpenSnackbar}
@@ -92,8 +94,6 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
             />
         </>
     )
-
-    const renderAlertSection = () => <ResultAlertSection messages={hooks.messages} />;
     
     // 最終処理
     if(props.recipe === "") return renderDialogs();
@@ -107,7 +107,7 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
     return (
         <>
             {renderAlertSection()}
-            <ResultSummarySection
+            <RenderSummarySection
                 isExpanded={isExpandeds[0]}
                 handleExpand={handleChangeAccordions.bind(null,0)}
                 recipeName={props.recipe}
@@ -125,7 +125,7 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
                 handleOpenQtyDialog={handleOpenQtyD}
             />
 
-            <ResultCostSheet
+            <RenderCostSheet
                 isExpanded={isExpandeds[1]}
                 handleExpand={handleChangeAccordions.bind(null,1)}
                 materials={hooks.lists.materials}
@@ -141,7 +141,7 @@ const ResultSection:React.FC<tResultSectionProps> = (props) => {
                 handleOpenQtyDialog={handleOpenQtyD}
             />
 
-            <ResultCreationTree
+            <RenderCreationTree
                 isExpanded={isExpandeds[2]}
                 main={hooks.trees.mains}
                 common={hooks.trees.commons}
@@ -159,7 +159,6 @@ export type tTrashState = {
     アイテム:string,
     廃棄:boolean
 }
-
 
 const useResultSection = (recipe:string,items:string[]) => {
     const [befRecipe,setBefRecipe] = React.useState("");

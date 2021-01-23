@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {tProcurement} from '../../../scripts/buildTree'
+import {tProcurement} from '../../../../scripts/buildTree'
 import TableCell from '@material-ui/core/TableCell'
 
 import {
@@ -53,16 +53,16 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
     })
 );
 
-type tResultItemNameCell = {
+type tItemNameCell = {
     itemName: string,
+    procurement: tProcurement,
     colspan?: number,
     rowspan?: number,
     keyName?: string,
     isTree?: boolean
-    procurement: tProcurement,
     handleClick: (str:string) => void
 }
-const ResultItemNameCell:React.FC<tResultItemNameCell> = (props) => {
+const ItemNameCell:React.FC<tItemNameCell> = (props) => {
     const classes = useStyles();
     const cellClass = (() => {
         if(props.procurement === "NPC")      return classes.npc;
@@ -72,7 +72,6 @@ const ResultItemNameCell:React.FC<tResultItemNameCell> = (props) => {
         return classes.unknown;
     })();
     
-
     const colSpan = props.colspan ? props.colspan : 1;
     const rowSpan = props.rowspan ? props.rowspan : 1;
     
@@ -90,4 +89,4 @@ const ResultItemNameCell:React.FC<tResultItemNameCell> = (props) => {
     );
 }
 
-export default ResultItemNameCell;
+export default ItemNameCell;

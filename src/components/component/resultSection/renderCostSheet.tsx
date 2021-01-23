@@ -1,5 +1,5 @@
 import React from 'react';
-import ResultItemNameCell from './resultItemNameCell';
+import ItemNameCell from './common/itemNameCell';
 
 import {
     tMaterial,
@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme:Theme) =>
     })
 );
 
-type tResultCostSheet= {
+type tRenderCostSheet= {
     isExpanded: boolean,
     creations: tCreation[],
     materials: tMaterial[],
@@ -81,7 +81,7 @@ const reduceResultDefault: tReduceResult = {
     hasUnknown:false
 }
 
-const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
+const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
     const classes = useStyles();
 
     // アイテム名クリック
@@ -160,12 +160,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                         <TableBody>
                             {props.materials.map((m,i) => (
                                 <TableRow key={"Result_MaterialTable_RowNo_" + i}>
-                                    <ResultItemNameCell
+                                    <ItemNameCell
                                         itemName={m.アイテム名}
                                         handleClick={handleItemNameClick}
                                         procurement={m.調達方法}>
                                         <Typography>{m.アイテム名}</Typography>
-                                    </ResultItemNameCell>
+                                    </ItemNameCell>
                                     <TableCell
                                         align="right">
                                         <Typography>{numDeform(m.必要個数)}</Typography>
@@ -228,12 +228,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                         <TableBody>
                             {props.byproducts.map((b,i) => (
                                 <TableRow key={"Result_ByproductTable_RowNo_" + i}>
-                                    <ResultItemNameCell
+                                    <ItemNameCell
                                         itemName={b.アイテム名}
                                         handleClick={handleItemNameClick}
                                         procurement="作成">
                                         <Typography>{b.アイテム名}</Typography>
-                                    </ResultItemNameCell>
+                                    </ItemNameCell>
                                     <TableCell
                                         className={(b.廃棄対象) ? classes.disableCell : ""}>
                                         <Typography>{b.作成個数}</Typography>
@@ -321,12 +321,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                         <TableBody>
                             {props.surpluses.map((s,i) => (
                                 <TableRow  key={"Result_SurplusTable_RowNo_" + i}>
-                                    <ResultItemNameCell
+                                    <ItemNameCell
                                         itemName={s.アイテム名}
                                         handleClick={handleItemNameClick}
                                         procurement="作成">
                                         <Typography>{s.アイテム名}</Typography>
-                                    </ResultItemNameCell>
+                                    </ItemNameCell>
                                     <TableCell
                                         align="right"
                                         className={(s.廃棄対象) ? classes.disableCell : ""}>
@@ -409,12 +409,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
         const renderObj = props.durabilities.map(d => {
             if(d.調達方法 === "未設定") return{
                 アイテム名: (
-                <ResultItemNameCell
+                <ItemNameCell
                     itemName={d.アイテム名}
                     handleClick={handleItemNameClick}
                     procurement={d.調達方法}>
                     <Typography>{d.アイテム名}</Typography>
-                </ResultItemNameCell>
+                </ItemNameCell>
                 ),
                 消費個数: (
                     <TableCell align="right">
@@ -459,12 +459,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
             };
             if(d.調達方法 === "作成" && d.未設定含) return{
                 アイテム名: (
-                    <ResultItemNameCell
+                    <ItemNameCell
                         itemName={d.アイテム名}
                         handleClick={handleItemNameClick}
                         procurement={d.調達方法}>
                         <Typography>{d.アイテム名}</Typography>
-                    </ResultItemNameCell>
+                    </ItemNameCell>
                 ),
                 消費個数: (
                     <TableCell align="right">
@@ -509,12 +509,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
             };
             return {
                 アイテム名: (
-                    <ResultItemNameCell
+                    <ItemNameCell
                         itemName={d.アイテム名}
                         handleClick={handleItemNameClick}
                         procurement={d.調達方法}>
                         <Typography>{d.アイテム名}</Typography>
-                    </ResultItemNameCell>
+                    </ItemNameCell>
                 ),
                 消費個数: (
                     <TableCell align="right">
@@ -654,13 +654,13 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                         <TableBody>
                             {props.noLostItems.map((item,i) => (
                                 <TableRow  key={"Result_NoLostTable_RowNo_" + i}>
-                                    <ResultItemNameCell
+                                    <ItemNameCell
                                         itemName={item.アイテム名}
                                         handleClick={handleItemNameClick}
                                         procurement={item.調達方法}
                                     >
                                         <Typography>{item.アイテム名}</Typography>
-                                    </ResultItemNameCell>
+                                    </ItemNameCell>
                                     <TableCell
                                         align="right"
                                         className={(item.廃棄対象) ? classes.disableCell : ""}>
@@ -776,12 +776,12 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
                         <TableBody>
                             {props.creations.map((c,i) =>
                                 <TableRow  key={"Result_CreationTable_RowNo_" + i}>
-                                    <ResultItemNameCell
+                                    <ItemNameCell
                                         itemName={c.アイテム名}
                                         handleClick={handleItemNameClick}
                                         procurement="作成">
                                         <Typography>{c.アイテム名}</Typography>
-                                    </ResultItemNameCell>
+                                    </ItemNameCell>
                                     <TableCell align="right"><Typography>{numDeform(c.作成個数)}</Typography></TableCell>
                                     {
                                         (c.未設定含)
@@ -837,4 +837,4 @@ const ResultCostSheet:React.FC<tResultCostSheet> = (props) => {
 
 }
 
-export default ResultCostSheet;
+export default RenderCostSheet;

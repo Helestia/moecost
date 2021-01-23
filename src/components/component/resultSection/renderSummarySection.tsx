@@ -33,7 +33,7 @@ const useStyles = makeStyles({
     }
 });
 
-type tResultSummarySectionProps = {
+type tRenderSummarySectionProps = {
     isExpanded: boolean,
     recipeName: string,
     creations: tCreation[],
@@ -50,7 +50,7 @@ type tResultSummarySectionProps = {
     changeTrashItemsNoLost: (newItems:string[]) => void,
     handleOpenQtyDialog: () => void
 }
-const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
+const RenderSummarySection:React.FC<tRenderSummarySectionProps> = (props) => {
     const classes = useStyles();
     const classHover = useStyleHover();
 
@@ -425,4 +425,4 @@ const ResultSummarySection:React.FC<tResultSummarySectionProps> = (props) => {
     )
 }
 
-export default ResultSummarySection;
+export default RenderSummarySection;

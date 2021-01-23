@@ -1,8 +1,8 @@
 import React from 'react';
-import { tQtyRoleResult } from '../../../scripts/buildTree';
-import { numDeform } from '../../../scripts/common';
+import { tQtyRoleResult } from '../../../../scripts/buildTree';
+import { numDeform } from '../../../../scripts/common';
 
-import DialogNormal from '../../commons/dialog/dialogNormal';
+import DialogNormal from '../../../commons/dialog/dialogNormal';
 
 import Box                      from '@material-ui/core/Box';
 import Button                   from '@material-ui/core/Button';
@@ -12,7 +12,11 @@ import FormControlLabel         from '@material-ui/core/FormControlLabel';
 import FormLabel                from '@material-ui/core/FormLabel';
 import Radio                    from '@material-ui/core/Radio';
 import RadioGroup               from '@material-ui/core/RadioGroup';
-import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
+
+import {
+    createStyles,
+    makeStyles,
+    Theme} from '@material-ui/core/styles';
 
 const useClasses = makeStyles((theme:Theme)=> 
     createStyles({
@@ -31,7 +35,7 @@ const useClasses = makeStyles((theme:Theme)=>
     })
 );
 
-type tResultInputCreateNumber = {
+type tRenderConfigQty = {
     isOpen:boolean,
     quantity:number,
     minimumQty:number,
@@ -40,7 +44,7 @@ type tResultInputCreateNumber = {
     changeQty: (number:number, role:tQtyRoleResult) => void
 }
 
-const ResultConfigCreateNumberDialog:React.FC<tResultInputCreateNumber> = (props) => {
+const RenderConfigQty:React.FC<tRenderConfigQty> = (props) => {
     const hooks = useResultConfigQtyDialog(
         props.quantity,
         props.minimumQty,
@@ -310,4 +314,4 @@ const useResultConfigQtyDialog = (
     }
 }
 
-export default ResultConfigCreateNumberDialog;
+export default RenderConfigQty;

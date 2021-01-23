@@ -18,10 +18,10 @@ const useStyles = makeStyles({
     }
 })
 
-type tResultAlertSection = {
+type tRenderAlerts = {
     messages:tMessage[]
 }
-const ResultAlertSection:React.FC<tResultAlertSection> = (props) => {
+const RenderAlerts:React.FC<tRenderAlerts> = (props) => {
     const classes = useStyles();
     return (
         <Box className={classes.root}>
@@ -50,4 +50,4 @@ const ResultAlertSection:React.FC<tResultAlertSection> = (props) => {
     )
 }
 
-export default ResultAlertSection;
+export default RenderAlerts;
