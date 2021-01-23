@@ -1,6 +1,6 @@
 import React from 'react';
 
-import TopBar         from './components/component/TopAndMenus/topBar';
+import TopBar         from './components/component/TopbarAndMenus/index';
 import SearchSection  from './components/component/searchSection/index';
 import ResultSection  from './components/component/resultSection/index';
 

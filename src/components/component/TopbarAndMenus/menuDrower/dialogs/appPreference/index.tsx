@@ -4,12 +4,13 @@ import AppTabPanel from './appTabPanel';
 import TreeDispTabPanel from './treeDispTabPanel';
 import CalcTabPanel from './calcTabPanel';
 
-import {tHandleOpenSnackbar}    from '../../../commons/snackbar/useSnackbar';
 import moecostDb,
-    { iApplicationConfig }      from '../../../../scripts/storage';
-import Tabs , {tTabState}       from '../../../commons/tabs/tabs';
-import useTabs                  from '../../../commons/tabs/useTabs';
-import DialogNormal             from '../../../commons/dialog/dialogNormal';
+    { iApplicationConfig }      from '../../../../../../scripts/storage';
+
+import {tHandleOpenSnackbar}    from '../../../../../commons/snackbar/useSnackbar';
+import Tabs , {tTabState}       from '../../../../../commons/tabs/tabs';
+import useTabs                  from '../../../../../commons/tabs/useTabs';
+import DialogNormal             from '../../../../../commons/dialog/dialogNormal';
 
 import Box           from '@material-ui/core/Box';
 import Button        from '@material-ui/core/Button';
@@ -536,6 +537,5 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
         }
     }
 }
-
 
 export default AppPreferenceDialog;

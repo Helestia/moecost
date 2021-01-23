@@ -1,18 +1,18 @@
 import React from 'react';
-import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
-import moecostDb             from '../../../scripts/storage';
+import {tHandleOpenSnackbar} from '../../../commons/snackbar/useSnackbar';
+import moecostDb             from '../../../../scripts/storage';
 
 import {
     tryJsonParse,
-    varidateJson_alldata}    from '../../../scripts/varidateJsonFile';
+    varidateJson_alldata}    from '../../../../scripts/varidateJsonFile';
 
-import useAccordionList from '../../commons/accordion/useAccordionList';
-import useDialogParent  from '../../commons/dialog/useDialogParent';
+import useAccordionList from '../../../commons/accordion/useAccordionList';
+import useDialogParent  from '../../../commons/dialog/useDialogParent';
 
-import DialogNormal from '../../commons/dialog/dialogNormal';
-import DialogEnded  from '../../commons/dialog/dialogEnded';
-import Accordion    from '../../commons/accordion/accordion';
-import FileReaderButton from '../../commons/buttons/fileReaderButton';
+import DialogNormal from '../../../commons/dialog/dialogNormal';
+import DialogEnded  from '../../../commons/dialog/dialogEnded';
+import Accordion    from '../../../commons/accordion/accordion';
+import FileReaderButton from '../../../commons/buttons/fileReaderButton';
 
 import Button           from '@material-ui/core/Button';
 import Box              from '@material-ui/core/Box';
