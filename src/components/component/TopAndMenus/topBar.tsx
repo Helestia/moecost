@@ -20,6 +20,7 @@ import SettingIcon          from '@material-ui/icons/SettingsApplications';
 import LocalLibraryIcon     from '@material-ui/icons/LocalLibrary';
 import NewReleasesIcon      from '@material-ui/icons/NewReleases';
 import StoreIcon            from '@material-ui/icons/Store';
+import HelpIcon             from '@material-ui/icons/Help';
 import ForumIcon            from '@material-ui/icons/Forum';
 import StorageIcon          from '@material-ui/icons/Storage';
 
@@ -55,9 +56,8 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
     const handleOpenChangeLogDialog  = () => setIsOpenChangeLogDialog(true);
     const handleCloseChangeLogDialog = () => setIsOpenChangeLogDialog(false);
 
-    const handleReportsBords = () => {
-        window.open("http://moecost.bbs.fc2.com/","_blank");
-    }
+    const handleReportsBords = () => window.open("http://moecost.bbs.fc2.com/","_blank");
+    const handleHelps = () => window.open("./helps/", "_blank");
 
     return (
         <Drawer
@@ -84,6 +84,10 @@ const MenuDrower:React.FC<iMenuDrower> = (props) => {
                     <ListItem button onClick={handleOpenAllDataDialog}>
                         <StorageIcon />
                         全データ管理
+                    </ListItem>
+                    <ListItem button onClick={handleHelps}>
+                        <HelpIcon />
+                        使い方・ヘルプ
                     </ListItem>
                     <ListItem button onClick={handleReportsBords}>
                         <ForumIcon />
