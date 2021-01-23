@@ -18,16 +18,17 @@ const schema_alldata = {
         },
         アプリ設定: {
             type: "object",
-            required: ["表示設定", "その他設定"],
+            required: ["表示設定", "計算設定"],
             additionalProperties: false,
             properties: {
                 表示設定: {
                     type: "object",
-                    required: ["ダークモード", "smallテーブル", "検索候補表示数", "初期表示設定", "ツリー表示内容"],
+                    required: ["ダークモード", "smallテーブル","常時最終作成物表示", "検索候補表示数", "初期表示設定", "ツリー表示内容"],
                     additionalProperties: false,
                     properties: {
                         ダークモード: {type: "boolean"},
                         smallテーブル: {type: "boolean"},
+                        常時最終作成物表示: {type: "boolean"},
                         検索候補表示数: {
                             type: "number",
                             minimum:0
@@ -108,12 +109,22 @@ const schema_alldata = {
                         }
                     }
                 },
-                その他設定: {
+                計算設定: {
                     type: "object",
-                    required: ["War販売物使用"],
+                    required: ["War販売物使用","廃棄設定"],
                     additionalProperties: false,
                     properties: {
-                        War販売物使用: {type: "boolean"}
+                        War販売物使用: {type: "boolean"},
+                        廃棄設定: {
+                            type: "object",
+                            required: ["副産物","余剰生産物","未消費素材"],
+                            additionalProperties: false,
+                            properties: {
+                                副産物: {type: "boolean"},
+                                余剰生産物: {type: "boolean"},
+                                未消費素材: {type: "boolean"}
+                            }
+                        }
                     }
                 }
             }
