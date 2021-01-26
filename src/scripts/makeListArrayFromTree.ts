@@ -291,7 +291,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
         return node.副産物.reduce((acc,cur) => {
             if(isTrash(cur.アイテム名)) return acc;
 
-            if(cur.原価) acc.価格 += cur.原価.設定原価;
+            if(cur.原価) acc.価格 += cur.原価.合計価格;
             else acc.未設定含 = true;
             return acc;
         },cloneObj_JSON(reCallResultDefault));
