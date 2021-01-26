@@ -1124,7 +1124,7 @@ const setQuantityToTree:tSetQuantityToTree = (main,common,quantity) => {
                     アイテム名: b.アイテム名,
                     セット作成個数: b.セット作成個数,
                     作成個数: creationQuantity,
-                    価格: {
+                    原価: {
                         設定原価: b.価格.設定原価,
                         合計価格: b.価格.設定原価 * creationQuantity
                     }
