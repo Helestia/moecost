@@ -217,9 +217,10 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
      */
     const subRecallResult: (args:tReCallResult[]) => tReCallResult = (args) => {
         return args.reduce((acc,cur) => {
-            acc.価格 -= cur.価格;
-            acc.未設定含 = acc.未設定含 || cur.未設定含;
-            return acc;
+            const result = cloneObj_JSON(acc);
+            result.価格 -= cur.価格;
+            result.未設定含 = result.未設定含 || cur.未設定含;
+            return result;
         })
     }
     /**
