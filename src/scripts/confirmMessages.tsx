@@ -52,7 +52,7 @@ const retrieveNoSetByproductCost:tRetrieveNoSetByproductCost = (main,common) => 
     const reCall:tReCall = (node) => {
         if(node.調達方法 !== "作成") return;
         if(node.副産物) node.副産物.forEach(b => {
-            if(! b.原価) unknownByproduct.push(node.アイテム名);
+            if(! b.原価) unknownByproduct.push(b.アイテム名);
         })
         node.材料.forEach(node => reCall(node));
     }
