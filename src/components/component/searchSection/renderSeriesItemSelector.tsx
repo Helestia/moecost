@@ -1,7 +1,8 @@
 import React from 'react'
 import {SeriesCreationItems,tJSON_seriesCreationItem_item} from '../../../scripts/jsonReader'
 
-import Button           from '@material-ui/core/Button'
+import Button           from '@material-ui/core/Button';
+import Box              from '@material-ui/core/Box';
 import Card             from '@material-ui/core/Card';
 import CheckBox         from '@material-ui/core/Checkbox'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
@@ -16,9 +17,14 @@ import {
     Theme}     from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme:Theme)=>createStyles({
+    root: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+        marginLeft: theme.spacing(1)
+    },
     cord : {
-        margin: theme.spacing(1),
-        width: 440
+        width: "440px",
+        maxWidth: "100%"
     },
     listItem: {
         paddingTop:0,
@@ -43,21 +49,23 @@ const RenderSeriesItemSelector:React.FC<RenderSeriesItemSelectorProps> = (props)
     if(props.seriesName === "") return null
 
     return (
-        <Card className={classes.cord}>
-            <List>
-                <ListSubheader>シリーズ一括生産・対象アイテム選択</ListSubheader>
-                {ListItemNodes.map(node => node)}
-            </List>
-            <Button
-                className={classes.button}
-                variant="text"
-                color="primary"
-                disabled={isSubmitDisabled}
-                onClick={handleSubmit}
-            >
-                選択完了
-            </Button>
-        </Card>
+        <Box className={classes.root}>
+            <Card className={classes.cord}>
+                <List>
+                    <ListSubheader>シリーズ一括生産・対象アイテム選択</ListSubheader>
+                    {ListItemNodes.map(node => node)}
+                </List>
+                <Button
+                    className={classes.button}
+                    variant="text"
+                    color="primary"
+                    disabled={isSubmitDisabled}
+                    onClick={handleSubmit}
+                >
+                    選択完了
+                </Button>
+            </Card>
+        </Box>
     )
 }
 
