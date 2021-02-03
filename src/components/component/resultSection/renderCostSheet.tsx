@@ -36,25 +36,32 @@ import RestoreIcon       from '@material-ui/icons/Restore';
 import {createStyles, Theme, makeStyles} from '@material-ui/core/styles';
 
 
-const useStyles = makeStyles((theme:Theme) => 
-    createStyles({
-        tableRoot: {
-            width: "100%",
-            maxWidth: "750px"
-        },
-        boxRootSeconds: {
-            marginTop: theme.spacing(2)
-        },
-        button: {
-            marginTop:theme.spacing(2)
-        },
-        disableCell: {
-            color: theme.palette.action.disabled,
-            backgroundColor: theme.palette.action.disabledBackground,
-            textDecorationLine: "line-through"
-        }
-    })
-);
+const useStyles = makeStyles((theme:Theme) => createStyles({
+    tableContainerBox: {
+        marginBottom: theme.spacing(2)
+    },
+    tableContainer: {
+        display: "inline-box",
+        width: "auto",
+        maxWidth: "100%"
+    },
+    tableClass:{
+        whiteSpace: "nowrap",
+        overflowX: "scroll",
+        msOverflowStyle: "none"
+    },
+    boxRootSeconds: {
+        marginTop: theme.spacing(2)
+    },
+    button: {
+        marginTop:theme.spacing(2)
+    },
+    disableCell: {
+        color: theme.palette.action.disabled,
+        backgroundColor: theme.palette.action.disabledBackground,
+        textDecorationLine: "line-through"
+    }
+}));
 
 type tRenderCostSheet= {
     isExpanded: boolean,
@@ -142,66 +149,68 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
 
     const renderTableMaterial = () => {
         return (
-            <Box>
+            <Box width="100%">
                 <Typography variant="h6">材料費</Typography>
-                <TableContainer
-                    component={Paper}
-                    className={classes.tableRoot}
-                >
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><Typography>アイテム名</Typography></TableCell>
-                                <TableCell><Typography>消費個数</Typography></TableCell>
-                                <TableCell><Typography>設定単価</Typography></TableCell>
-                                <TableCell><Typography>合計金額</Typography></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {props.materials.map((m,i) => (
-                                <TableRow key={"Result_MaterialTable_RowNo_" + i}>
-                                    <ItemNameCell
-                                        itemName={m.アイテム名}
-                                        handleClick={handleItemNameClick}
-                                        procurement={m.調達方法}>
-                                        <Typography>{m.アイテム名}</Typography>
-                                    </ItemNameCell>
-                                    <TableCell
-                                        align="right">
-                                        <Typography>{numDeform(m.必要個数)}</Typography>
-                                    </TableCell>
-                                    {(m.調達方法 === "未設定") 
-                                        ? (<>
-                                            <TableCell align="center">
-                                                <Typography color="error">-</Typography>
-                                            </TableCell>
-                                            <TableCell align="center">
-                                                <Typography color="error">-</Typography>
-                                            </TableCell>
-                                        </>)
-                                        : (<>
-                                            <TableCell align="right">
-                                                <Typography>{numDeform(m.設定単価)}</Typography>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Typography>{numDeform(m.合計金額)}</Typography>
-                                            </TableCell>
-                                        </>)
+                <Box className={classes.tableContainerBox}>
+                    <TableContainer
+                        component={Paper}
+                        className={classes.tableContainer}
+                    >
+                        <Table className={classes.tableClass}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell><Typography>消費個数</Typography></TableCell>
+                                    <TableCell><Typography>設定単価</Typography></TableCell>
+                                    <TableCell><Typography>合計金額</Typography></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {props.materials.map((m,i) => (
+                                    <TableRow key={"Result_MaterialTable_RowNo_" + i}>
+                                        <ItemNameCell
+                                            itemName={m.アイテム名}
+                                            handleClick={handleItemNameClick}
+                                            procurement={m.調達方法}>
+                                            <Typography>{m.アイテム名}</Typography>
+                                        </ItemNameCell>
+                                        <TableCell
+                                            align="right">
+                                            <Typography>{numDeform(m.必要個数)}</Typography>
+                                        </TableCell>
+                                        {(m.調達方法 === "未設定") 
+                                            ? (<>
+                                                <TableCell align="center">
+                                                    <Typography color="error">-</Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography color="error">-</Typography>
+                                                </TableCell>
+                                            </>)
+                                            : (<>
+                                                <TableCell align="right">
+                                                    <Typography>{numDeform(m.設定単価)}</Typography>
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <Typography>{numDeform(m.合計金額)}</Typography>
+                                                </TableCell>
+                                            </>)
+                                        }
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                                    {materialTotal.hasUnknown 
+                                        ? <TableCell align="right"><Typography color="error">{numDeform(materialTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell align="right"><Typography>{numDeform(materialTotal.money)}</Typography></TableCell>
                                     }
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
-                                {materialTotal.hasUnknown 
-                                    ? <TableCell align="right"><Typography color="error">{numDeform(materialTotal.money) + "+ α"}</Typography></TableCell>
-                                    : <TableCell align="right"><Typography>{numDeform(materialTotal.money)}</Typography></TableCell>
-                                }
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </TableContainer>
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
         )
     }
@@ -212,88 +221,90 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">副産物</Typography>
-                <TableContainer
-                    component={Paper}
-                    className={classes.tableRoot}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><Typography>アイテム名</Typography></TableCell>
-                                <TableCell><Typography>作成個数</Typography></TableCell>
-                                <TableCell><Typography>設定単価</Typography></TableCell>
-                                <TableCell><Typography>合計金額</Typography></TableCell>
-                                <TableCell><Typography>除外</Typography></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {props.byproducts.map((b,i) => (
-                                <TableRow key={"Result_ByproductTable_RowNo_" + i}>
-                                    <ItemNameCell
-                                        itemName={b.アイテム名}
-                                        handleClick={handleItemNameClick}
-                                        procurement="作成">
-                                        <Typography>{b.アイテム名}</Typography>
-                                    </ItemNameCell>
-                                    <TableCell
-                                        className={(b.廃棄対象) ? classes.disableCell : ""}>
-                                        <Typography>{b.作成個数}</Typography>
-                                    </TableCell>
-                                    {(b.価格設定有) 
-                                        ? (<>
-                                            <TableCell
-                                                align="right"
-                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography>{numDeform(b.設定単価)}</Typography>
-                                            </TableCell>
-                                            <TableCell
-                                                align="right"
-                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography>{numDeform(b.合計金額)}</Typography>
-                                            </TableCell>
-                                        </>)
-                                        : (<>
-                                            <TableCell
-                                                align="center"
-                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography color="error">-</Typography>
-                                            </TableCell>
-                                            <TableCell
-                                                align="center"
-                                                className={(b.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography color="error">-</Typography>
-                                            </TableCell>
-                                        </>)
-                                    }
-                                    <TableCell>
-                                        <Tooltip
-                                            title="原価反映／廃棄の切り替え"
-                                            arrow
-                                        >
-                                            <IconButton
-                                                onClick={handleTrashItems_byproduct(b.アイテム名)}
-                                                size="small">
-                                                {b.廃棄対象
-                                                    ? <RestoreIcon />
-                                                    : <DeleteIcon />
-                                                }
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
+                <Box className={classes.tableContainerBox}>
+                    <TableContainer
+                        component={Paper}
+                        className={classes.tableContainer}>
+                        <Table className={classes.tableClass}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell><Typography>作成個数</Typography></TableCell>
+                                    <TableCell><Typography>設定単価</Typography></TableCell>
+                                    <TableCell><Typography>合計金額</Typography></TableCell>
+                                    <TableCell><Typography>除外</Typography></TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
-                                {byproductTotal.hasUnknown 
-                                    ? <TableCell align="right"><Typography color="error">{numDeform(byproductTotal.money) + "+ α"}</Typography></TableCell>
-                                    : <TableCell align="right"><Typography>{numDeform(byproductTotal.money)}</Typography></TableCell>
-                                }
-                                <TableCell />
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {props.byproducts.map((b,i) => (
+                                    <TableRow key={"Result_ByproductTable_RowNo_" + i}>
+                                        <ItemNameCell
+                                            itemName={b.アイテム名}
+                                            handleClick={handleItemNameClick}
+                                            procurement="作成">
+                                            <Typography>{b.アイテム名}</Typography>
+                                        </ItemNameCell>
+                                        <TableCell
+                                            className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                            <Typography>{b.作成個数}</Typography>
+                                        </TableCell>
+                                        {(b.価格設定有) 
+                                            ? (<>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography>{numDeform(b.設定単価)}</Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography>{numDeform(b.合計金額)}</Typography>
+                                                </TableCell>
+                                            </>)
+                                            : (<>
+                                                <TableCell
+                                                    align="center"
+                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography color="error">-</Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    align="center"
+                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography color="error">-</Typography>
+                                                </TableCell>
+                                            </>)
+                                        }
+                                        <TableCell>
+                                            <Tooltip
+                                                title="原価反映／廃棄の切り替え"
+                                                arrow
+                                            >
+                                                <IconButton
+                                                    onClick={handleTrashItems_byproduct(b.アイテム名)}
+                                                    size="small">
+                                                    {b.廃棄対象
+                                                        ? <RestoreIcon />
+                                                        : <DeleteIcon />
+                                                    }
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                                    {byproductTotal.hasUnknown 
+                                        ? <TableCell align="right"><Typography color="error">{numDeform(byproductTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell align="right"><Typography>{numDeform(byproductTotal.money)}</Typography></TableCell>
+                                    }
+                                    <TableCell />
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
         )
     }
@@ -304,101 +315,103 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">余剰生産品</Typography>
-                <TableContainer
-                    component={Paper}
-                    className={classes.tableRoot}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><Typography>アイテム名</Typography></TableCell>
-                                <TableCell><Typography>作成個数</Typography></TableCell>
-                                <TableCell><Typography>余り個数</Typography></TableCell>
-                                <TableCell><Typography>単価</Typography></TableCell>
-                                <TableCell><Typography>余り金額</Typography></TableCell>
-                                <TableCell><Typography>除外</Typography></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {props.surpluses.map((s,i) => (
-                                <TableRow  key={"Result_SurplusTable_RowNo_" + i}>
-                                    <ItemNameCell
-                                        itemName={s.アイテム名}
-                                        handleClick={handleItemNameClick}
-                                        procurement="作成">
-                                        <Typography>{s.アイテム名}</Typography>
-                                    </ItemNameCell>
-                                    <TableCell
-                                        align="right"
-                                        className={(s.廃棄対象) ? classes.disableCell : ""}>
-                                        <Typography>{s.作成個数}</Typography>
-                                    </TableCell>
-                                    <TableCell
-                                        align="right"
-                                        className={(s.廃棄対象) ? classes.disableCell : ""}>
-                                        <Typography>{s.余り個数}</Typography>
-                                    </TableCell>
-                                    {(s.未設定含) 
-                                        ? (<>
-                                            <TableCell
-                                                align="right"
-                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography
-                                                    color={(s.廃棄対象) ? "initial" : "error"}>
-                                                    {numDeform(s.単価)} ± α
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell
-                                                align="right"                                                
-                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography
-                                                    color={(s.廃棄対象) ? "initial" : "error"}>
-                                                    {numDeform(s.余り合計金額)} ± α
-                                                </Typography>
-                                            </TableCell>
-                                        </>)
-                                        : (<>
-                                            <TableCell
-                                                align="right"
-                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography>{numDeform(s.単価)}</Typography>
-                                            </TableCell>
-                                            <TableCell
-                                                align="right"
-                                                className={(s.廃棄対象) ? classes.disableCell : ""}>
-                                                <Typography>{numDeform(s.余り合計金額)}</Typography>
-                                            </TableCell>
-                                        </>)
-                                    }
-                                    <TableCell>
-                                        <Tooltip
-                                            title="原価反映／廃棄の切り替え"
-                                            arrow
-                                        >
-                                            <IconButton
-                                                onClick={handleTrashItems_surplus(s.アイテム名)}
-                                                size="small">
-                                                {s.廃棄対象
-                                                    ? <RestoreIcon />
-                                                    : <DeleteIcon />
-                                                }
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
+                <Box className={classes.tableContainerBox}>
+                    <TableContainer
+                        component={Paper}
+                        className={classes.tableContainer}>
+                        <Table className={classes.tableClass}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell><Typography>作成個数</Typography></TableCell>
+                                    <TableCell><Typography>余り個数</Typography></TableCell>
+                                    <TableCell><Typography>単価</Typography></TableCell>
+                                    <TableCell><Typography>余り金額</Typography></TableCell>
+                                    <TableCell><Typography>除外</Typography></TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell colSpan={4} align="center"><Typography>合計金額</Typography></TableCell>
-                                {surplusTotal.hasUnknown 
-                                    ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
-                                    : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
-                                }
-                                <TableCell />
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {props.surpluses.map((s,i) => (
+                                    <TableRow  key={"Result_SurplusTable_RowNo_" + i}>
+                                        <ItemNameCell
+                                            itemName={s.アイテム名}
+                                            handleClick={handleItemNameClick}
+                                            procurement="作成">
+                                            <Typography>{s.アイテム名}</Typography>
+                                        </ItemNameCell>
+                                        <TableCell
+                                            align="right"
+                                            className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                            <Typography>{s.作成個数}</Typography>
+                                        </TableCell>
+                                        <TableCell
+                                            align="right"
+                                            className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                            <Typography>{s.余り個数}</Typography>
+                                        </TableCell>
+                                        {(s.未設定含) 
+                                            ? (<>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography
+                                                        color={(s.廃棄対象) ? "initial" : "error"}>
+                                                        {numDeform(s.単価)} ± α
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    align="right"                                                
+                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography
+                                                        color={(s.廃棄対象) ? "initial" : "error"}>
+                                                        {numDeform(s.余り合計金額)} ± α
+                                                    </Typography>
+                                                </TableCell>
+                                            </>)
+                                            : (<>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography>{numDeform(s.単価)}</Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    align="right"
+                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    <Typography>{numDeform(s.余り合計金額)}</Typography>
+                                                </TableCell>
+                                            </>)
+                                        }
+                                        <TableCell>
+                                            <Tooltip
+                                                title="原価反映／廃棄の切り替え"
+                                                arrow
+                                            >
+                                                <IconButton
+                                                    onClick={handleTrashItems_surplus(s.アイテム名)}
+                                                    size="small">
+                                                    {s.廃棄対象
+                                                        ? <RestoreIcon />
+                                                        : <DeleteIcon />
+                                                    }
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center"><Typography>合計金額</Typography></TableCell>
+                                    {surplusTotal.hasUnknown 
+                                        ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
+                                    }
+                                    <TableCell />
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
         )
     }
@@ -562,72 +575,77 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">耐久割</Typography>
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><Typography>アイテム名</Typography></TableCell>
-                                <TableCell><Typography>消費<br />個数</Typography></TableCell>
-                                <TableCell><Typography>調達<br />単価</Typography></TableCell>
-                                <TableCell><Typography>合計<br />金額</Typography></TableCell>
-                                <TableCell><Typography>最大<br />耐久値</Typography></TableCell>
-                                <TableCell><Typography>消費<br />耐久値</Typography></TableCell>
-                                <TableCell><Typography>耐久割<br />単価</Typography></TableCell>
-                                <TableCell><Typography>耐久割<br />金額</Typography></TableCell>
-                                <TableCell><Typography>未償却</Typography></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                renderObj.map((d,i) => (
-                                    <TableRow key={"Result_DurabilitiesTable_RowNo_" + i}>
-                                        {d.アイテム名}
-                                        {d.消費個数}
-                                        {d.調達単価}
-                                        {d.合計金額}
-                                        {d.最大耐久}
-                                        {d.消費耐久}
-                                        {d.耐久割単価}
-                                        {d.耐久割金額}
-                                        {d.未償却金額}
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell align="center" colSpan={3}><Typography>合計金額</Typography></TableCell>
-                                {(durabilityTotal.hasUnknown)
-                                    ? <TableCell align="right"><Typography color="error">{numDeform(durabilityTotal.total)} ± α</Typography></TableCell>
-                                    : <TableCell align="right"><Typography>{numDeform(durabilityTotal.total)}</Typography></TableCell>
+                <Box className={classes.tableContainerBox}>
+                    <TableContainer
+                        className={classes.tableContainer}
+                        component={Paper}
+                    >
+                        <Table className={classes.tableClass}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell><Typography>消費<br />個数</Typography></TableCell>
+                                    <TableCell><Typography>調達<br />単価</Typography></TableCell>
+                                    <TableCell><Typography>合計<br />金額</Typography></TableCell>
+                                    <TableCell><Typography>最大<br />耐久値</Typography></TableCell>
+                                    <TableCell><Typography>消費<br />耐久値</Typography></TableCell>
+                                    <TableCell><Typography>耐久割<br />単価</Typography></TableCell>
+                                    <TableCell><Typography>耐久割<br />金額</Typography></TableCell>
+                                    <TableCell><Typography>未償却</Typography></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {
+                                    renderObj.map((d,i) => (
+                                        <TableRow key={"Result_DurabilitiesTable_RowNo_" + i}>
+                                            {d.アイテム名}
+                                            {d.消費個数}
+                                            {d.調達単価}
+                                            {d.合計金額}
+                                            {d.最大耐久}
+                                            {d.消費耐久}
+                                            {d.耐久割単価}
+                                            {d.耐久割金額}
+                                            {d.未償却金額}
+                                        </TableRow>
+                                    ))
                                 }
-                                <TableCell colSpan={3}></TableCell>
-                                {(durabilityTotal.hasUnknown)
-                                    ? (
-                                        <>
-                                            <TableCell align="right">
-                                                <Typography color="error">{numDeform(durabilityTotal.durable)} ± α</Typography>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Typography color="error">{numDeform(durabilityTotal.undepreciated)} ± α</Typography>
-                                            </TableCell>
-                                        </>
-                                    )
-                                    : (
-                                        <>
-                                            <TableCell align="right">
-                                                <Typography>{numDeform(durabilityTotal.durable)}</Typography>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Typography>{numDeform(durabilityTotal.undepreciated)}</Typography>
-                                            </TableCell>
-                                        </>
-                                    )
-                                }
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </TableContainer>
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell align="center" colSpan={3}><Typography>合計金額</Typography></TableCell>
+                                    {(durabilityTotal.hasUnknown)
+                                        ? <TableCell align="right"><Typography color="error">{numDeform(durabilityTotal.total)} ± α</Typography></TableCell>
+                                        : <TableCell align="right"><Typography>{numDeform(durabilityTotal.total)}</Typography></TableCell>
+                                    }
+                                    <TableCell colSpan={3}></TableCell>
+                                    {(durabilityTotal.hasUnknown)
+                                        ? (
+                                            <>
+                                                <TableCell align="right">
+                                                    <Typography color="error">{numDeform(durabilityTotal.durable)} ± α</Typography>
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <Typography color="error">{numDeform(durabilityTotal.undepreciated)} ± α</Typography>
+                                                </TableCell>
+                                            </>
+                                        )
+                                        : (
+                                            <>
+                                                <TableCell align="right">
+                                                    <Typography>{numDeform(durabilityTotal.durable)}</Typography>
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <Typography>{numDeform(durabilityTotal.undepreciated)}</Typography>
+                                                </TableCell>
+                                            </>
+                                        )
+                                    }
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
         )
     }
@@ -638,121 +656,123 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">未消費素材</Typography>
-                <TableContainer
-                    component={Paper}
-                    className={classes.tableRoot}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><Typography>アイテム名</Typography></TableCell>
-                                <TableCell><Typography>使用個数</Typography></TableCell>
-                                <TableCell><Typography>単価</Typography></TableCell>
-                                <TableCell><Typography>金額</Typography></TableCell>
-                                <TableCell><Typography>除外</Typography></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {props.noLostItems.map((item,i) => (
-                                <TableRow  key={"Result_NoLostTable_RowNo_" + i}>
-                                    <ItemNameCell
-                                        itemName={item.アイテム名}
-                                        handleClick={handleItemNameClick}
-                                        procurement={item.調達方法}
-                                    >
-                                        <Typography>{item.アイテム名}</Typography>
-                                    </ItemNameCell>
-                                    <TableCell
-                                        align="right"
-                                        className={(item.廃棄対象) ? classes.disableCell : ""}>
-                                        <Typography>{item.個数}</Typography>
-                                    </TableCell>
-                                    {(item.調達方法 === "未設定")
-                                        ? (<>
-                                            <TableCell
-                                                align="center"
-                                                className={(item.廃棄対象) ? classes.disableCell : ""}
-                                            >
-                                                <Typography color="error">
-                                                    -
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell
-                                                align="center"
-                                                className={(item.廃棄対象) ? classes.disableCell : ""}
-                                            >
-                                                <Typography color="error">
-                                                    -
-                                                </Typography>
-                                            </TableCell>
-                                        </>)
-                                        : (item.調達方法 === "作成" && item.未設定含) 
+                <Box className={classes.tableContainerBox}>
+                    <TableContainer
+                        component={Paper}
+                        className={classes.tableContainer}>
+                        <Table className={classes.tableClass}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell><Typography>使用個数</Typography></TableCell>
+                                    <TableCell><Typography>単価</Typography></TableCell>
+                                    <TableCell><Typography>金額</Typography></TableCell>
+                                    <TableCell><Typography>除外</Typography></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {props.noLostItems.map((item,i) => (
+                                    <TableRow  key={"Result_NoLostTable_RowNo_" + i}>
+                                        <ItemNameCell
+                                            itemName={item.アイテム名}
+                                            handleClick={handleItemNameClick}
+                                            procurement={item.調達方法}
+                                        >
+                                            <Typography>{item.アイテム名}</Typography>
+                                        </ItemNameCell>
+                                        <TableCell
+                                            align="right"
+                                            className={(item.廃棄対象) ? classes.disableCell : ""}>
+                                            <Typography>{item.個数}</Typography>
+                                        </TableCell>
+                                        {(item.調達方法 === "未設定")
                                             ? (<>
                                                 <TableCell
-                                                    align="right"
+                                                    align="center"
                                                     className={(item.廃棄対象) ? classes.disableCell : ""}
                                                 >
                                                     <Typography color="error">
-                                                        {numDeform(item.単価)} ± α
+                                                        -
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell
-                                                    align="right"
+                                                    align="center"
                                                     className={(item.廃棄対象) ? classes.disableCell : ""}
                                                 >
                                                     <Typography color="error">
-                                                        {numDeform(item.合計金額)} ± α
+                                                        -
                                                     </Typography>
                                                 </TableCell>
                                             </>)
-                                            : (<>
-                                                <TableCell
-                                                    align="right"
-                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
-                                                >
-                                                    <Typography>
-                                                        {numDeform(item.単価)}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell
-                                                    align="right"
-                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
-                                                >
-                                                    <Typography>
-                                                        {numDeform(item.合計金額)}
-                                                    </Typography>
-                                                </TableCell>
-                                            </>)
+                                            : (item.調達方法 === "作成" && item.未設定含) 
+                                                ? (<>
+                                                    <TableCell
+                                                        align="right"
+                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                    >
+                                                        <Typography color="error">
+                                                            {numDeform(item.単価)} ± α
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell
+                                                        align="right"
+                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                    >
+                                                        <Typography color="error">
+                                                            {numDeform(item.合計金額)} ± α
+                                                        </Typography>
+                                                    </TableCell>
+                                                </>)
+                                                : (<>
+                                                    <TableCell
+                                                        align="right"
+                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                    >
+                                                        <Typography>
+                                                            {numDeform(item.単価)}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell
+                                                        align="right"
+                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                    >
+                                                        <Typography>
+                                                            {numDeform(item.合計金額)}
+                                                        </Typography>
+                                                    </TableCell>
+                                                </>)
+                                        }
+                                        <TableCell>
+                                            <Tooltip
+                                                title="原価反映／廃棄の切り替え"
+                                                arrow
+                                            >
+                                                <IconButton
+                                                    onClick={handleTrashItems_noLost(item.アイテム名)}
+                                                    size="small">
+                                                    {item.廃棄対象
+                                                        ? <RestoreIcon />
+                                                        : <DeleteIcon />
+                                                    }
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                                    {surplusTotal.hasUnknown 
+                                        ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
                                     }
-                                    <TableCell>
-                                        <Tooltip
-                                            title="原価反映／廃棄の切り替え"
-                                            arrow
-                                        >
-                                            <IconButton
-                                                onClick={handleTrashItems_noLost(item.アイテム名)}
-                                                size="small">
-                                                {item.廃棄対象
-                                                    ? <RestoreIcon />
-                                                    : <DeleteIcon />
-                                                }
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
+                                    <TableCell />
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
-                                {surplusTotal.hasUnknown 
-                                    ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
-                                    : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
-                                }
-                                <TableCell />
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </TableContainer>
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
         )
     }
@@ -763,50 +783,55 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">最終作成物</Typography>
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>アイテム名</TableCell>
-                                <TableCell>作成個数</TableCell>
-                                <TableCell>合計金額</TableCell>
-                                <TableCell>単価</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {props.creations.map((c,i) =>
-                                <TableRow  key={"Result_CreationTable_RowNo_" + i}>
-                                    <ItemNameCell
-                                        itemName={c.アイテム名}
-                                        handleClick={handleItemNameClick}
-                                        procurement="作成">
-                                        <Typography>{c.アイテム名}</Typography>
-                                    </ItemNameCell>
-                                    <TableCell align="right"><Typography>{numDeform(c.作成個数)}</Typography></TableCell>
-                                    {
-                                        (c.未設定含)
-                                            ? <>
-                                                <TableCell align="right">
-                                                    <Typography color="error">{numDeform(c.合計材料費)} ± α</Typography>
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <Typography color="error">{numDeform(c.単価)} ± α</Typography>
-                                                </TableCell>
-                                            </>
-                                            : <>
-                                                <TableCell align="right">
-                                                    <Typography>{numDeform(c.合計材料費)}</Typography>
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <Typography>{numDeform(c.単価)}</Typography>
-                                                </TableCell>
-                                            </>
-                                    }
+                <Box className={classes.tableContainerBox}>
+                    <TableContainer
+                        className={classes.tableContainer}
+                        component={Paper}
+                    >
+                        <Table className={classes.tableClass}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>アイテム名</TableCell>
+                                    <TableCell>作成個数</TableCell>
+                                    <TableCell>合計金額</TableCell>
+                                    <TableCell>単価</TableCell>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {props.creations.map((c,i) =>
+                                    <TableRow  key={"Result_CreationTable_RowNo_" + i}>
+                                        <ItemNameCell
+                                            itemName={c.アイテム名}
+                                            handleClick={handleItemNameClick}
+                                            procurement="作成">
+                                            <Typography>{c.アイテム名}</Typography>
+                                        </ItemNameCell>
+                                        <TableCell align="right"><Typography>{numDeform(c.作成個数)}</Typography></TableCell>
+                                        {
+                                            (c.未設定含)
+                                                ? <>
+                                                    <TableCell align="right">
+                                                        <Typography color="error">{numDeform(c.合計材料費)} ± α</Typography>
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <Typography color="error">{numDeform(c.単価)} ± α</Typography>
+                                                    </TableCell>
+                                                </>
+                                                : <>
+                                                    <TableCell align="right">
+                                                        <Typography>{numDeform(c.合計材料費)}</Typography>
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <Typography>{numDeform(c.単価)}</Typography>
+                                                    </TableCell>
+                                                </>
+                                        }
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
         );
     }
@@ -817,7 +842,7 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
             onChange={props.handleExpand}
             summary={<Typography component="span" variant="h6">原価表</Typography>}
         >
-            <Box>
+            <Box width="100%">
                 {renderTableMaterial()}
                 {renderTableByproduct()}
                 {renderTableSurplus()}
