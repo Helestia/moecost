@@ -2,7 +2,7 @@ import React from 'react';
 
 import {tSwitchTarget_calc} from './index'
 
-import ListItemInSwitch     from './listItemInSwitch';
+import ListItemInSwitch     from './commons/listItemInSwitch';
 
 import Box          from '@material-ui/core/Box';
 import Paper        from '@material-ui/core/Paper';
@@ -21,7 +21,7 @@ const useStyle = makeStyles((theme:Theme) => createStyles({
             flexWrap: "wrap"
         },
         [theme.breakpoints.down("md")] : {
-            flexDirection:"column",
+            flexDirection:"column"
         }
     },
     paper: {
@@ -32,13 +32,17 @@ const useStyle = makeStyles((theme:Theme) => createStyles({
     },
     list:{
         marginBottom:theme.spacing(2),
-        minWidth:"380px"
+        [theme.breakpoints.down("xs")]: {
+            width:"100%"
+        },
+        [theme.breakpoints.up("sm")]: {
+            minWidth:"380px"
+        }
     }
 }));
 
 type tAppTabPanel = {
     isDisplay:boolean,
-    listItemClassName: string,
     status:{
         isUseWarNpc: boolean,
         isTrashNoLost: boolean,
@@ -65,7 +69,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">War Ageの販売情報を計算結果に含めます。</Typography>}
                         isChecked={props.status.isUseWarNpc}
                         onClick={props.handler.switch.bind(null,"useWarNpc",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         War販売物の利用
                     </ListItemInSwitch>
@@ -81,7 +84,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">未消費系素材（未消費／失敗時消失）を使用時、初期で廃棄状態にセットします。</Typography>}
                         isChecked={props.status.isTrashNoLost}
                         onClick={props.handler.switch.bind(null,"trashNoLost",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         消失しない素材
                     </ListItemInSwitch>
@@ -89,7 +91,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">副産物が生成されるレシピ作成時、初期で廃棄状態にセットします。</Typography>}
                         isChecked={props.status.isTrashByproduct}
                         onClick={props.handler.switch.bind(null,"trashByproduct",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         副産物
                     </ListItemInSwitch>
@@ -97,7 +98,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">余分に作成された生産物が作成される場合、初期で廃棄状態にセットします。</Typography>}
                         isChecked={props.status.isTrashSurplus}
                         onClick={props.handler.switch.bind(null,"trashSurplus",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         余剰生産品
                     </ListItemInSwitch>

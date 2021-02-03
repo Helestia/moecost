@@ -2,8 +2,8 @@ import React from 'react';
 
 import {tSwitchTarget_app}  from './index'
 
-import ListItemInSwitch     from './listItemInSwitch';
-import ListItemInTextField  from './listItemInTextField';
+import ListItemInSwitch     from './commons/listItemInSwitch';
+import ListItemInTextField  from './commons/listItemInTextField';
 
 import Box          from '@material-ui/core/Box';
 import Paper        from '@material-ui/core/Paper';
@@ -22,7 +22,6 @@ const useStyle = makeStyles((theme:Theme) => createStyles({
         },
         [theme.breakpoints.down("md")] : {
             flexDirection:"column",
-            width:"100%"
         }
     },
     paper: {
@@ -33,13 +32,17 @@ const useStyle = makeStyles((theme:Theme) => createStyles({
     },
     list:{
         marginBottom:theme.spacing(2),
-        minWidth:"380px"
+        [theme.breakpoints.down("xs")]: {
+            width:"100%"
+        },
+        [theme.breakpoints.up("sm")]: {
+            minWidth:"380px"
+        }
     }
 }))
 
 type tAppTabPanel = {
     isDisplay:boolean,
-    listItemClassName: string,
     status:{
         isUseDark: boolean,
         isUseSmallTable: boolean,
@@ -73,7 +76,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">アプリ全体の色設定を黒背景に変更します。</Typography>}
                         isChecked={props.status.isUseDark}
                         onClick={props.handler.switch.bind(null,"useDark",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         ダークモード使用
                     </ListItemInSwitch>
@@ -86,7 +88,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         }
                         isChecked={props.status.isUseSmallTable}
                         onClick={props.handler.switch.bind(null,"useSmallTable",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         緻密表の使用
                     </ListItemInSwitch>
@@ -99,7 +100,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         }
                         isChecked={props.status.isDispCreationEverytime}
                         onClick={props.handler.switch.bind(null,"dispCreationEverytime",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         常時最終作成物表示
                     </ListItemInSwitch>
@@ -119,7 +119,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                                 <Typography variant="body2">動作が重いようでしたら、30程度に絞ることで検索時の動作を軽くできます。</Typography>
                             </>
                         }
-                        listItemClassName={props.listItemClassName}
                         value={props.status.suggestMax}
                         handleChange={props.handler.suggestMax}
                     >
@@ -137,7 +136,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">計算後の画面で、結果の概要を初期状態で展開します。</Typography>}
                         isChecked={props.status.isDefDispSummary}
                         onClick={props.handler.switch.bind(null,"defDispSummary",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         概要
                     </ListItemInSwitch>
@@ -145,7 +143,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">計算後の画面で、結果の原価表を初期状態で展開します。</Typography>}
                         isChecked={props.status.isDefDispCostSheet}
                         onClick={props.handler.switch.bind(null,"defDispCostSheet",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         原価表
                     </ListItemInSwitch>
@@ -153,7 +150,6 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         helpText={<Typography variant="body2">計算後の画面で、結果の生産ツリーを初期状態で展開します。</Typography>}
                         isChecked={props.status.isDefDispCreationTree}
                         onClick={props.handler.switch.bind(null,"defDispCreationTree",undefined)}
-                        listItemClassName={props.listItemClassName}
                     >
                         原価表
                     </ListItemInSwitch>

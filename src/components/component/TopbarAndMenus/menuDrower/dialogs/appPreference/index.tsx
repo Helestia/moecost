@@ -115,13 +115,11 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
             >
                 <AppTabPanel
                     isDisplay={tabHooks.selected === "appConf"}
-                    listItemClassName={classes.listClassName}
                     status={hooks.status.app}
                     handler={hooks.handler.app}
                 />
                 <TreeDispTabPanel
                     isDisplay={tabHooks.selected === "dispTree"}
-                    listItemClassName={classes.listClassName}
                     creationStatus={hooks.status.treeCreation}
                     userStatus={hooks.status.treeUser}
                     npcStatus={hooks.status.treeNpc}
@@ -131,7 +129,6 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
                 />
                 <CalcTabPanel
                     isDisplay={tabHooks.selected === "calc"}
-                    listItemClassName={classes.listClassName}
                     status={hooks.status.calc}
                     handler={hooks.handler.calcs}
                 />
