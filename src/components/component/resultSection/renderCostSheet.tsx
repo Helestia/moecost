@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
         marginBottom: theme.spacing(2)
     },
     tableContainer: {
-        display: "inline-box",
+        display: "inline-block",
         width: "auto",
         maxWidth: "100%"
     },
