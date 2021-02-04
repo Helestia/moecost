@@ -88,6 +88,8 @@ const reduceResultDefault: tReduceResult = {
     hasUnknown:false
 }
 
+
+
 const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
     const classes = useStyles();
 
@@ -148,6 +150,16 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
     }
 
     const renderTableMaterial = () => {
+        const sortFunc = (bef:tMaterial,aft:tMaterial) => {
+            if(bef.調達方法 === aft.調達方法) return 0;
+            if(bef.調達方法 === "未設定") return -1;
+            if(aft.調達方法 === "未設定") return 1;
+            if(bef.調達方法 === "NPC") return -1;
+            if(aft.調達方法 === "NPC") return 1;
+            return 0;
+        }
+        const sortedMaterials = cloneObj_JSON(props.materials);
+        sortedMaterials.sort(sortFunc);
         return (
             <Box width="100%">
                 <Typography variant="h6">材料費</Typography>
@@ -166,7 +178,7 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {props.materials.map((m,i) => (
+                                {sortedMaterials.map((m,i) => (
                                     <TableRow key={"Result_MaterialTable_RowNo_" + i}>
                                         <ItemNameCell
                                             itemName={m.アイテム名}
