@@ -56,6 +56,7 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 type tItemNameCell = {
     itemName: string,
     procurement: tProcurement,
+    className? : string,
     colspan?: number,
     rowspan?: number,
     keyName?: string,
@@ -72,6 +73,12 @@ const ItemNameCell:React.FC<tItemNameCell> = (props) => {
         return classes.unknown;
     })();
     
+    const className = (() => {
+        if(props.isTree) return `${cellClass} ${classes.isTree}`
+        if(props.className) return `${cellClass} ${props.className}`
+        return cellClass;
+    })();
+
     const colSpan = props.colspan ? props.colspan : 1;
     const rowSpan = props.rowspan ? props.rowspan : 1;
     
@@ -81,7 +88,7 @@ const ItemNameCell:React.FC<tItemNameCell> = (props) => {
             colSpan={colSpan}
             rowSpan={rowSpan}
             onClick={handleClick(props.itemName)}
-            className={(props.isTree) ? cellClass + " " +  classes.isTree : cellClass}
+            className={className}
             key={props.keyName}
         >
             {props.children}

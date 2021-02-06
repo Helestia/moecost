@@ -21,10 +21,13 @@ import moecostDb from '../../../scripts/storage';
 const useStyleTableDefault = makeStyles((theme:Theme) => createStyles({
     tableContainer: {
         display: "inline-block",
-        maxWidth: "100%"
+        maxWidth: "100%",
+        width: "auto"
     },
     table: {
-        whiteSpace: "nowrap"
+        whiteSpace: "nowrap",
+        display: "inline-table",
+        width: "auto"
     },
     tableCellLeft: {
         textAlign: "left"
@@ -74,18 +77,26 @@ const useStyleTableToBlock = (dataLabelLength:number) => makeStyles((theme:Theme
     },
     tableCell: {
         [theme.breakpoints.down("xs")]: {
+            position: "relative",
             display: "block",
             width: "100%",
             padding: moecostDb.アプリ設定.表示設定.smallテーブル ? "6px 16px" : "16px",
             "&:not(:first-child)": {
+                paddingLeft: `${(dataLabelLength + 2)}rem`,
                 "&:before":{
                     content: "attr(data-label)",
                     display: "block",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
                     padding: moecostDb.アプリ設定.表示設定.smallテーブル ? "6px 16px" : "16px",
                     width: `${(dataLabelLength + 1)}rem`,
-                    float: "left",
-                    textAlign: "center"
+                    textAlign: "center",
+                    verticalAlign: "center"
                 }
+            },
+            "&:first-child": {
+                textAlign: "center"
             }
         }
     }
@@ -124,7 +135,7 @@ type tDefaultTableStyleResult = {
     }
 }
 
-const getTableStyles :(dataLabelLength:number) => tDefaultTableStyleResult = (dataLabelLength) => {
+const useTableStyles :(dataLabelLength:number) => tDefaultTableStyleResult = (dataLabelLength) => {
     const def = useStyleTableDefault();
     const scroll = useStyleTableScroll();
     const block = useStyleTableToBlock(dataLabelLength)();
@@ -157,4 +168,4 @@ const getTableStyles :(dataLabelLength:number) => tDefaultTableStyleResult = (da
     }
 }
 
-export default getTableStyles;
+export default useTableStyles;
