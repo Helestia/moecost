@@ -46,6 +46,7 @@ type tAppTabPanel = {
     status:{
         isUseDark: boolean,
         isUseSmallTable: boolean,
+        isDispTableWideScroll: boolean,
         isDispCreationEverytime: boolean,
         suggestMax: number,
         isDefDispSummary: boolean,
@@ -90,6 +91,17 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         onClick={props.handler.switch.bind(null,"useSmallTable",undefined)}
                     >
                         緻密表の使用
+                    </ListItemInSwitch>
+                    <ListItemInSwitch
+                        helpText={
+                            <>
+                                <Typography variant="body2">3列以上の幅の広い表を画面に表示できないとき、横スクロールを可能にしてパソコンレイアウトで表示します。</Typography>
+                            </>
+                        }
+                        isChecked={props.status.isDispTableWideScroll}
+                        onClick={props.handler.switch.bind(null,"dispTableWideScroll",undefined)}
+                    >
+                        表の横スクロール表示
                     </ListItemInSwitch>
                     <ListItemInSwitch
                         helpText={
