@@ -89,14 +89,14 @@ const useStyleTableToBlock = (dataLabelLength:number) => makeStyles((theme:Theme
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    padding: moecostDb.アプリ設定.表示設定.smallテーブル ? "6px 16px" : "16px",
-                    width: `${(dataLabelLength + 1)}rem`,
-                    textAlign: "center",
+                    paddingTop: moecostDb.アプリ設定.表示設定.smallテーブル ? "6px" : "16px",
+                    paddingBottom: moecostDb.アプリ設定.表示設定.smallテーブル ? "6px" : "16px",
+                    paddingRight: "16px",
+                    paddingLeft: (theme.spacing(2) + 16) + "px",
+                    width: `${(dataLabelLength + 2)}rem`,
+                    textAlign: "left",
                     verticalAlign: "center"
                 }
-            },
-            "&:first-child": {
-                textAlign: "center"
             }
         }
     }
