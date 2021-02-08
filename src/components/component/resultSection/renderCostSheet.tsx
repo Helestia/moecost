@@ -15,6 +15,7 @@ import {
 import moecostDb from '../../../scripts/storage';
 
 import Accordion from '../../commons/accordion/accordion';
+import useTableStyles from '../../commons/styles/useTableStyles';
 
 import Box               from '@material-ui/core/Box'
 import Button            from '@material-ui/core/Button'
@@ -92,6 +93,9 @@ const reduceResultDefault: tReduceResult = {
 
 const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
     const classes = useStyles();
+    // テーブル用クラスの取得
+    const TC4 = useTableStyles(4);
+    const TC5 = useTableStyles(5);
 
     // アイテム名クリック
     const handleItemNameClick = (str:string) => {props.handleItemClick(str)};
@@ -163,47 +167,66 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box width="100%">
                 <Typography variant="h6">材料費</Typography>
-                <Box className={classes.tableContainerBox}>
+                <Box>
                     <TableContainer
                         component={Paper}
-                        className={classes.tableContainer}
+                        className={TC4.container}
                     >
-                        <Table className={classes.tableClass}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell><Typography>アイテム名</Typography></TableCell>
-                                    <TableCell><Typography>消費個数</Typography></TableCell>
-                                    <TableCell><Typography>設定単価</Typography></TableCell>
-                                    <TableCell><Typography>合計金額</Typography></TableCell>
+                        <Table className={TC4.table}>
+                            <TableHead className={TC4.thead}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell className={TC4.td.center}><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>消費個数</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>設定単価</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>合計金額</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            <TableBody className={TC4.tbody}>
                                 {sortedMaterials.map((m,i) => (
-                                    <TableRow key={"Result_MaterialTable_RowNo_" + i}>
+                                    <TableRow
+                                        className={TC4.tr}
+                                        key={"Result_MaterialTable_RowNo_" + i}
+                                    >
                                         <ItemNameCell
+                                            className={TC4.td.left}
                                             itemName={m.アイテム名}
                                             handleClick={handleItemNameClick}
-                                            procurement={m.調達方法}>
+                                            procurement={m.調達方法}
+                                        >
                                             <Typography>{m.アイテム名}</Typography>
                                         </ItemNameCell>
                                         <TableCell
-                                            align="right">
+                                            data-label="消費個数"
+                                            className={TC4.td.right}
+                                        >
                                             <Typography>{numDeform(m.必要個数)}</Typography>
                                         </TableCell>
                                         {(m.調達方法 === "未設定") 
                                             ? (<>
-                                                <TableCell align="center">
+                                                <TableCell
+                                                    data-label="設定単価"
+                                                    className={TC4.td.center}
+                                                >
                                                     <Typography color="error">-</Typography>
                                                 </TableCell>
-                                                <TableCell align="center">
+                                                <TableCell
+                                                    data-label="合計金額"
+                                                    className={TC4.td.center}
+                                                >
                                                     <Typography color="error">-</Typography>
                                                 </TableCell>
                                             </>)
                                             : (<>
-                                                <TableCell align="right">
+                                                <TableCell
+                                                    data-label="設定単価"
+                                                    className={TC4.td.right}
+                                                >
                                                     <Typography>{numDeform(m.設定単価)}</Typography>
                                                 </TableCell>
-                                                <TableCell align="right">
+                                                <TableCell
+                                                    data-label="合計金額"
+                                                    className={TC4.td.right}
+                                                >
                                                     <Typography>{numDeform(m.合計金額)}</Typography>
                                                 </TableCell>
                                             </>)
@@ -211,12 +234,17 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                     </TableRow>
                                 ))}
                             </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                            <TableFooter className={TC4.tfoot}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell
+                                        colSpan={3}
+                                        className={TC4.td.center}
+                                    >
+                                        <Typography>合計金額</Typography>
+                                    </TableCell>
                                     {materialTotal.hasUnknown 
-                                        ? <TableCell align="right"><Typography color="error">{numDeform(materialTotal.money) + "+ α"}</Typography></TableCell>
-                                        : <TableCell align="right"><Typography>{numDeform(materialTotal.money)}</Typography></TableCell>
+                                        ? <TableCell className={TC4.td.right}><Typography color="error">{numDeform(materialTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell className={TC4.td.right}><Typography>{numDeform(materialTotal.money)}</Typography></TableCell>
                                     }
                                 </TableRow>
                             </TableFooter>
@@ -233,60 +261,85 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">副産物</Typography>
-                <Box className={classes.tableContainerBox}>
+                <Box>
                     <TableContainer
                         component={Paper}
-                        className={classes.tableContainer}>
-                        <Table className={classes.tableClass}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell><Typography>アイテム名</Typography></TableCell>
-                                    <TableCell><Typography>作成個数</Typography></TableCell>
-                                    <TableCell><Typography>設定単価</Typography></TableCell>
-                                    <TableCell><Typography>合計金額</Typography></TableCell>
-                                    <TableCell><Typography>除外</Typography></TableCell>
+                        className={TC4.container}
+                    >
+                        <Table className={TC4.table}>
+                            <TableHead className={TC4.thead}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell className={TC4.td.center}><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>作成個数</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>設定単価</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>合計金額</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>除外</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
-                                {props.byproducts.map((b,i) => (
-                                    <TableRow key={"Result_ByproductTable_RowNo_" + i}>
+                            <TableBody className={TC4.tbody}>
+                                {props.byproducts.map((b,i) => {
+                                    const tdClass = (() => {
+                                        if(b.廃棄対象) return {
+                                            center: `${TC4.td.center} ${classes.disableCell}`,
+                                            right: `${TC4.td.right} ${classes.disableCell}`
+                                        }
+                                        return {
+                                            center: TC4.td.center,
+                                            right: TC4.td.right
+                                        }
+                                    })();
+                                    return (
+                                    <TableRow
+                                        key={"Result_ByproductTable_RowNo_" + i}
+                                        className={TC4.tr}
+                                    >
                                         <ItemNameCell
+                                            className={TC4.td.left}
                                             itemName={b.アイテム名}
                                             handleClick={handleItemNameClick}
                                             procurement="作成">
                                             <Typography>{b.アイテム名}</Typography>
                                         </ItemNameCell>
                                         <TableCell
-                                            className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                            className={tdClass.right}
+                                            data-label="作成個数"
+                                        >
                                             <Typography>{b.作成個数}</Typography>
                                         </TableCell>
                                         {(b.価格設定有) 
                                             ? (<>
                                                 <TableCell
-                                                    align="right"
-                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass.right}
+                                                    data-label="設定単価"
+                                                >
                                                     <Typography>{numDeform(b.設定単価)}</Typography>
                                                 </TableCell>
                                                 <TableCell
-                                                    align="right"
-                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass.right}
+                                                    data-label="合計金額"
+                                                >
                                                     <Typography>{numDeform(b.合計金額)}</Typography>
                                                 </TableCell>
                                             </>)
                                             : (<>
                                                 <TableCell
-                                                    align="center"
-                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass.center}
+                                                    data-label="設定単価"
+                                                >
                                                     <Typography color="error">-</Typography>
                                                 </TableCell>
                                                 <TableCell
-                                                    align="center"
-                                                    className={(b.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass.center}
+                                                    data-label="合計金額"
+                                                    >
                                                     <Typography color="error">-</Typography>
                                                 </TableCell>
                                             </>)
                                         }
-                                        <TableCell>
+                                        <TableCell
+                                            className={TC4.td.center}
+                                            data-label="除外切替"
+                                        >
                                             <Tooltip
                                                 title="原価反映／廃棄の切り替え"
                                                 arrow
@@ -302,14 +355,19 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                             </Tooltip>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )})}
                             </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                            <TableFooter className={TC4.tfoot}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell
+                                        colSpan={3}
+                                        className={TC4.td.center}
+                                    >
+                                        <Typography>合計金額</Typography>
+                                    </TableCell>
                                     {byproductTotal.hasUnknown 
-                                        ? <TableCell align="right"><Typography color="error">{numDeform(byproductTotal.money) + "+ α"}</Typography></TableCell>
-                                        : <TableCell align="right"><Typography>{numDeform(byproductTotal.money)}</Typography></TableCell>
+                                        ? <TableCell className={TC4.td.right}><Typography color="error">{numDeform(byproductTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell className={TC4.td.right}><Typography>{numDeform(byproductTotal.money)}</Typography></TableCell>
                                     }
                                     <TableCell />
                                 </TableRow>
@@ -327,53 +385,63 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">余剰生産品</Typography>
-                <Box className={classes.tableContainerBox}>
+                <Box>
                     <TableContainer
                         component={Paper}
-                        className={classes.tableContainer}>
-                        <Table className={classes.tableClass}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell><Typography>アイテム名</Typography></TableCell>
-                                    <TableCell><Typography>作成個数</Typography></TableCell>
-                                    <TableCell><Typography>余り個数</Typography></TableCell>
-                                    <TableCell><Typography>単価</Typography></TableCell>
-                                    <TableCell><Typography>余り金額</Typography></TableCell>
-                                    <TableCell><Typography>除外</Typography></TableCell>
+                        className={TC4.container}>
+                        <Table className={TC4.table}>
+                            <TableHead className={TC4.thead}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell className={TC4.td.center}><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>作成個数</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>余り個数</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>単価</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>余り金額</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>除外</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
-                                {props.surpluses.map((s,i) => (
-                                    <TableRow  key={"Result_SurplusTable_RowNo_" + i}>
+                            <TableBody  className={TC4.tbody}>
+                                {props.surpluses.map((s,i) => {
+                                    const tdClass = (s.廃棄対象) ? `${TC4.td.right} ${classes.disableCell}` : TC4.td.right;
+                                    return (
+                                    <TableRow
+                                        key={"Result_SurplusTable_RowNo_" + i}
+                                        className={TC4.tr}
+                                    >
                                         <ItemNameCell
+                                            className={TC4.td.left}
                                             itemName={s.アイテム名}
                                             handleClick={handleItemNameClick}
                                             procurement="作成">
                                             <Typography>{s.アイテム名}</Typography>
                                         </ItemNameCell>
                                         <TableCell
-                                            align="right"
-                                            className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                            className={tdClass}
+                                            data-label="作成個数"
+                                        >
                                             <Typography>{s.作成個数}</Typography>
                                         </TableCell>
                                         <TableCell
-                                            align="right"
-                                            className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                            className={tdClass}
+                                            data-label="余り個数"
+                                        >
                                             <Typography>{s.余り個数}</Typography>
                                         </TableCell>
                                         {(s.未設定含) 
                                             ? (<>
                                                 <TableCell
-                                                    align="right"
-                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass}
+                                                    data-label="単価"
+                                                >
                                                     <Typography
                                                         color={(s.廃棄対象) ? "initial" : "error"}>
                                                         {numDeform(s.単価)} ± α
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell
-                                                    align="right"                                                
-                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass}
+                                                    data-label="余り金額"
+                                                >
                                                     <Typography
                                                         color={(s.廃棄対象) ? "initial" : "error"}>
                                                         {numDeform(s.余り合計金額)} ± α
@@ -382,18 +450,23 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                             </>)
                                             : (<>
                                                 <TableCell
-                                                    align="right"
-                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass}
+                                                    data-label="単価"
+                                                >
                                                     <Typography>{numDeform(s.単価)}</Typography>
                                                 </TableCell>
                                                 <TableCell
-                                                    align="right"
-                                                    className={(s.廃棄対象) ? classes.disableCell : ""}>
+                                                    className={tdClass}
+                                                    data-label="余り金額"
+                                                >
                                                     <Typography>{numDeform(s.余り合計金額)}</Typography>
                                                 </TableCell>
                                             </>)
                                         }
-                                        <TableCell>
+                                        <TableCell
+                                            className={TC4.td.center}
+                                            data-label="除外切替"
+                                        >
                                             <Tooltip
                                                 title="原価反映／廃棄の切り替え"
                                                 arrow
@@ -409,14 +482,14 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                             </Tooltip>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )})}
                             </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center"><Typography>合計金額</Typography></TableCell>
+                            <TableFooter className={TC4.tfoot}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell colSpan={4} className={TC4.td.center}><Typography>合計金額</Typography></TableCell>
                                     {surplusTotal.hasUnknown 
-                                        ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
-                                        : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
+                                        ? <TableCell className={TC4.td.right}><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell className={TC4.td.right}><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
                                     }
                                     <TableCell />
                                 </TableRow>
@@ -435,6 +508,7 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
             if(d.調達方法 === "未設定") return{
                 アイテム名: (
                 <ItemNameCell
+                    className={TC5.td.left}
                     itemName={d.アイテム名}
                     handleClick={handleItemNameClick}
                     procurement={d.調達方法}>
@@ -442,42 +516,66 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                 </ItemNameCell>
                 ),
                 消費個数: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="消費個数"
+                    >
                         <Typography>{numDeform(d.消費個数)}</Typography>
                     </TableCell>
                 ),
                 調達単価: (
-                    <TableCell align="center">
+                    <TableCell
+                        className={TC5.td.center}
+                        data-label="調達単価"
+                    >
                         <Typography color="error">-</Typography>
                     </TableCell>
                 ),
                 合計金額: (
-                    <TableCell align="center">
+                    <TableCell
+                        className={TC5.td.center}
+                        data-label="合計金額"
+                    >
                         <Typography color="error">-</Typography>
                     </TableCell>
                 ),
                 最大耐久: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="最大耐久"
+                    >
                         <Typography>{numDeform(d.最大耐久値)}</Typography>
                     </TableCell>
                 ),
                 消費耐久: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="消費耐久"
+                    >
                         <Typography>{numDeform(d.消費耐久値)}</Typography>
                     </TableCell>
                 ),
                 耐久割単価: (
-                    <TableCell align="center">
+                    <TableCell
+                        className={TC5.td.center}
+                        data-label="耐久割単価"
+                    >
                         <Typography color="error">-</Typography>
                     </TableCell>
                 ),
                 耐久割金額: (
-                    <TableCell align="center">
+                    <TableCell
+                        className={TC5.td.center}
+                        data-label="耐久割金額"
+                    >
                         <Typography color="error">-</Typography>
                     </TableCell>
                 ),
                 未償却金額: (
-                    <TableCell align="center">
+                    <TableCell
+                        className={TC5.td.center}
+                        data-label="未償却金額"
+                    >
                         <Typography color="error">-</Typography>
                     </TableCell>
                 )
@@ -485,6 +583,7 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
             if(d.調達方法 === "作成" && d.未設定含) return{
                 アイテム名: (
                     <ItemNameCell
+                        className={TC5.td.left}
                         itemName={d.アイテム名}
                         handleClick={handleItemNameClick}
                         procurement={d.調達方法}>
@@ -492,42 +591,66 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                     </ItemNameCell>
                 ),
                 消費個数: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="消費個数"
+                    >
                         <Typography>{numDeform(d.消費個数)}</Typography>
                     </TableCell>
                 ),
                 調達単価: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="調達単価"
+                    >
                         <Typography color="error">{numDeform(d.単価)} ± α</Typography>
                     </TableCell>
                 ),
                 合計金額: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="合計金額"
+                    >
                         <Typography color="error">{numDeform(d.合計価格)} ± α</Typography>
                     </TableCell>
                 ),
                 最大耐久: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="最大耐久"
+                    >
                         <Typography>{numDeform(d.最大耐久値)}</Typography>
                     </TableCell>
                 ),
                 消費耐久: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="消費耐久"
+                    >
                         <Typography>{numDeform(d.消費耐久値)}</Typography>
                     </TableCell>
                 ),
                 耐久割単価: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="耐久割単価"
+                    >
                         <Typography color="error">{numDeform(d.耐久割単価)} ± α</Typography>
                     </TableCell>
                 ),
                 耐久割金額: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="耐久割金額"
+                    >
                         <Typography color="error">{numDeform(d.耐久割金額)} ± α</Typography>
                     </TableCell>
                 ),
                 未償却金額: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="未償却金額"
+                    >
                         <Typography color="error">{numDeform(d.合計価格 - d.耐久割金額)} ± α</Typography>
                     </TableCell>
                 )
@@ -535,6 +658,7 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
             return {
                 アイテム名: (
                     <ItemNameCell
+                        className={TC5.td.left}
                         itemName={d.アイテム名}
                         handleClick={handleItemNameClick}
                         procurement={d.調達方法}>
@@ -542,42 +666,66 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                     </ItemNameCell>
                 ),
                 消費個数: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="消費個数"
+                    >
                         <Typography>{numDeform(d.消費個数)}</Typography>
                     </TableCell>
                 ),
                 調達単価: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="調達単価"
+                    >
                         <Typography>{numDeform(d.単価)}</Typography>
                     </TableCell>
                 ),
                 合計金額: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="合計金額"
+                    >
                         <Typography>{numDeform(d.合計価格)}</Typography>
                     </TableCell>
                 ),
                 最大耐久: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="最大耐久"
+                    >
                         <Typography>{numDeform(d.最大耐久値)}</Typography>
                     </TableCell>
                 ),
                 消費耐久: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="消費耐久"
+                    >
                         <Typography>{numDeform(d.消費耐久値)}</Typography>
                     </TableCell>
                 ),
                 耐久割単価: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="耐久割単価"
+                    >
                         <Typography>{numDeform(d.耐久割単価)}</Typography>
                     </TableCell>
                 ),
                 耐久割金額: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="耐久割金額"
+                    >
                         <Typography>{numDeform(d.耐久割金額)}</Typography>
                     </TableCell>
                 ),
                 未償却金額: (
-                    <TableCell align="right">
+                    <TableCell
+                        className={TC5.td.right}
+                        data-label="未償却金額"
+                    >
                         <Typography>{numDeform(d.合計価格 - d.耐久割金額)}</Typography>
                     </TableCell>
                 )
@@ -587,29 +735,32 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">耐久割</Typography>
-                <Box className={classes.tableContainerBox}>
+                <Box>
                     <TableContainer
-                        className={classes.tableContainer}
+                        className={TC5.container}
                         component={Paper}
                     >
-                        <Table className={classes.tableClass}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell><Typography>アイテム名</Typography></TableCell>
-                                    <TableCell><Typography>消費<br />個数</Typography></TableCell>
-                                    <TableCell><Typography>調達<br />単価</Typography></TableCell>
-                                    <TableCell><Typography>合計<br />金額</Typography></TableCell>
-                                    <TableCell><Typography>最大<br />耐久値</Typography></TableCell>
-                                    <TableCell><Typography>消費<br />耐久値</Typography></TableCell>
-                                    <TableCell><Typography>耐久割<br />単価</Typography></TableCell>
-                                    <TableCell><Typography>耐久割<br />金額</Typography></TableCell>
-                                    <TableCell><Typography>未償却</Typography></TableCell>
+                        <Table className={TC5.table}>
+                            <TableHead className={TC5.thead}>
+                                <TableRow className={TC5.tr}>
+                                    <TableCell className={TC5.td.center}><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>消費<br />個数</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>調達<br />単価</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>合計<br />金額</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>最大<br />耐久値</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>消費<br />耐久値</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>耐久割<br />単価</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>耐久割<br />金額</Typography></TableCell>
+                                    <TableCell className={TC5.td.center}><Typography>未償却</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            <TableBody className={TC5.tbody}>
                                 {
                                     renderObj.map((d,i) => (
-                                        <TableRow key={"Result_DurabilitiesTable_RowNo_" + i}>
+                                        <TableRow
+                                            className={TC5.tr}
+                                            key={"Result_DurabilitiesTable_RowNo_" + i}
+                                        >
                                             {d.アイテム名}
                                             {d.消費個数}
                                             {d.調達単価}
@@ -623,31 +774,39 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                     ))
                                 }
                             </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell align="center" colSpan={3}><Typography>合計金額</Typography></TableCell>
+                            <TableFooter className={TC5.tfoot}>
+                                <TableRow className={TC5.tr}>
+                                    <TableCell
+                                        colSpan={3}
+                                        className={TC5.td.center}
+                                    >
+                                        <Typography>合計金額</Typography>
+                                    </TableCell>
                                     {(durabilityTotal.hasUnknown)
-                                        ? <TableCell align="right"><Typography color="error">{numDeform(durabilityTotal.total)} ± α</Typography></TableCell>
-                                        : <TableCell align="right"><Typography>{numDeform(durabilityTotal.total)}</Typography></TableCell>
+                                        ? <TableCell className={TC5.td.right}><Typography color="error">{numDeform(durabilityTotal.total)} ± α</Typography></TableCell>
+                                        : <TableCell className={TC5.td.right}><Typography>{numDeform(durabilityTotal.total)}</Typography></TableCell>
                                     }
-                                    <TableCell colSpan={3}></TableCell>
+                                    <TableCell
+                                        colSpan={3}
+                                        className={TC5.td.center}
+                                    />
                                     {(durabilityTotal.hasUnknown)
                                         ? (
                                             <>
-                                                <TableCell align="right">
+                                                <TableCell className={TC5.td.right}>
                                                     <Typography color="error">{numDeform(durabilityTotal.durable)} ± α</Typography>
                                                 </TableCell>
-                                                <TableCell align="right">
+                                                <TableCell className={TC5.td.right}>
                                                     <Typography color="error">{numDeform(durabilityTotal.undepreciated)} ± α</Typography>
                                                 </TableCell>
                                             </>
                                         )
                                         : (
                                             <>
-                                                <TableCell align="right">
+                                                <TableCell className={TC5.td.right}>
                                                     <Typography>{numDeform(durabilityTotal.durable)}</Typography>
                                                 </TableCell>
-                                                <TableCell align="right">
+                                                <TableCell className={TC5.td.right}>
                                                     <Typography>{numDeform(durabilityTotal.undepreciated)}</Typography>
                                                 </TableCell>
                                             </>
@@ -668,93 +827,112 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">未消費素材</Typography>
-                <Box className={classes.tableContainerBox}>
+                <Box>
                     <TableContainer
                         component={Paper}
-                        className={classes.tableContainer}>
-                        <Table className={classes.tableClass}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell><Typography>アイテム名</Typography></TableCell>
-                                    <TableCell><Typography>使用個数</Typography></TableCell>
-                                    <TableCell><Typography>単価</Typography></TableCell>
-                                    <TableCell><Typography>金額</Typography></TableCell>
-                                    <TableCell><Typography>除外</Typography></TableCell>
+                        className={TC4.container}>
+                        <Table className={TC4.table}>
+                            <TableHead className={TC4.thead}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell className={TC4.td.center}><Typography>アイテム名</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>使用個数</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>単価</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>金額</Typography></TableCell>
+                                    <TableCell className={TC4.td.center}><Typography>除外</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {props.noLostItems.map((item,i) => (
-                                    <TableRow  key={"Result_NoLostTable_RowNo_" + i}>
-                                        <ItemNameCell
-                                            itemName={item.アイテム名}
-                                            handleClick={handleItemNameClick}
-                                            procurement={item.調達方法}
+                                {props.noLostItems.map((item,i) => {
+                                    const tdClass = (() => {
+                                        if(item.廃棄対象) return {
+                                            center: `${TC4.td.center} ${classes.disableCell}`,
+                                            right: `${TC4.td.right} ${classes.disableCell}`
+                                        }
+                                        return {
+                                            center: TC4.td.center,
+                                            right: TC4.td.right
+                                        }
+                                    })();
+                                    return (
+                                        <TableRow
+                                            className={TC4.tr}
+                                            key={"Result_NoLostTable_RowNo_" + i}
                                         >
-                                            <Typography>{item.アイテム名}</Typography>
-                                        </ItemNameCell>
-                                        <TableCell
-                                            align="right"
-                                            className={(item.廃棄対象) ? classes.disableCell : ""}>
-                                            <Typography>{item.個数}</Typography>
-                                        </TableCell>
-                                        {(item.調達方法 === "未設定")
-                                            ? (<>
-                                                <TableCell
-                                                    align="center"
-                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
-                                                >
-                                                    <Typography color="error">
-                                                        -
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell
-                                                    align="center"
-                                                    className={(item.廃棄対象) ? classes.disableCell : ""}
-                                                >
-                                                    <Typography color="error">
-                                                        -
-                                                    </Typography>
-                                                </TableCell>
-                                            </>)
-                                            : (item.調達方法 === "作成" && item.未設定含) 
+                                            <ItemNameCell
+                                                className={TC4.td.left}
+                                                itemName={item.アイテム名}
+                                                handleClick={handleItemNameClick}
+                                                procurement={item.調達方法}
+                                            >
+                                                <Typography>{item.アイテム名}</Typography>
+                                            </ItemNameCell>
+                                            <TableCell
+                                                className={tdClass.right}
+                                                data-label="使用個数"
+                                            >
+                                                <Typography>{item.個数}</Typography>
+                                            </TableCell>
+                                            {(item.調達方法 === "未設定")
                                                 ? (<>
                                                     <TableCell
-                                                        align="right"
-                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                        className={tdClass.center}
+                                                        data-label="単価"
                                                     >
                                                         <Typography color="error">
-                                                            {numDeform(item.単価)} ± α
+                                                            -
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell
-                                                        align="right"
-                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
+                                                        className={tdClass.center}
+                                                        data-label="金額"
                                                     >
                                                         <Typography color="error">
-                                                            {numDeform(item.合計金額)} ± α
+                                                            -
                                                         </Typography>
                                                     </TableCell>
                                                 </>)
-                                                : (<>
-                                                    <TableCell
-                                                        align="right"
-                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
-                                                    >
-                                                        <Typography>
-                                                            {numDeform(item.単価)}
-                                                        </Typography>
-                                                    </TableCell>
-                                                    <TableCell
-                                                        align="right"
-                                                        className={(item.廃棄対象) ? classes.disableCell : ""}
-                                                    >
-                                                        <Typography>
-                                                            {numDeform(item.合計金額)}
-                                                        </Typography>
-                                                    </TableCell>
-                                                </>)
+                                                : (item.調達方法 === "作成" && item.未設定含) 
+                                                    ? (<>
+                                                        <TableCell
+                                                            className={tdClass.right}
+                                                            data-label="単価"
+                                                        >
+                                                            <Typography color="error">
+                                                                {numDeform(item.単価)} ± α
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell
+                                                            className={tdClass.right}
+                                                            data-label="金額"
+                                                        >
+                                                            <Typography color="error">
+                                                                {numDeform(item.合計金額)} ± α
+                                                            </Typography>
+                                                        </TableCell>
+                                                    </>)
+                                                    : (<>
+                                                        <TableCell
+                                                            className={tdClass.right}
+                                                            data-label="単価"
+                                                        >
+                                                            <Typography>
+                                                                {numDeform(item.単価)}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell
+                                                            className={tdClass.right}
+                                                            data-label="金額"
+                                                        >
+                                                            <Typography>
+                                                                {numDeform(item.合計金額)}
+                                                            </Typography>
+                                                        </TableCell>
+                                                    </>)
                                         }
-                                        <TableCell>
+                                        <TableCell
+                                            className={TC4.td.center}
+                                            data-label="除外切替"
+                                        >
                                             <Tooltip
                                                 title="原価反映／廃棄の切り替え"
                                                 arrow
@@ -770,14 +948,19 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
                                             </Tooltip>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )})}
                             </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="center"><Typography>合計金額</Typography></TableCell>
+                            <TableFooter className={TC4.tfoot}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell
+                                        colSpan={3}
+                                        className={TC4.td.center}
+                                    >
+                                        <Typography>合計金額</Typography>
+                                    </TableCell>
                                     {surplusTotal.hasUnknown 
-                                        ? <TableCell align="right"><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
-                                        : <TableCell align="right"><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
+                                        ? <TableCell className={TC4.td.right}><Typography color="error">{numDeform(surplusTotal.money) + "+ α"}</Typography></TableCell>
+                                        : <TableCell className={TC4.td.right}><Typography>{numDeform(surplusTotal.money)}</Typography></TableCell>
                                     }
                                     <TableCell />
                                 </TableRow>
@@ -795,45 +978,67 @@ const RenderCostSheet:React.FC<tRenderCostSheet> = (props) => {
         return (
             <Box className={classes.boxRootSeconds}>
                 <Typography variant="h6">最終作成物</Typography>
-                <Box className={classes.tableContainerBox}>
+                <Box>
                     <TableContainer
-                        className={classes.tableContainer}
+                        className={TC4.container}
                         component={Paper}
                     >
-                        <Table className={classes.tableClass}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>アイテム名</TableCell>
-                                    <TableCell>作成個数</TableCell>
-                                    <TableCell>合計金額</TableCell>
-                                    <TableCell>単価</TableCell>
+                        <Table className={TC4.table}>
+                            <TableHead className={TC4.thead}>
+                                <TableRow className={TC4.tr}>
+                                    <TableCell className={TC4.td.center}>アイテム名</TableCell>
+                                    <TableCell className={TC4.td.center}>作成個数</TableCell>
+                                    <TableCell className={TC4.td.center}>合計金額</TableCell>
+                                    <TableCell className={TC4.td.center}>単価</TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            <TableBody className={TC4.tbody}>
                                 {props.creations.map((c,i) =>
-                                    <TableRow  key={"Result_CreationTable_RowNo_" + i}>
+                                    <TableRow
+                                        className={TC4.tr}
+                                        key={"Result_CreationTable_RowNo_" + i}
+                                    >
                                         <ItemNameCell
+                                            className={TC4.td.left}
                                             itemName={c.アイテム名}
                                             handleClick={handleItemNameClick}
-                                            procurement="作成">
+                                            procurement="作成"
+                                        >
                                             <Typography>{c.アイテム名}</Typography>
                                         </ItemNameCell>
-                                        <TableCell align="right"><Typography>{numDeform(c.作成個数)}</Typography></TableCell>
+                                        <TableCell
+                                            className={TC4.td.right}
+                                            data-label="作成個数"
+                                        >
+                                            <Typography>{numDeform(c.作成個数)}</Typography>
+                                        </TableCell>
                                         {
                                             (c.未設定含)
                                                 ? <>
-                                                    <TableCell align="right">
+                                                    <TableCell
+                                                        className={TC4.td.right}
+                                                        data-label="合計金額"
+                                                    >
                                                         <Typography color="error">{numDeform(c.合計材料費)} ± α</Typography>
                                                     </TableCell>
-                                                    <TableCell align="right">
+                                                    <TableCell
+                                                        className={TC4.td.right}
+                                                        data-label="単価"
+                                                    >
                                                         <Typography color="error">{numDeform(c.単価)} ± α</Typography>
                                                     </TableCell>
                                                 </>
                                                 : <>
-                                                    <TableCell align="right">
+                                                    <TableCell
+                                                        className={TC4.td.right}
+                                                        data-label="合計金額"
+                                                    >
                                                         <Typography>{numDeform(c.合計材料費)}</Typography>
                                                     </TableCell>
-                                                    <TableCell align="right">
+                                                    <TableCell
+                                                        className={TC4.td.right}
+                                                        data-label="単価"
+                                                    >
                                                         <Typography>{numDeform(c.単価)}</Typography>
                                                     </TableCell>
                                                 </>
