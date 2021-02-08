@@ -762,30 +762,10 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
     type tSplitCommonBuildObj = (node:tTreeNodeD,separated:tTreeNodeD_creation[]) => tTreeNodeD_creation[]
     const splitCommonBuildObj:tSplitCommonBuildObj = (node,separated) => {
         const splitCommonBuildNode: (node:tTreeNodeD_creation) => tTreeNodeD_creation = (node) => {
-            const resultObj = (node.特殊消費 === "消費") 
-                ? {
+            const resultObj: tTreeNodeD_creation_nonDurable = {
                     アイテム名: node.アイテム名,
                     調達方法: node.調達方法,
-                    特殊消費: node.特殊消費,
-                    個数: {
-                        セット作成個数: node.個数.セット作成個数,
-                        上位レシピ要求個数: 0,
-                        耐久値: {
-                            上位要求: 1,
-                            最大耐久値: node.個数.耐久値.最大耐久値
-                        }
-                    },
-                    テクニック: node.テクニック,
-                    スキル: node.スキル,
-                    材料: node.材料,
-                    ギャンブル: node.ギャンブル,
-                    ペナルティ: node.ペナルティ,
-                    要レシピ: node.要レシピ
-                } as tTreeNodeD_creation_durable
-                : {
-                    アイテム名: node.アイテム名,
-                    調達方法: node.調達方法,
-                    特殊消費: node.特殊消費,
+                    特殊消費: "消失",
                     個数: {
                         セット作成個数: node.個数.セット作成個数,
                         上位レシピ要求個数: 1,
@@ -796,7 +776,7 @@ const splitCommonAndMain: tSplitCommonAndMain = (main) => {
                     ギャンブル: node.ギャンブル,
                     ペナルティ: node.ペナルティ,
                     要レシピ: node.要レシピ
-                } as tTreeNodeD_creation_nonDurable
+                }
             if(node.副産物) resultObj.副産物 = node.副産物;
             if(node.備考)   resultObj.備考   = node.備考;
             return resultObj;
@@ -916,7 +896,7 @@ const calcMinimumQty:iCalcMinimumCreationNumber = (main, commons) => {
                 return pushobj;
             })();
             const pushMaterialData:tMaterialData = (() => {
-                if(isNoLost) return {
+                if(isNoLost || node.特殊消費 === "消費") return {
                     アイテム: node.アイテム名,
                     作成数: 1,
                     要求数: 1
