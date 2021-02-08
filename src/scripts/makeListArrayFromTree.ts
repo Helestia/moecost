@@ -329,7 +329,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
     const processDurability: (node:tTreeNode,parentResult:tReCallResult) => tReCallResult = (node,parentResult) => {
         if(node.特殊消費 !== "消費") return cloneObj_JSON(reCallResultDefault);
         const durabilityObj = (() => {
-            const findObj = durabilities.find((d) => d.アイテム名 === node.アイテム名 && d.調達方法 === node.調達方法);
+            const findObj = durabilities.find(d => d.アイテム名 === node.アイテム名 && (d.調達方法 === node.調達方法 || (d.調達方法 === "作成" && node.調達方法 === "共通素材")));
             if(findObj !== undefined) return findObj;
             if(node.調達方法 === "作成"){
                 const usingQty = node.個数.作成個数 - node.個数.余剰作成個数;
@@ -434,7 +434,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
             return moecostDb.アプリ設定.計算設定.廃棄設定.未消費素材;
         })();
         const noLostItemObj = (() => {
-            const findObj = noLostItems.find(noLostItem => noLostItem.アイテム名 === node.アイテム名 && noLostItem.調達方法 === node.調達方法);
+            const findObj = noLostItems.find(noLostItem => noLostItem.アイテム名 === node.アイテム名 && (noLostItem.調達方法 === node.調達方法 || (noLostItem.調達方法 === "作成" && node.調達方法 === "共通素材")));
             if(findObj !== undefined) return findObj;
             
             if(node.調達方法 === "作成"){
