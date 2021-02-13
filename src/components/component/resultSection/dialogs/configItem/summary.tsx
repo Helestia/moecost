@@ -27,7 +27,10 @@ import {
 
 const useStyles = makeStyles((theme:Theme) => createStyles({
     userCostInput: {
-        width: "10rem"
+        width: "10rem",
+        [theme.breakpoints.down("xs")]: {
+            width: "5rem"
+        }
     }
 }));
 
