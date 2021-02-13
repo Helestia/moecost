@@ -3,6 +3,7 @@ import React from 'react';
 import {tJSON_npcSaleItem}  from '../../../../../scripts/jsonReader';
 import {numDeform}          from '../../../../../scripts/common';
 
+import useStyleTableDefault from '../../../../commons/styles/useTableStyles';
 
 import TableContainer   from '@material-ui/core/TableContainer';
 import Table            from '@material-ui/core/Table';
@@ -33,55 +34,79 @@ type tRenderNpcProps = {
 }
 const RenderNpc:React.FC<tRenderNpcProps> = (props) => {
     const classes = useStyles();
+    const tableStyles = useStyleTableDefault(4,false);
+
     if(! props.tabSelected) return null;
     if(! props.npcs) return null;
 
     return (
-        <TableContainer component={Paper}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>時代</TableCell>
-                        <TableCell>地域</TableCell>
-                        <TableCell>販売員名</TableCell>
-                        <TableCell>販売価格</TableCell>
-                        <TableCell>備考</TableCell>
+        <TableContainer
+            component={Paper}
+            className={tableStyles.container}
+        >
+            <Table className={tableStyles.table}>
+                <TableHead className={tableStyles.thead}>
+                    <TableRow className={tableStyles.tr}>
+                        <TableCell className={tableStyles.td.center}>時代</TableCell>
+                        <TableCell className={tableStyles.td.center}>地域</TableCell>
+                        <TableCell className={tableStyles.td.center}>販売員名</TableCell>
+                        <TableCell className={tableStyles.td.center}>販売価格</TableCell>
+                        <TableCell className={tableStyles.td.center}>備考</TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody className={tableStyles.tbody}>
                     {
-                        props.npcs.販売情報.map((s,i) => (
-                            <TableRow
-                                key={`resultConfigItemDialog_Npc_TableRow_${i}`}
-                                className={(s.時代 === "War Age") ? classes.warSale : ""}>
-                                <TableCell>
-                                    <Typography className={(s.時代 === "War Age") ? classes.warSaleText : ""}>{s.時代}</Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography className={(s.時代 === "War Age") ? classes.warSaleText : ""}>{s.エリア}</Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography className={(s.時代 === "War Age") ? classes.warSaleText : ""}>{s.販売員}</Typography>
-                                </TableCell>
-                                <TableCell align="right">
-                                    {(s.時代 === "War Age")
-                                        ? <Typography className={classes.warSaleText}>
-                                            {numDeform(s.価格)} jade
-                                        </Typography>
-                                        : <Typography>
-                                            {numDeform(s.価格)} gold
-                                        </Typography>
-                                    }
-
-                                </TableCell>
-                                <TableCell>
-                                    {(s.備考)
-                                        ? <Typography className={(s.時代 === "War Age") ? classes.warSaleText : ""}>{s.備考}</Typography>
-                                        : null
-                                    }
-                                </TableCell>
-                            </TableRow>
-                        ))
+                        props.npcs.販売情報.map((s,i) => {
+                                const trClass = (s.時代 === "War Age") ? `${tableStyles.tr} ${classes.warSale}` : tableStyles.tr;
+                                const typoClassName = (s.時代 === "War Age") ? classes.warSaleText : "";
+                                return (
+                                <TableRow
+                                    key={`resultConfigItemDialog_Npc_TableRow_${i}`}
+                                    className={trClass}
+                                >
+                                    <TableCell
+                                        className={tableStyles.td.left}
+                                        data-label="時代"
+                                    >
+                                        <Typography className={typoClassName}>{s.時代}</Typography>
+                                    </TableCell>
+                                    <TableCell
+                                        className={tableStyles.td.left}
+                                        data-label="エリア"
+                                    >
+                                        <Typography className={typoClassName}>{s.エリア}</Typography>
+                                    </TableCell>
+                                    <TableCell
+                                        className={tableStyles.td.left}
+                                        data-label="販売員名"
+                                    >
+                                        <Typography className={typoClassName}>{s.販売員}</Typography>
+                                    </TableCell>
+                                    <TableCell
+                                        className={tableStyles.td.right}
+                                        data-label="販売価格"
+                                    >
+                                        {(s.時代 === "War Age")
+                                            ? <Typography className={classes.warSaleText}>
+                                                {numDeform(s.価格)} jade
+                                            </Typography>
+                                            : <Typography>
+                                                {numDeform(s.価格)} gold
+                                            </Typography>
+                                        }
+                                    </TableCell>
+                                    <TableCell
+                                        className={tableStyles.td.left}
+                                        data-label="備考"
+                                    >
+                                        {(s.備考)
+                                            ? <Typography className={typoClassName}>{s.備考}</Typography>
+                                            : null
+                                        }
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })
                     }
                 </TableBody>
             </Table>

@@ -20,9 +20,6 @@ import {
 const useStyles = makeStyles((theme:Theme) => createStyles({
     racipeTableContainer: {
         marginBottom: theme.spacing(2)
-    },
-    recipeTableLeftCell: {
-        width: "15em"
     }
 }));
 
@@ -46,7 +43,7 @@ const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
         })()
         return (
             <TableRow>
-                <TableCell className={classes.recipeTableLeftCell}><Typography>ルーレット</Typography></TableCell>
+                <TableCell><Typography>ルーレット</Typography></TableCell>
                 <TableCell><Typography>{text}</Typography></TableCell>
             </TableRow>
         )
@@ -67,7 +64,7 @@ const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
             : <Typography>{text}</Typography>
         return (
             <TableRow>
-                <TableCell className={classes.recipeTableLeftCell}><Typography>副産物</Typography></TableCell>
+                <TableCell><Typography>副産物</Typography></TableCell>
                 <TableCell>{resultJSX}</TableCell>
             </TableRow>
         )
@@ -85,11 +82,11 @@ const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
                     <Table>
                         <TableBody>
                             <TableRow>
-                                <TableCell className={classes.recipeTableLeftCell}><Typography>レシピ名</Typography></TableCell>
+                                <TableCell><Typography>レシピ名</Typography></TableCell>
                                 <TableCell><Typography>{r.レシピ.レシピ名}</Typography></TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell className={classes.recipeTableLeftCell}><Typography>作成物</Typography></TableCell>
+                                <TableCell><Typography>作成物</Typography></TableCell>
                                 <TableCell>
                                     <Typography>
                                         {r.レシピ.生成物.アイテム}{(r.レシピ.生成物.個数)
@@ -102,7 +99,7 @@ const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
                             {/*副産物*/}
                             {renderByproduct(r.レシピ)}
                             <TableRow>
-                                <TableCell className={classes.recipeTableLeftCell}><Typography>材料</Typography></TableCell>
+                                <TableCell><Typography>材料</Typography></TableCell>
                                 <TableCell>
                                     <Typography>
                                     {r.レシピ.材料.map(m => {
@@ -116,7 +113,7 @@ const RenderRecipe:React.FC<tRenderRecipeProps> = (props) => {
                             {renderRouletteRow(r.レシピ)}
                             {(r.レシピ.要レシピ)
                                 ? (<TableRow>
-                                    <TableCell className={classes.recipeTableLeftCell}><Typography>要レシピ</Typography></TableCell>
+                                    <TableCell><Typography>要レシピ</Typography></TableCell>
                                     <TableCell><Typography>レシピが必要</Typography></TableCell>
                                 </TableRow>)
                                 : null
