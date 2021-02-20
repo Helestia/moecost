@@ -57,8 +57,8 @@ const ClearAllData:React.FC<tClearAllData> = (props) => {
         >
             <Box width="100%">
                 <Typography color="error">【注意】この処理で削除したデータは復元できません。</Typography>
-                <Typography>このアプリで登録した情報をすべて初期化します。削除と異なり引き続きこのアプリを利用する場合に実行してください。</Typography>
-                <Typography>アプリの利用をやめる場合はこのメニューでなく、下部のデータの削除を実行することで初期化データすら残さず削除することができます。</Typography>
+                <Typography>このアプリケーションで登録した情報をすべて初期化します。削除と異なり引き続きこのアプリケーションを利用する場合に実行してください。</Typography>
+                <Typography>アプリケーションの利用をやめる場合はこのメニューでなく、下部のデータの削除を実行することで初期化データすら残さず削除することができます。</Typography>
                 <FormControlLabel
                     label="クリアを実行する場合はチェック"
                     onChange={handleCheck}

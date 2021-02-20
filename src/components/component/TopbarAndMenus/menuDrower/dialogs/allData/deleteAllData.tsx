@@ -72,12 +72,8 @@ const DeleteAllData:React.FC<tDeleteAllData> = (props) => {
             <Box width="100%">
                 <Box>
                     <Typography color="error">【注意】削除したデータは復元できません！</Typography>
-                    <Typography color="error">
-                        このアプリで利用しているブラウザ上の全ての情報を削除します。アプリの利用をやめるときにのみ、この処理を実行してください。
-                    </Typography>
-                    <Typography>
-                        処理実行後、ダイアログを表示してアプリ上の全ての動作を無効にします。アプリに再度アクセスすると自動的に初期データを作成し、再度アプリが利用可能になります。
-                    </Typography>
+                    <Typography color="error">このアプリケーションで利用しているブラウザ上の全ての情報を削除します。アプリケーションの利用をやめるときにのみ、この処理を実行してください。</Typography>
+                    <Typography>処理実行後、ダイアログを表示してアプリケーション上の全ての動作を無効にします。アプリケーションに再度アクセスすると自動的に初期データを作成し、再度利用可能になります。</Typography>
                     
                     <FormControlLabel
                         label={

@@ -84,8 +84,8 @@ const ExportDictionary:React.FC<tExportDictionaryProps> = (props) => {
         >
             <Box width="100%">
                 <Box marginBottom={`${theme.spacing(4)}px`}>
-                    <Typography>指定の辞書をファイルとしてエクスポートします。「辞書のインポート」機能を用いることで、抽出したファイルを再度ツール内に復元することができます。</Typography>
-                    <Typography>ツール全体のバックアップとしては「全データ管理」から「全データのエクスポート」機能がありますので、そちらを利用してください。</Typography>
+                    <Typography>指定の辞書をファイルとしてエクスポートします。「辞書のインポート」機能を用いることで、抽出したファイルを再度アプリケーション内に復元することができます。</Typography>
+                    <Typography>アプリケーション全体のバックアップとしては「全データ管理」から「全データのエクスポート」機能がありますので、そちらを利用してください。</Typography>
                 </Box>
                 <Box
                     className={classesAutoComplete.root}

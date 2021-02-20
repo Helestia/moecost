@@ -142,7 +142,7 @@ const ImportDictionary:React.FC<tImportDictionaryProps> = (props) => {
         >
             <Box width="100%">
                 <Box marginBottom={`${theme.spacing(4)}px`}>
-                    <Typography>「辞書のエクスポート」機能で出力されたファイルをツール内に復元します。</Typography>
+                    <Typography>「辞書のエクスポート」機能で出力されたファイルをアプリケーション上に復元します。</Typography>
                 </Box>
                 <Box marginY={`${theme.spacing(1)}px`}>
                     <TextField
