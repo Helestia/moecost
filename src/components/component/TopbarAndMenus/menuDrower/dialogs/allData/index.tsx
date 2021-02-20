@@ -9,7 +9,8 @@ import {tHandleOpenSnackbar}    from '../../../../../commons/snackbar/useSnackba
 import useAccordionList         from '../../../../../commons/accordion/useAccordionList';
 import DialogNormal             from '../../../../../commons/dialog/dialogNormal';
 
-import Typography       from '@material-ui/core/Typography';
+import Box          from '@material-ui/core/Box';
+import Typography   from '@material-ui/core/Typography';
 
 type tAllDataDialog = {
     isOpen : boolean,
@@ -29,6 +30,9 @@ const AllDataDialog:React.FC<tAllDataDialog> = (props) => {
             maxWidth="lg"
             initialize={accordionHooks.expandInitialize}
         >
+            <Box marginBottom={2}>
+                <Typography>このダイアログは、このアプリ独自で利用している利用者データ全体の管理を行うことができます。利用環境のバックアップ・及びその復元や、環境の削除を行うことができます。</Typography>
+            </Box>
             <ExportAllData
                 isExpanded={accordionHooks.isExpandeds[0]}
                 handleExpand={accordionHooks.handleChangeAccordions.bind(null,0)}
