@@ -249,7 +249,6 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
     }
     
     const handleSwitchApp = (target:tSwitchTarget_app, terminus?:boolean) => {
-        console.log(terminus);
         const {targetDispatch, current} = (() => {
             switch(target) {
                 case "useDark":                 return {targetDispatch:setApp_isUseDark, current:app_isUseDark};
