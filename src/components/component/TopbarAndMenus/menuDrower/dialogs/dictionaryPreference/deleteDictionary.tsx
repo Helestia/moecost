@@ -78,7 +78,7 @@ const DeleteDictionary:React.FC<tDeleteDictionaryProps> = (props) => {
         >
             <Box width="100%">
                 <Box marginBottom={`${theme.spacing(4)}px`}>
-                    <Typography>指定された辞書を削除します。現在使用中の辞書を削除することはできません。使用辞書を変更して削除などを行ってください。このツールの使用をやめる場合はこのメニューからではなく、「全データ処理」からデータの削除を実行してください。</Typography>
+                    <Typography>指定された辞書を削除します。現在使用中の辞書を削除することはできません。使用辞書を変更して削除などを行ってください。このアプリケーションの使用をやめる場合はこのメニューからではなく、「全データ処理」からデータの削除を実行してください。</Typography>
                 </Box>
                 <Box className={classesAutoComplete.root}>
                     <Autocomplete
