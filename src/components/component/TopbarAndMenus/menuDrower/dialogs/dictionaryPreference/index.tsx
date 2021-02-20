@@ -60,6 +60,10 @@ const DictionaryPreferenceDialog:React.FC<tDictionaryPreferenceDialogProps> = (p
             handleClose={props.close}
             initialize={dialogInitialize}
         >
+            <Box marginBottom={2}>
+                <Typography>このダイアログでは、辞書(=ツール内で登録されたアイテムの入手手段)を管理することができます。</Typography>
+                <Typography>利用サーバーごとにアイテムの入手金額が異なる場合や、身内販売用に安い金額を設定したい場合等に利用できます。</Typography>
+            </Box>
             {renderNowLoading()}
             <DisplayDictionary
                 isExpanded={isExpandeds[0]}
