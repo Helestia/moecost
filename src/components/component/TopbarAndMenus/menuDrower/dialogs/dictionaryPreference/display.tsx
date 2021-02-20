@@ -4,6 +4,7 @@ import useStyleAutocomplete         from './hooks/useStyleAutocomplete';
 import useSelectorDictionaryName    from './hooks/useSelectorDictionaryName';
 
 import Accordion                from '../../../../../commons/accordion/accordion';
+import useTableStyles           from '../../../../../commons/styles/useTableStyles2';
 
 import moecostDb,{iDictionary}  from '../../../../../../scripts/storage';
 import {numDeform}              from '../../../../../../scripts/common';
@@ -51,8 +52,9 @@ type tDisplayDictionaryProps = {
 const DisplayDictionary:React.FC<tDisplayDictionaryProps> = (props) => {
     const selectorHook = useSelectorDictionaryName(props.dictionaryNames,props.usingDictionary);
     const [dictionaryData,setDictionaryData] = React.useState<iDictionary|null>(null);
-    const classesTable = useStylesDisplayTable();
+    const classesTableLocal = useStylesDisplayTable();
     const classesAutoComplete = useStyleAutocomplete();
+    const classesTable = useTableStyles(4);
     const theme = useTheme();
 
     if(dictionaryData === null || dictionaryData.辞書名 !== selectorHook.value) retrieveDictionary(selectorHook.value);
@@ -72,42 +74,82 @@ const DisplayDictionary:React.FC<tDisplayDictionaryProps> = (props) => {
         return (
             <TableContainer
                 component={Paper}
-                className={classesTable.tableRoot}
+                className={`${classesTableLocal.tableRoot} ${classesTable.container}`}
             >
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>アイテム名</TableCell>
-                            <TableCell>調達方法</TableCell>
-                            <TableCell>価格／レシピ名</TableCell>
+                <Table className={classesTable.table}>
+                    <TableHead className={classesTable.thead}>
+                        <TableRow className={classesTable.tr}>
+                            <TableCell className={classesTable.td.center}>アイテム名</TableCell>
+                            <TableCell className={classesTable.td.center}>調達方法</TableCell>
+                            <TableCell className={classesTable.td.center}>価格／レシピ名</TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
+                    <TableBody className={classesTable.tbody}>
                         {dictionaryData.内容.map(d => {
                             const key = `DisplayDictionary_${d.アイテム}`
                             switch(d.調達方法){
                                 case "生産":
                                     return (
-                                        <TableRow key={key}>
-                                            <TableCell  className={classesTable.create}>{d.アイテム}</TableCell>
-                                            <TableCell>生産</TableCell>
-                                            <TableCell align="left">{d.レシピ名}</TableCell>
+                                        <TableRow
+                                            key={key}
+                                            className={classesTable.tr}
+                                        >
+                                            <TableCell className={`${classesTable.td.left} ${classesTableLocal.create}`}>{d.アイテム}</TableCell>
+                                            <TableCell
+                                                className={classesTable.td.left}
+                                                data-label="調達方法"
+                                            >
+                                                生産
+                                            </TableCell>
+                                            <TableCell
+                                                className={classesTable.td.left}
+                                                data-label="レシピ名"
+                                            >
+                                                {d.レシピ名}
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 case "自力調達":
                                     return (
-                                        <TableRow key={key}>
-                                            <TableCell  className={classesTable.user}>{d.アイテム}</TableCell>
-                                            <TableCell>自力調達</TableCell>
-                                            <TableCell align="right">{numDeform(d.調達価格)}</TableCell>
+                                        <TableRow
+                                            key={key}
+                                            className={classesTable.tr}
+                                        >
+                                            <TableCell className={`${classesTable.td.left} ${classesTableLocal.user}`}>{d.アイテム}</TableCell>
+                                            <TableCell
+                                                className={classesTable.td.left}
+                                                data-label="調達方法"
+                                            >
+                                                自力調達
+                                            </TableCell>
+                                            <TableCell
+                                                align="right"
+                                                className={classesTable.td.right}
+                                                data-label="価格"
+                                            >
+                                                {numDeform(d.調達価格)}
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 default:
                                     return (
-                                        <TableRow key={key}>
-                                            <TableCell className={classesTable.npc}>{d.アイテム}</TableCell>
-                                            <TableCell>NPC購入</TableCell>
-                                            <TableCell align="center">-</TableCell>
+                                        <TableRow
+                                            key={key}
+                                            className={classesTable.tr}
+                                        >
+                                            <TableCell className={`${classesTable.td.left} ${classesTableLocal.npc}`}>{d.アイテム}</TableCell>
+                                            <TableCell
+                                                className={classesTable.td.left}
+                                                data-label="調達方法"
+                                            >
+                                                NPC購入
+                                            </TableCell>
+                                            <TableCell
+                                                className={classesTable.td.center}
+                                                data-label="価格"
+                                            >
+                                                -
+                                            </TableCell>
                                         </TableRow>
                                     );
                             }
