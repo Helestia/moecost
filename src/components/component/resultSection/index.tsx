@@ -3,7 +3,7 @@ import {tHandleOpenSnackbar} from '../../commons/snackbar/useSnackbar';
 
 import RenderAlerts                   from './renderAlerts';
 import RenderSummarySection                 from './renderSummarySection';
-import RenderCostSheet                      from './renderCostSheet';
+import RenderCostSheet                      from './costSheet/index';
 import RenderCreationTree                   from './renderCreationTree';
 import RenderConfigQty from './dialogs/configCreateNumber';
 import RenderConfigItem from './dialogs/configItem/index';

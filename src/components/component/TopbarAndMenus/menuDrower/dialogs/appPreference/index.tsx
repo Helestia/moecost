@@ -138,7 +138,7 @@ const AppPreferenceDialog:React.FC<tAppPrefeerenceDialog> = (props) => {
 }
 
 // スイッチ制御用文字列
-export type tSwitchTarget_app = "useDark" | "useSmallTable" | "dispCreationEverytime" | "dispTableWideScroll" | "defDispSummary" | "defDispCostSheet" | "defDispCreationTree";
+export type tSwitchTarget_app = "useDark" | "useSmallTable" | "dispCreationEverytime" | "dispTableWideScroll" | "dispMaterialCheckbox" | "defDispSummary" | "defDispCostSheet" | "defDispCreationTree";
 export type tSwitchTarget_treeCreation = "skill" | "technique" | "durable" | "spExpense" | "byproduct" | "surplus" | "createRemark" | "needRecipe" | "maxCreate" | "remark";
 export type tSwitchTarget_treeUserAndNpc = "durable" | "spExpense" | "price";
 export type tSwitchTarget_treeCommonAndUnknown = "durable" | "spExpense" | "message";
@@ -152,6 +152,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
     const [app_isUseSmallTable,       setApp_isUseSmallTable]           = React.useState(false);
     const [app_isDispCreationEverytime, setApp_isDispCreationEverytime] = React.useState(false);
     const [app_isDispTableWideScroll, setApp_isDispTableWideScroll]     = React.useState(false);
+    const [app_isDispMaterialCheckbox, setApp_isDispMaterialCheckbox]   = React.useState(false);
     const [app_isDefDispSummary,      setApp_isDefDispSummary]          = React.useState(true);
     const [app_isDefDispCostSheet,    setApp_isDefDispCostSheet]        = React.useState(true);
     const [app_isDefDispCreationTree, setApp_isDefDispCreationTree]     = React.useState(true);
@@ -197,6 +198,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
         setApp_isUseDark(app.表示設定.ダークモード);
         setApp_isUseSmallTable(app.表示設定.smallテーブル);
         setApp_isDispTableWideScroll(app.表示設定.表横スクロール表示);
+        setApp_isDispMaterialCheckbox(app.表示設定.材料にチェック表示);
         setApp_isDispCreationEverytime(app.表示設定.常時最終作成物表示);
 
         const defDisp = app.表示設定.初期表示設定
@@ -254,6 +256,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
                 case "useDark":                 return {targetDispatch:setApp_isUseDark, current:app_isUseDark};
                 case "useSmallTable":           return {targetDispatch:setApp_isUseSmallTable, current:app_isUseSmallTable};
                 case "dispTableWideScroll":     return {targetDispatch:setApp_isDispTableWideScroll, current:app_isDispTableWideScroll};
+                case "dispMaterialCheckbox":    return {targetDispatch:setApp_isDispMaterialCheckbox, current:app_isDispMaterialCheckbox};
                 case "dispCreationEverytime":   return {targetDispatch:setApp_isDispCreationEverytime, current:app_isDispCreationEverytime};
                 case "defDispSummary":          return {targetDispatch:setApp_isDefDispSummary, current:app_isDefDispSummary};
                 case "defDispCostSheet":        return {targetDispatch:setApp_isDefDispCostSheet, current:app_isDefDispCostSheet};
@@ -398,6 +401,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
                 常時最終作成物表示: app_isDispCreationEverytime,
                 表横スクロール表示: app_isDispTableWideScroll,
                 検索候補表示数: app_suggestMax,
+                材料にチェック表示: app_isDispMaterialCheckbox,
                 初期表示設定: {
                     概要: app_isDefDispSummary,
                     原価表: app_isDefDispCostSheet,
@@ -473,6 +477,7 @@ const useAppPreferenceDialog = (handleOpenSnackbar:tHandleOpenSnackbar,handleClo
                 isUseSmallTable: app_isUseSmallTable,
                 isDispCreationEverytime: app_isDispCreationEverytime,
                 isDispTableWideScroll: app_isDispTableWideScroll,
+                isDispCheckBoxMaterialTable: app_isDispMaterialCheckbox,
                 suggestMax: app_suggestMax,
                 isDefDispSummary: app_isDefDispSummary,
                 isDefDispCostSheet: app_isDefDispCostSheet,

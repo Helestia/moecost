@@ -184,6 +184,7 @@ const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ
             検索候補表示数 : 100,
             表横スクロール表示: false,
             常時最終作成物表示: false,
+            材料にチェック表示: false,
             初期表示設定 : {
                 概要 : true,
                 原価表 : true,
@@ -286,6 +287,7 @@ export interface iApplicationConfig {
         ダークモード : boolean,
         常時最終作成物表示: boolean,
         表横スクロール表示: boolean,
+        材料にチェック表示: boolean,
         初期表示設定 :{
             概要 : boolean,
             原価表 : boolean,

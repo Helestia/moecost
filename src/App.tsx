@@ -77,6 +77,16 @@ function App() {
         expandIcon: {
           padding: "8px"
         }
+      },
+      MuiCheckbox:{
+        root:{
+          padding: "4px"
+        }
+      },
+      MuiRadio:{
+        root:{
+          padding: "4px"
+        }
       }
     }
   });

@@ -47,6 +47,7 @@ type tAppTabPanel = {
         isUseDark: boolean,
         isUseSmallTable: boolean,
         isDispTableWideScroll: boolean,
+        isDispCheckBoxMaterialTable: boolean,
         isDispCreationEverytime: boolean,
         suggestMax: number,
         isDefDispSummary: boolean,
@@ -102,6 +103,17 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         onClick={props.handler.switch.bind(null,"dispTableWideScroll",undefined)}
                     >
                         表の横スクロール表示
+                    </ListItemInSwitch>
+                    <ListItemInSwitch
+                        helpText={
+                            <>
+                                <Typography variant="body2">材料表にチェックボックスを追加します。準備済みかどうかの判別に使うことができます。</Typography>
+                            </>
+                        }
+                        isChecked={props.status.isDispCheckBoxMaterialTable}
+                        onClick={props.handler.switch.bind(null,"dispMaterialCheckbox",undefined)}
+                    >
+                        材料表にチェックボックスを追加
                     </ListItemInSwitch>
                     <ListItemInSwitch
                         helpText={
