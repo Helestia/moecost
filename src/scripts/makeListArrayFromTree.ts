@@ -37,6 +37,16 @@ type tMaterial_unknown = {
     必要個数: number
 }
 
+type tMaterial_durable = {
+    最大耐久値: number,
+    消費耐久値: number
+}
+
+type tMaterial_user_addDurable = tMaterial_user & tMaterial_durable;
+type tMaterial_npc_addDurable = tMaterial_npc & tMaterial_durable;
+type tMaterial_unknown_addDurable = tMaterial_unknown & tMaterial_durable;
+type tMaterial_addDurable = tMaterial_user_addDurable | tMaterial_npc_addDurable | tMaterial_unknown_addDurable;
+
 export type tSurplus  = {
     アイテム名: string,
     作成個数: number,
@@ -192,16 +202,16 @@ type tMakeListArrayFromTree = (
     trashStateItemsNoLost: tTrashState[]
 ) => tMakeListArrayResult
 const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateItemsByproduct,trashStateItemsSurplus,trashStateItemsNoLost) => {
-    const materials:tMaterial[]          = [];
-    const byproducts:tByproduct[]        = [];
-    const surpluses:tSurplus[]           = [];
-    const lastCreations:tCreation[]      = [];
-    const durabilities :tDurability[]    = [];
-    const skills: tSkill[]               = [];
-    const needRecipes : string[]         = [];
+    const materialsAddDurable:tMaterial_addDurable[] = [];
+    const byproducts:tByproduct[]       = [];
+    const surpluses:tSurplus[]          = [];
+    const lastCreations:tCreation[]     = [];
+    const durabilities :tDurability[]   = [];
+    const skills: tSkill[]              = [];
+    const needRecipes : string[]        = [];
     const noLostItems : tNoLostItem[]   = [];
 
-    const commons:tCommons[]             = [];
+    const commons:tCommons[]            = [];
 
     const reCall:(node:tTreeNode) => tReCallResult = (node) => {
         if(node.調達方法 === "作成") return fCreation(node);
@@ -531,48 +541,58 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
         return subRecallResult([baseCost,durabilityCost,noLostCost]);
     }
     
-    const registerMaterial: (node:tTreeNode_npc | tTreeNode_user | tTreeNode_unknown) => void = (node) => {
+    const registerMaterialAddDurable: (node:tTreeNode_npc | tTreeNode_user | tTreeNode_unknown) => void = (node) => {
         const registerObj = (() => {
-            const findObj = materials.find(m => m.アイテム名 === node.アイテム名 && m.調達方法 === node.調達方法);
+            const findObj = materialsAddDurable.find(m => m.アイテム名 === node.アイテム名 && m.調達方法 === node.調達方法);
             if(findObj !== undefined) return findObj;
             if(node.調達方法 === "NPC"){
-                const result: tMaterial_npc = {
+                const result: tMaterial_npc_addDurable = {
                     アイテム名: node.アイテム名,
                     調達方法: "NPC",
                     必要個数: 0,
                     設定単価: node.価格.調達単価,
-                    合計金額: 0
+                    合計金額: 0,
+                    最大耐久値: 0,
+                    消費耐久値: 0
                 }
-                materials.push(result);
+                materialsAddDurable.push(result);
                 return result;
             }
             if(node.調達方法 === "自力調達"){
-                const result: tMaterial_user = {
+                const result: tMaterial_user_addDurable = {
                     アイテム名: node.アイテム名,
                     調達方法: "自力調達",
                     必要個数: 0,
                     設定単価: node.価格.調達単価,
-                    合計金額: 0
+                    合計金額: 0,
+                    最大耐久値: 0,
+                    消費耐久値: 0
                 }
-                materials.push(result);
+                materialsAddDurable.push(result);
                 return result;
             }
-            const result: tMaterial_unknown = {
+            const result: tMaterial_unknown_addDurable = {
                 アイテム名: node.アイテム名,
                 調達方法: "未設定",
-                必要個数: 0
+                必要個数: 0,
+                最大耐久値: 0,
+                消費耐久値: 0
             }
-            materials.push(result);
+            materialsAddDurable.push(result);
             return result;
         })();
-        if(node.調達方法 === "未設定") registerObj.必要個数 += node.個数.消費個数;
-        else registerObj.必要個数 += node.個数.調達個数;
-        
-        if(registerObj.調達方法 !== "未設定") registerObj.合計金額 = registerObj.必要個数 * registerObj.設定単価;
+        if(node.特殊消費 === "消費"){
+            registerObj.最大耐久値 = node.個数.耐久値.最大耐久値;
+            registerObj.消費耐久値 += node.個数.耐久値.消費耐久合計;
+        }
+        else if(node.特殊消費 === "消失"){
+            if(node.調達方法 === "未設定") registerObj.必要個数 += node.個数.消費個数;
+            else registerObj.必要個数 += node.個数.調達個数;
+        }
     }
 
     const fUser:(node:tTreeNode_user) => tReCallResult = (node) => {
-        registerMaterial(node);
+        registerMaterialAddDurable(node);
         const resultBase:tReCallResult = {
             価格: node.価格.合計金額,
             未設定含: false
@@ -583,7 +603,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
     }
 
     const fNpc:(node:tTreeNode_npc) => tReCallResult = (node) => {
-        registerMaterial(node);
+        registerMaterialAddDurable(node);
         const resultBase:tReCallResult = {
             価格: node.価格.合計金額,
             未設定含: false
@@ -594,7 +614,7 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
     }
 
     const fUnknown:(node:tTreeNode_unknown) => tReCallResult = (node) => {
-        registerMaterial(node);
+        registerMaterialAddDurable(node);
         const resultBase:tReCallResult = {
             価格: 0,
             未設定含: true
@@ -627,6 +647,46 @@ const makeListArrayFromTree: tMakeListArrayFromTree = (main, common, trashStateI
             未設定含: result.未設定含
         });
     });
+    // 耐久割情報や、未消費素材使用時の調整
+    const materials:tMaterial[] = materialsAddDurable.map(md => {
+        const newCount = (() => {
+            if(md.消費耐久値 !== 0 && md.最大耐久値 !== 0) return md.必要個数 + Math.ceil(md.消費耐久値 / md.最大耐久値);
+            if(md.必要個数 === 0) return 1;
+            return md.必要個数;
+        })();
+        const result:tMaterial = (() => {
+            if(md.調達方法 === "自力調達"){
+                const result:tMaterial_user = {
+                    アイテム名: md.アイテム名,
+                    調達方法: "自力調達",
+                    必要個数: newCount,
+                    設定単価: md.設定単価,
+                    合計金額: newCount * md.設定単価
+                }
+                return result;
+            }
+            if(md.調達方法 === "NPC"){
+                const result:tMaterial_npc = {
+                    アイテム名: md.アイテム名,
+                    調達方法: "NPC",
+                    必要個数: newCount,
+                    設定単価: md.設定単価,
+                    合計金額: newCount * md.設定単価
+                }
+                return result;
+            }
+            else {
+                const result:tMaterial_unknown = {
+                    アイテム名: md.アイテム名,
+                    調達方法: "未設定",
+                    必要個数: newCount
+                }
+                return result;
+            }
+        })();
+        return result;
+    })
+
     return {
         余剰作成: surpluses,
         副産物: byproducts,
