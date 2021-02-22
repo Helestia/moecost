@@ -13,8 +13,9 @@ import AutoComplete,
 import {FilterOptionsState} from '@material-ui/lab/useAutocomplete'
 
 
-import Box          from '@material-ui/core/Box'
-import Button       from '@material-ui/core/Button'
+import Box          from '@material-ui/core/Box';
+import Button       from '@material-ui/core/Button';
+import Link         from '@material-ui/core/Link';
 import TextField    from '@material-ui/core/TextField';
 import Typography   from '@material-ui/core/Typography';
 import {
@@ -69,44 +70,52 @@ const RenderRecipeFindBox:React.FC<tRenderRecipeFindBox> = (props) => {
     const handleButtonClick = () => handleSubmit();
 
     return (
-        <Box
-            className={classes.rootBox}
-        >
+        <>
             <Box
-                className={classes.Autocomplete}
+                marginTop={1}
+                marginBottom={1}
             >
-                <AutoComplete
-                    size="small"
-                    value={value}
-                    inputValue={inputValue}
-                    options={allSuggestions}
-                    filterOptions={filterOptions}
-                    getOptionLabel={getOptionLabel}
-                    onBlur={handleOnBlue}
-                    clearOnEscape={true}
-                    noOptionsText={noOptionsText}
-                    renderInput={(p) =>
-                        <TextField {...p}
-                            onChange={handleInputChange}
-                            label="レシピ検索"
-                            variant="outlined"
-                            helperText={helperText}
-                        />
-                    }
-                    renderOption={renderOption}
-                    onChange={handleOnChange} />
+                <Typography>このアプリケーションについては、<Link href="./helps/" target="_blank">ヘルプページ</Link>に使用方法等をまとめましたので、ご確認ください。</Typography>
             </Box>
-            <Box>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={value.レシピ名 === defSuggestion.レシピ名}
-                    onClick={handleButtonClick}
+            <Box
+                className={classes.rootBox}
+            >
+                <Box
+                    className={classes.Autocomplete}
                 >
-                    レシピ検索
-                </Button>
+                    <AutoComplete
+                        size="small"
+                        value={value}
+                        inputValue={inputValue}
+                        options={allSuggestions}
+                        filterOptions={filterOptions}
+                        getOptionLabel={getOptionLabel}
+                        onBlur={handleOnBlue}
+                        clearOnEscape={true}
+                        noOptionsText={noOptionsText}
+                        renderInput={(p) =>
+                            <TextField {...p}
+                                onChange={handleInputChange}
+                                label="レシピ検索"
+                                variant="outlined"
+                                helperText={helperText}
+                            />
+                        }
+                        renderOption={renderOption}
+                        onChange={handleOnChange} />
+                </Box>
+                <Box>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={value.レシピ名 === defSuggestion.レシピ名}
+                        onClick={handleButtonClick}
+                    >
+                        レシピ検索
+                    </Button>
+                </Box>
             </Box>
-        </Box>
+        </>
     );
 }
 
