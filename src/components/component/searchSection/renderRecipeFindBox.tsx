@@ -78,6 +78,12 @@ const RenderRecipeFindBox:React.FC<tRenderRecipeFindBox> = (props) => {
                 <Typography>このアプリケーションについては、<Link href="./helps/" target="_blank">ヘルプページ</Link>に使用方法等をまとめましたので、ご確認ください。</Typography>
             </Box>
             <Box
+                marginTop={1}
+                marginBottom={1}
+            >
+                <Typography>何らかの不具合等発生した場合の対応として、過去バージョンのリンクを<Link href="./oldVersion/" target="_blank">こちら</Link>に置いておきます。掲示板等に何らかの報告がない場合、3/13以降に削除します。</Typography>
+            </Box>
+            <Box
                 className={classes.rootBox}
             >
                 <Box
