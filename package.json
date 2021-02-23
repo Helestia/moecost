@@ -1,6 +1,6 @@
 {
   "name": "moecost",
-  "version": "0.9.7",
+  "version": "1.0.0",
   "private": true,
   "homepage": "./",
   "dependencies": {
