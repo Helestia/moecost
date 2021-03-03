@@ -168,7 +168,10 @@ class moecostDbClass extends Dexie {
     }
 }
 
-
+/**
+ * 注意！
+ * このコードの変更時は、varidateJsonFile.tsの全データバリデート処理も更新すること！
+ */
 const defaultStrage: {辞書:iDictionary, 使用辞書:iUseDictionary, アプリ設定:iApplicationConfig} = {
     辞書 : {
         辞書名 : "Default Dictionary",
