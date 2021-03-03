@@ -23,12 +23,14 @@ const schema_alldata = {
             properties: {
                 表示設定: {
                     type: "object",
-                    required: ["ダークモード", "smallテーブル","常時最終作成物表示", "検索候補表示数", "初期表示設定", "ツリー表示内容"],
+                    required: ["ダークモード", "smallテーブル", "表横スクロール表示", "常時最終作成物表示", "材料にチェック表示", "検索候補表示数", "初期表示設定", "ツリー表示内容"],
                     additionalProperties: false,
                     properties: {
                         ダークモード: {type: "boolean"},
                         smallテーブル: {type: "boolean"},
+                        表横スクロール表示: {type: "boolean"},
                         常時最終作成物表示: {type: "boolean"},
+                        材料にチェック表示: {type: "boolean"},
                         検索候補表示数: {
                             type: "number",
                             minimum:0
