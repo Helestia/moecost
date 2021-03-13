@@ -174,13 +174,14 @@ const RenderCreationTree:React.FC<tRenderCreationTree> = (props) => {
             : null;
         return (
             <ItemNameCell
+                key={key}
                 itemName={node.アイテム名}
                 procurement={node.調達方法}
                 handleClick={handleItemCellClick}
                 rowspan={node.rowSpan}
                 colspan={node.colSpan}
                 isTree={true}
-                keyName={key}>
+            >
                 <Box>
                     {skill}
                     {technique}
@@ -238,13 +239,14 @@ const RenderCreationTree:React.FC<tRenderCreationTree> = (props) => {
         })();
         return (
             <ItemNameCell
+                key={key}
                 itemName={node.アイテム名}
                 procurement={node.調達方法}
                 handleClick={handleItemCellClick}
                 rowspan={node.rowSpan}
                 colspan={node.colSpan}
                 isTree={true}
-                keyName={key}>
+            >
                 <Box>
                     <Box>{itemName}{creationNumber}</Box>
                     {lostDurability}
