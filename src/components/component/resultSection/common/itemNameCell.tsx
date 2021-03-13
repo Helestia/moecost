@@ -59,7 +59,6 @@ type tItemNameCell = {
     className? : string,
     colspan?: number,
     rowspan?: number,
-    keyName?: string,
     isTree?: boolean
     handleClick: (str:string) => void
 }
@@ -89,7 +88,6 @@ const ItemNameCell:React.FC<tItemNameCell> = (props) => {
             rowSpan={rowSpan}
             onClick={handleClick(props.itemName)}
             className={className}
-            key={props.keyName}
         >
             {props.children}
         </TableCell>
