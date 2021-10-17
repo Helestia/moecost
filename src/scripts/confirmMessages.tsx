@@ -5,7 +5,7 @@ import {
     tTreeNode_npc,
     tTreeNode_common,
     tTreeNode_user
-} from './buildTree';
+} from './buildTrees/commonTypes';
 
 type tFindMessages = (main:tTreeNode_creation[], common:tTreeNode_creation[], createNumber:number) => tMessage[]
 const findMessages:tFindMessages = (main,common,createNumber) => {

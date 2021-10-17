@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {tMessage}           from '../../../scripts/buildTree';
+import {tMessage}           from '../../../scripts/buildTrees/commonTypes';
 
 import {Alert, AlertTitle}  from '@material-ui/lab'
 import Box                  from '@material-ui/core/Box'

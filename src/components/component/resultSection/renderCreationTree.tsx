@@ -10,7 +10,7 @@ import {
     tTreeNode_common,
     tTreeNode_npc,
     tTreeNode_unknown,
-    tTreeNode_user}         from '../../../scripts/buildTree';
+    tTreeNode_user}         from '../../../scripts/buildTrees/commonTypes';
 
 import Accordion            from '../../commons/accordion/accordion';
 

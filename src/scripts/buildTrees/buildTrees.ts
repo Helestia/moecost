@@ -12,13 +12,13 @@ import {setQuantitiesToTrees} from './200_setQuantityToTrees/setQuantitiesToTree
 
 
 
-type tBuildTree = (
+type tBuildTrees = (
     recipe: string,
     items: string[],
     qtyRole: tQtyRole,
     qty: number
 ) => tBuildTreeResult;
-const buildTree : tBuildTree = (recipe, items, qtyRole, qty) => {
+export const buildTrees : tBuildTrees = (recipe, items, qtyRole, qty) => {
     // エラー有無確認処理
     const ErrorObj = handleError(recipe, items, qty);
     if(ErrorObj) return {

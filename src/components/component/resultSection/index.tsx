@@ -11,8 +11,8 @@ import RenderConfigItem from './dialogs/configItem/index';
 import useAccordionList from '../../commons/accordion/useAccordionList';
 import useDialogParent  from '../../commons/dialog/useDialogParent';
 
-import buildTree,
-    {tQtyRole,tQtyRoleResult} from '../../../scripts/buildTree';
+import {buildTrees} from '../../../scripts/buildTrees/buildTrees';
+import {tQtyRole,tQtyRoleResult} from '../../../scripts/buildTrees/commonTypes';
 import confirmMessages        from '../../../scripts/confirmMessages';
 import makeListArrayFromTree  from '../../../scripts/makeListArrayFromTree';
 import moecostDb              from '../../../scripts/storage';
@@ -197,7 +197,7 @@ const useResultSection = (recipe:string,items:string[]) => {
         qtyRoleResult,
         totalQuantity,
         fullyMinimumQuantity
-    } = buildTree(recipe, items, qtyRole, quantity);
+    } = buildTrees(recipe, items, qtyRole, quantity);
 
     // メッセージ取得・リスト化処理
     const {isCanceledCalcuration ,resultMessage, lists} = (() => {

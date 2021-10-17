@@ -1,8 +1,8 @@
 import React from 'react';
 import {tHandleOpenSnackbar}    from '../../../../commons/snackbar/useSnackbar';
 
-import buildTree,
-    {tBuildTreeResult}          from '../../../../../scripts/buildTree';
+import {buildTrees} from '../../../../../scripts/buildTrees/buildTrees';
+import {tBuildTreeResult}   from '../../../../../scripts/buildTrees/commonTypes';
 import makeListArrayFromTree,
     {tMakeListArrayResult}      from '../../../../../scripts/makeListArrayFromTree';
 import {
@@ -218,7 +218,7 @@ const RetrieveItemData_Recipe = (itemName:string) => {
     const recipeAll = Recipes.filter(r => r.生成物.アイテム === itemName);
     const propBuildTrees = recipeAll.map(r => {return {レシピ名:r.レシピ名, 生成アイテム:[r.生成物.アイテム]}})
     
-    const buildTreeResults = propBuildTrees.map(p => buildTree(p.レシピ名, p.生成アイテム, "fully", 0));
+    const buildTreeResults = propBuildTrees.map(p => buildTrees(p.レシピ名, p.生成アイテム, "fully", 0));
     const lists = buildTreeResults.map(tree => makeListArrayFromTree(tree.main, tree.common, [], [], []));
     
     const result: tRetrieveItemData_RecipeResult[] = [];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { tQtyRoleResult } from '../../../../scripts/buildTree';
+import { tQtyRoleResult } from '../../../../scripts/buildTrees/commonTypes';
 import { numDeform } from '../../../../scripts/common';
 
 import DialogNormal from '../../../commons/dialog/dialogNormal';

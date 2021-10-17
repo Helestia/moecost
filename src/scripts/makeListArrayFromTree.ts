@@ -5,7 +5,7 @@ import {
     tTreeNode_common,
     tTreeNode_unknown,
     tTreeNode_user,
-} from './buildTree';
+} from './buildTrees/commonTypes';
 import {cloneObj_JSON} from './common';
 import moecostDb from './storage';
 
