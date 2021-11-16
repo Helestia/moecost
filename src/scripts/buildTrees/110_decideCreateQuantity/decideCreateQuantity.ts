@@ -3,44 +3,22 @@ import {
     tQtyRoleResult
 } from '../commonTypes';
 import {CanStackItems} from '../../jsonReader';
+import {decideCreateQuantity_fully} from "./decideCreateQuantity_fully";
+import {decideCreateQuantity_surplus} from "./decideCreateQuantity_surplus";
 
-type tDecideCreateQuantityResult = {
+export type tDecideCreateQuantityResult = {
     qty:number,
     qtyRole: tQtyRoleResult
 }
 type tDecideCreateQuantity = (
-    items: string[],
-    qtyRole: tQtyRole,
+    items: readonly string[],
+    qtyRole: Readonly<tQtyRole>,
     qty: number,
     mini:number) => tDecideCreateQuantityResult;
-export const decideCreateQuantity:tDecideCreateQuantity = (items, qtyRole, qty, mini) => {
-    const fSurplus: () => tDecideCreateQuantityResult = () => {
-        if(qty === 0)return {
-            qty: 1,
-            qtyRole: "surplus"
-        }
-        return {
-            qty: qty,
-            qtyRole: "surplus"
-        }
-    }
-    const fFully : () => tDecideCreateQuantityResult = () => {
-        if(qty === 0) return {
-            qty: mini,
-            qtyRole: "fully"
-        };
-        if(qty % mini === 0) return {
-            qty: qty,
-            qtyRole: "fully"
-        };
-        return {
-            qty: mini,
-            qtyRole: "fully"
-        };
-    }
-    if(qtyRole === "surplus")   return fSurplus();
-    if(qtyRole === "fully")     return fFully();
-    if(items.length > 1)        return fSurplus();
-    if(CanStackItems.includes(items[0])) return fFully();
-    return fSurplus();
+export const decideCreateQuantity:tDecideCreateQuantity = (items, qtyRole, qty, minimumQty) => {
+    if(qtyRole === "surplus")   return decideCreateQuantity_surplus(qty);
+    if(qtyRole === "fully")     return decideCreateQuantity_fully(qty, minimumQty);
+    if(items.length > 1)        return decideCreateQuantity_surplus(qty);
+    if(CanStackItems.includes(items[0])) return decideCreateQuantity_fully(qty, minimumQty);
+    return decideCreateQuantity_surplus(qty);
 }
