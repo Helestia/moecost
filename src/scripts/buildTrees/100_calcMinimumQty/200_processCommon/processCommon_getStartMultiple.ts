@@ -27,7 +27,6 @@ export const processCommon_getStartMultiple:tProcessCommon_getStartMultiple = (n
     const minCombine = minCombineArray.reduce((prev,minComb) => prev + minComb, 0);
 
     // 　計算結果
-//    const resultCreation = node.個数.セット作成個数 * CmATdA_lcm;
     const resultCreation = CmATdA_lcm;
     const resultAmount = lcmAmount * minCombine;
     const resultLcm = gcd(resultCreation, resultAmount);
