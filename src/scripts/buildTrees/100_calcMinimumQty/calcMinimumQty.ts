@@ -14,7 +14,6 @@ export const calcMinimumQty:tCalcMinimumQty = (main,commons) => {
         commonUsagesMain,
         creationMultipleMain
     );
-    console.log(creationMultipleMainAndCommon);
     const AllAmountLcm = lcmArray(creationMultipleMainAndCommon.map(cm => cm.要求数));
     const AllCmATdA = creationMultipleMainAndCommon.map(cm => cm.作成数 * AllAmountLcm / cm.要求数);
     return lcmArray(AllCmATdA) / AllAmountLcm;
