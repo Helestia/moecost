@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {tProcurement} from '../../../../scripts/buildTree'
+import {tProcurement} from '../../../../scripts/buildTrees/commonTypes';
 import TableCell from '@material-ui/core/TableCell'
 
 import {
