@@ -1,4 +1,4 @@
-# もえこすと　試作版
+# もえこすと
 
 これはオンラインゲーム [Master of Epic](https://moepic.com/) の生産者支援用Webツールです。
 
