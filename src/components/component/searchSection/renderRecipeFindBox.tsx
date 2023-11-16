@@ -75,7 +75,13 @@ const RenderRecipeFindBox:React.FC<tRenderRecipeFindBox> = (props) => {
                 marginTop={1}
                 marginBottom={1}
             >
-                <Typography>このアプリケーションについては、<Link href="./helps/index.html" target="_blank">ヘルプページ</Link>に使用方法等をまとめましたので、ご確認ください。</Typography>
+                <Typography>このアプリケーションについては、<Link href="./helps/" target="_blank">ヘルプページ</Link>に使用方法等をまとめましたので、ご確認ください。</Typography>
+            </Box>
+            <Box
+                marginTop={1}
+                marginBottom={1}
+            >
+                <Typography>このアプリケーションの管理・運営を 2024/06/30 までで終了することにしました。詳細は<Link href="./endService/" target="_blank">こちら</Link>をご確認ください。(ローカルファイルの用意ができました)</Typography>
             </Box>
             <Box
                 className={classes.rootBox}
