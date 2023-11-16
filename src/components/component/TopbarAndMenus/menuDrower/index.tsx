@@ -15,7 +15,6 @@ import SettingIcon          from '@material-ui/icons/SettingsApplications';
 import LocalLibraryIcon     from '@material-ui/icons/LocalLibrary';
 import NewReleasesIcon      from '@material-ui/icons/NewReleases';
 import HelpIcon             from '@material-ui/icons/Help';
-import ForumIcon            from '@material-ui/icons/Forum';
 import StorageIcon          from '@material-ui/icons/Storage';
 
 
@@ -34,7 +33,6 @@ const MenuDrower:React.FC<tMenuDrower> = (props) => {
 
     const handleClose = () => props.closeMenu();
 
-    const handleReportsBords = () => window.open("http://moecost.bbs.fc2.com/","_blank");
     const handleHelps = () => window.open("./helps/", "_blank");
 
     return (
@@ -73,13 +71,6 @@ const MenuDrower:React.FC<tMenuDrower> = (props) => {
                 >
                     <HelpIcon />
                     使い方・ヘルプ
-                </ListItem>
-                <ListItem
-                    button
-                    onClick={handleReportsBords}
-                >
-                    <ForumIcon />
-                    不具合報告・機能要望
                 </ListItem>
                 <ListItem
                     button
