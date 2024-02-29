@@ -36,7 +36,7 @@ const TopBar: React.FC<tTopBar> = (props) => {
                         <MenuIcon />
                     </Iconbutton>
                     <Typography variant="h6" component="h1" noWrap >
-                        もえこすと - 生産品原価計算器
+                        もえこすと ローカル版 - 生産品原価計算器
                     </Typography>
                 </Toolbar>
             </AppBar>

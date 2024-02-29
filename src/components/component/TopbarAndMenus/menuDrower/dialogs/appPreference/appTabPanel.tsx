@@ -175,7 +175,7 @@ const AppTabPanel:React.FC<tAppTabPanel> = (props) => {
                         isChecked={props.status.isDefDispCreationTree}
                         onClick={props.handler.switch.bind(null,"defDispCreationTree",undefined)}
                     >
-                        原価表
+                        生産ツリー
                     </ListItemInSwitch>
                 </List>
             </Paper>
