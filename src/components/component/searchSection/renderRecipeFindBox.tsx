@@ -82,7 +82,7 @@ const RenderRecipeFindBox:React.FC<tRenderRecipeFindBox> = (props) => {
                 marginBottom={1}
             >
                 <Typography>このアプリケーションの管理・運営を 2024/06/30 までで終了することにしました。</Typography>
-                <Typography>詳細は<Link href="./endService/" target="_blank">こちら</Link>をご確認ください。(05/04更新)</Typography>
+                <Typography>詳細は<Link href="./endService/" target="_blank">こちら</Link>をご確認ください。(06/01更新)</Typography>
             </Box>
             <Box
                 className={classes.rootBox}
